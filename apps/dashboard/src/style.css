@@ -1,0 +1,351 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* ── CSS Variablen: Light Mode ── */
+:root {
+  --bg-app:         #f0f2f5;
+  --bg-surface:     #ffffff;
+  --bg-hover:       #f0f2f5;
+  --bg-active:      #f0ebff;
+
+  --text-primary:   #222222;
+  --text-secondary: #555555;
+  --text-muted:     #888888;
+  --text-faint:     #bbbbbb;
+  --text-active:    #7c3aed;
+
+  --border-color:   #e0e0e0;
+  --accent:         #7c3aed;
+}
+
+/* ── CSS Variablen: Dark Mode ── */
+.app.dark {
+  --bg-app:         #1c1c1e;
+  --bg-surface:     #2c2c2e;
+  --bg-hover:       #3a3a3c;
+  --bg-active:      #3b2f54;
+
+  --text-primary:   #f0f0f0;
+  --text-secondary: #b0b0b0;
+  --text-muted:     #787878;
+  --text-faint:     #505050;
+  --text-active:    #c084fc;
+
+  --border-color:   #3a3a3c;
+  --accent:         #a855f7;
+}
+
+body {
+  font-family: sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+  background-color: var(--bg-app);
+}
+
+/* ── Topbar ── */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 100;
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.icon-btn:hover {
+  background: var(--bg-hover);
+}
+
+.burger {
+  font-size: 22px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-btn {
+  padding: 0;
+}
+
+/* ── Sidebar ── */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 200;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 240px;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-color);
+  z-index: 300;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 12px 0;
+}
+
+.sidebar-item {
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  margin: 2px 8px;
+  transition: background 0.15s;
+}
+
+.sidebar-item:hover {
+  background: var(--bg-hover);
+}
+
+.sidebar-item.active {
+  background: var(--bg-active);
+  color: var(--text-active);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 6px 8px;
+  list-style: none;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.sidebar-bottom-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-bottom-btn:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* ── Main Content ── */
+.main-content {
+  margin-top: 56px;
+  padding: 24px 16px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dashboard-header {
+  margin-bottom: 24px;
+}
+
+.dashboard-greeting-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-avatar-default {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.profile-avatar-default svg {
+  width: 32px;
+  height: 32px;
+}
+
+.dashboard-greeting {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dashboard-date {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── Widget Grid ── */
+.widget-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(var(--grid-cols, 6), 1fr);
+  grid-auto-rows: 120px;
+  position: relative;
+}
+
+/* Leere Grid-Zellen (Drop-Zonen) */
+.grid-cell {
+  border-radius: 8px;
+  transition: background 0.15s;
+  pointer-events: none;
+}
+
+/* Sichtbar sobald ein Widget gezogen wird — wird per JS gesteuert */
+.widget-grid.dragging .grid-cell {
+  pointer-events: all;
+  background: var(--bg-hover);
+  border: 1px dashed var(--border-color);
+}
+
+.grid-cell-active {
+  background: var(--bg-active) !important;
+  border-color: var(--accent) !important;
+}
+
+/* ── Widget Card ── */
+.widget-card {
+  background: var(--bg-surface);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.widget-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.widget-options {
+  font-size: 18px;
+  color: var(--text-faint);
+}
+
+.widget-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.widget-placeholder {
+  font-size: 13px;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+/* ── Responsive ── */
+@media (min-width: 600px) {
+  .main-content {
+    padding: 24px;
+  }
+}
+
+/* Mobil: 2-Spalten-Grid, Widgets nehmen volle Breite */
+@media (max-width: 599px) {
+  .widget-grid {
+    --grid-cols: 2 !important;
+    grid-auto-rows: 140px;
+  }
+}
