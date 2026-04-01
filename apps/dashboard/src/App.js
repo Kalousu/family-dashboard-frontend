@@ -70,6 +70,11 @@ const SIDEBAR_ITEMS = [
     action: () => console.log('Widgets verwalten'),
   },
   {
+    id: 'adjust-layout',
+    label: 'Layout anpassen',
+    action: () => console.log('Layout anpassen'),
+  },
+  {
     id: 'auth',
     label: () => isLoggedIn ? 'Abmelden' : 'Anmelden',
     action: () => console.log(isLoggedIn ? 'logout' : 'login'),

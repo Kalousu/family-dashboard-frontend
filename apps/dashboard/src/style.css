@@ -71,7 +71,7 @@ body {
   left: 0;
   right: 0;
   height: 56px;
-  background: #2c2c2e;
+  background: linear-gradient(to right, #363638, #252527);
   border-bottom: 1px solid #3a3a3c;
   display: flex;
   align-items: center;
@@ -173,7 +173,7 @@ body {
   right: 0;
   height: 100%;
   width: 15%;
-  background: #2c2c2e;
+  background: #252527;
   border-left: 1px solid #3a3a3c;
   z-index: 300;
   transform: translateX(100%);
@@ -370,13 +370,38 @@ body {
 
 /* ── Widget Card ── */
 .widget-card {
-  background: var(--bg-surface);
+  background: linear-gradient(
+    160deg,
+    rgba(210, 212, 218, 0.8) 0%,
+    rgba(190, 193, 200, 0.6) 50%,
+    rgba(172, 175, 183, 0.5) 100%
+  );
   border-radius: 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   padding: 16px;
   display: flex;
   flex-direction: column;
   min-width: 0;
+}
+
+.app.dark .widget-card {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.055) 0%,
+    rgba(255, 255, 255, 0.035) 50%,
+    rgba(255, 255, 255, 0.025) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .widget-header {
