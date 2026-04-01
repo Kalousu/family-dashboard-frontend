@@ -14,7 +14,7 @@ html, body {
 /* ── CSS Variablen: Light Mode ── */
 :root {
   --bg-app:         #f0f2f5;
-  --bg-surface:     #ffffff;
+  --bg-surface:     #c7c9ce;
   --bg-hover:       #f0f2f5;
   --bg-active:      #f0ebff;
 
@@ -55,6 +55,13 @@ body {
 .app {
   min-height: 100vh;
   background-color: var(--bg-app);
+  background-image: radial-gradient(circle, #d8dbe0 1.5px, transparent 1.5px);
+  background-size: 21px 21px;
+}
+
+.app.dark {
+  background-image: radial-gradient(circle, #333538 1.5px, transparent 1.5px);
+  background-size: 21px 21px;
 }
 
 /* ── Topbar ── */
@@ -131,8 +138,8 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
+  background: #4a4a4e;
+  color: #d0d0d0;
   font-size: 14px;
   font-weight: bold;
   display: flex;
@@ -399,7 +406,7 @@ body {
 
 .widget-placeholder {
   font-size: 13px;
-  color: var(--text-faint);
+  color: var(--text-secondary);
   text-align: center;
 }
 
