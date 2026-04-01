@@ -22,14 +22,30 @@ function Topbar({ onMenuToggle }) {
   return (
     <header className="topbar">
       <div className="topbar-left">
-        <button className="icon-btn" onClick={onMenuToggle} title="Menu">
-          <span className="burger">&#9776;</span>
-        </button>
         <span className="topbar-title">Family Dashboard</span>
       </div>
       <div className="topbar-right">
         <button className="icon-btn" onClick={toggleDarkMode} title={darkMode ? 'Light Mode' : 'Dark Mode'}>
-          <span>{darkMode ? '☀️' : '🌙'}</span>
+          {darkMode ? (
+            <svg key="sun" className="theme-icon" width="20" height="20" viewBox="0 0 24 24" fill="white">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="2" x2="12" y2="4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="12" y1="20" x2="12" y2="22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="2" y1="12" x2="4" y2="12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="20" y1="12" x2="22" y2="12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          ) : (
+            <svg key="moon" className="theme-icon" width="20" height="20" viewBox="0 0 24 24" fill="white">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          )}
+        </button>
+        <button className="icon-btn" onClick={onMenuToggle} title="Menu">
+          <span className="burger">&#9776;</span>
         </button>
       </div>
     </header>
@@ -58,21 +74,26 @@ const SIDEBAR_ITEMS = [
 ];
 
 function Sidebar({ open, onClose }) {
-  const [activeItem, setActiveItem] = useState(null);
-
   function handleClick(item) {
-    setActiveItem(item.id);
     item.action();
   }
 
   return (
     <>
-      {open && <div className="sidebar-overlay" onClick={onClose} />}
+      <div className={`sidebar-overlay ${open ? 'sidebar-overlay-visible' : ''}`} onClick={onClose} />
       <nav className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
-          <span className="topbar-title">Menü</span>
           <button className="icon-btn" onClick={onClose}>&#10005;</button>
         </div>
+        <div className="sidebar-profile">
+          <div className="sidebar-avatar">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+            </svg>
+          </div>
+          <span className="sidebar-welcome">Willkommen, User!</span>
+        </div>
+        <div className="sidebar-divider-line" />
         <ul className="sidebar-nav">
           {SIDEBAR_ITEMS.filter(item => !item.bottom).map((item, i) =>
             item.type === 'divider'
@@ -80,7 +101,7 @@ function Sidebar({ open, onClose }) {
               : (
                 <li
                   key={item.id}
-                  className={`sidebar-item ${activeItem === item.id ? 'active' : ''}`}
+                  className="sidebar-item"
                   onClick={() => handleClick(item)}
                 >
                   {typeof item.label === 'function' ? item.label() : item.label}
@@ -125,11 +146,13 @@ function WidgetGrid({ widgets, setWidgets }) {
   const dragWidget = useRef(null);
   const [dropTarget, setDropTarget] = useState(null); // { col, row }
 
-  // Maximale Reihe berechnen für leere Zellen
-  const maxRow = widgets.reduce((max, w) => {
+  // Maximale belegte Reihe
+  const usedRows = widgets.reduce((max, w) => {
     const { rowSpan } = SIZE_SPANS[w.size];
     return Math.max(max, w.row + rowSpan - 1);
-  }, 0) + 2;
+  }, 0);
+  // +2 Puffer-Reihen für Drop-Zonen
+  const maxRow = usedRows + 2;
 
   // Alle Gitterzellen generieren
   const cells = [];
@@ -181,7 +204,7 @@ function WidgetGrid({ widgets, setWidgets }) {
   return (
     <div
       className="widget-grid"
-      style={{ '--grid-cols': gridCols }}
+      style={{ '--grid-cols': gridCols, '--grid-rows': usedRows }}
     >
       {/* Leere Zellen als Drop-Zonen */}
       {cells.map(({ col, row }) => (
@@ -233,19 +256,6 @@ function Dashboard() {
       <Topbar onMenuToggle={() => setSidebarOpen(true)} />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="main-content">
-        <div className="dashboard-header">
-          <div className="dashboard-greeting-row">
-            <div className="profile-avatar-default">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-              </svg>
-            </div>
-            <div>
-              <h1 className="dashboard-greeting">Hallo User!</h1>
-              <p className="dashboard-date">{new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            </div>
-          </div>
-        </div>
         <WidgetGrid widgets={widgets} setWidgets={setWidgets} />
       </main>
     </div>
