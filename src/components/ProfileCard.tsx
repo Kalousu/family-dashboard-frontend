@@ -9,7 +9,7 @@ function ProfileCard({ name, color, image, onSelect }: ProfileCardProps) {
     return (
         <div className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"onClick={onSelect}>
             {image ? (
-                <img src={image} className="w-24 h-24 rounded-full object-cover overflow-hidden" />
+                <img src={image} className="w-24 h-24 rounded-3xl object-cover overflow-hidden" />
             ) : (
                 <div className="w-24 h-24 rounded-xl" style={{ backgroundColor: color }} />
             )}
