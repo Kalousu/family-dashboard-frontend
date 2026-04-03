@@ -1,4 +1,5 @@
 import ProfileCard from "../components/ProfileCard"
+import { useState } from "react"
 
 const profiles = [
     { id: 1, name: "Kevin", color: "blue", image: "https://cdn.discordapp.com/attachments/887358855372242975/1489658243469938729/image.png?ex=69d137d9&is=69cfe659&hm=967d1f4fcbd31d3c6c357d93754d1ddf2416b11b38a21339e3a6b6c1a810c343" },
@@ -7,19 +8,37 @@ const profiles = [
     { id: 4, name: "Lea", color: "pink", image: "https://cdn.discordapp.com/attachments/887358855372242975/1489705940352634920/image.png?ex=69d16445&is=69d012c5&hm=a5fc54f1c876494e365ea35c895d53d70f92c2a73aecae68ffc7245b2b9ecee4&" },
     { id: 5, name: "Katrin", color: "lightblue", image: "https://cdn.discordapp.com/attachments/887358855372242975/1489706154996138085/image.png?ex=69d16478&is=69d012f8&hm=5094990a6d8b2e3fbfa11a216da05d12987e0c6c5ca12c965e848f73ca4f56e6&" },
 ]
+interface Profile {
+  id: number
+  name: string
+  color: string
+  image: string
+}
 
 function ProfileSelectPage() {
-    return (
-        <div className="flex flex-col items-center justify-center h-screen gap-8 bg-gradient-to-b from-gray-400 to-gray-200">
-            <div>
-                <p className="text-gray-900 text-center text-2xl font-bold">Wer bist du?</p>
-            </div>
-            <div className="flex flex-row items-center justify-center gap-8">
-                {profiles.map(profile => (
-                    <ProfileCard key={profile.id} name={profile.name} color={profile.color} image={profile.image} onSelect={() => console.log(profile.name)} />
-                ))}
-            </div>
+    const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null)
 
+    return (
+        <div className="flex flex-col items-center justify-center h-screen gap-8 bg-linear-to-b from-gray-400 to-gray-200">
+            {selectedProfile ? (
+                <div className="p-4 flex flex-col items-center gap-8">
+                    <p className="text-gray-900 text-center text-3xl font-bold">Willkommen zurück, {selectedProfile.name}!</p>
+                    <ProfileCard name={selectedProfile.name} color={selectedProfile.color} image={selectedProfile.image} onSelect={() => setSelectedProfile(null)} />
+                    <p>Hier wäre ein Passwortfeld!</p>
+                    <button className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors" onClick={() => setSelectedProfile(null)}>Benutzer wechseln</button>
+                </div>
+            ) : (
+                <div>
+                    <div className="p-2 flex flex-col items-center gap-8">
+                        <p className="text-gray-900 text-center text-3xl font-bold">Wer bist du?</p>
+                    </div>
+                    <div className="p-8 flex flex-row items-center justify-center gap-8">
+                        {profiles.map(profile => (
+                            <ProfileCard key={profile.id} name={profile.name} color={profile.color} image={profile.image} onSelect={() => setSelectedProfile(profile)} />
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
