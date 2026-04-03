@@ -1,3 +1,4 @@
+import PasswortInput from "../components/PasswordInput"
 import ProfileCard from "../components/ProfileCard"
 import { useState } from "react"
 
@@ -17,6 +18,16 @@ interface Profile {
 
 function ProfileSelectPage() {
     const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null)
+    const [error, setError] = useState<string | null>(null)
+
+    function handleLogin(password: string) {
+        if (password === "") {
+            setError("Bitte Passwort eingeben")
+        } else {
+            setError(null)
+            alert(`Logging in with username: ${selectedProfile?.name} and password: ${password}`)
+        }
+    }
 
     return (
         <div className="flex flex-col items-center justify-center h-screen gap-8 bg-linear-to-b from-gray-400 to-gray-200">
@@ -24,8 +35,11 @@ function ProfileSelectPage() {
                 <div className="p-4 flex flex-col items-center gap-8">
                     <p className="text-gray-900 text-center text-3xl font-bold">Willkommen zurück, {selectedProfile.name}!</p>
                     <ProfileCard name={selectedProfile.name} color={selectedProfile.color} image={selectedProfile.image} onSelect={() => setSelectedProfile(null)} />
-                    <p>Hier wäre ein Passwortfeld!</p>
-                    <button className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors" onClick={() => setSelectedProfile(null)}>Benutzer wechseln</button>
+                    <PasswortInput onLogin={handleLogin} />
+                        <p className={`text-sm font-semibold mt-2 ${error ? "text-red-500" : "text-transparent"}`}>
+                            {error || "Platzhalter"}
+                        </p>
+                    <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors border-2 border-gray-400" onClick={() => setSelectedProfile(null)}>Benutzer wechseln</button>
                 </div>
             ) : (
                 <div>
