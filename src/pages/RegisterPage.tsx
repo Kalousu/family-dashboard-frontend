@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { HslStringColorPicker } from "react-colorful";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import imageIcons from "../constants/imageIcons";
 
 function RegisterPage() {
@@ -15,6 +16,7 @@ function RegisterPage() {
     const [error, setError] = useState<string | null>(null)
     const [showColorPicker, setShowColorPicker] = useState(false)
     const colorPickerRef = useRef<HTMLDivElement>(null)
+    const navigate = useNavigate()
 
     function handleRegister() {
         if (formData.password !== formData.passwordConfirm) {
@@ -107,7 +109,7 @@ function RegisterPage() {
                     </p>
                     <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors border-3 border-gray-400 text-lg"
                         onClick={() => {handleRegister()}}>Registrieren</button>
-                    <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors ">
+                    <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors" onClick={() => navigate("/")}>
                         Zurück zur Nutzerauswahl
                     </button>
                 </motion.div>
