@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { User, Cat, Dog, Flower, Star, Heart, Sun, Music, Gamepad2} from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion";
+import imageIcons from "../constants/imageIcons";
 
 function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -10,17 +10,6 @@ function RegisterPage() {
         passwordConfirm: "",
         image: ""
     })
-    const imageIcons = {
-        "user": User,
-        "cat": Cat,
-        "dog": Dog,
-        "flower": Flower,
-        "star": Star,
-        "heart": Heart,
-        "sun": Sun,
-        "music": Music,
-        "gamepad": Gamepad2
-    }
 
     return (
         <div className="flex flex-col items-center justify-center h-screen gap-8 bg-linear-to-b from-gray-400 to-gray-200">
