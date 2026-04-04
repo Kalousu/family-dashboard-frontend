@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { HslStringColorPicker } from "react-colorful";
 import { motion, AnimatePresence } from "framer-motion";
 import imageIcons from "../constants/imageIcons";
@@ -10,9 +10,20 @@ function RegisterPage() {
         password: "",
         passwordConfirm: "",
         image: "",
-        color: "#808080"
+        color: "hsl(0, 0%, 50%)"
     })
     const [showColorPicker, setShowColorPicker] = useState(false)
+    const colorPickerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
+                setShowColorPicker(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [showColorPicker])
 
     return (
         <div className="flex flex-col items-center justify-center h-screen gap-8 bg-linear-to-b from-gray-400 to-gray-200">
@@ -36,7 +47,7 @@ function RegisterPage() {
                                     <option value="Familienadministrator">Familienadministrator</option>
                                     <option value="Systemadministrator">Systemadministrator</option>
                                 </select>
-                                <div className="relative">
+                                <div className="relative" ref={colorPickerRef}>
                                     <div 
                                         className="w-9 h-9 rounded-xl cursor-pointer border-2 border-gray-400"
                                         style={{ backgroundColor: formData.color }}
