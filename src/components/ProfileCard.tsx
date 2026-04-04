@@ -7,7 +7,7 @@ interface ProfileCardProps {
 
 function ProfileCard({ name, color, image, onSelect }: ProfileCardProps) {
     return (
-        <div className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"onClick={onSelect}>
+        <div className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform ease-in-out"onClick={onSelect}>
             {image ? (
                 <img src={image} className="w-24 h-24 rounded-3xl object-cover overflow-hidden" />
             ) : (
