@@ -23,7 +23,7 @@ function ProfileSelectPage() {
 
     function handleLogin(password: string) {
         if (password === "") {
-            setError("Bitte Passwort eingeben")
+            setError("Bitte Passwort eingeben.")
         } else {
             setError(null)
             alert(`Logging in with username: ${selectedProfile?.name} and password: ${password}`)

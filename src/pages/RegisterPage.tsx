@@ -9,11 +9,25 @@ function RegisterPage() {
         role: "Mitglied",
         password: "",
         passwordConfirm: "",
-        image: "",
+        icon: "user",
         color: "hsl(0, 0%, 50%)"
     })
+    const [error, setError] = useState<string | null>(null)
     const [showColorPicker, setShowColorPicker] = useState(false)
     const colorPickerRef = useRef<HTMLDivElement>(null)
+
+    function handleRegister() {
+        if (formData.password !== formData.passwordConfirm) {
+            setError("Passwörter stimmen nicht überein.")
+        }
+        else if (formData.name === "" || formData.password === "") {
+            setError("Bitte alle Felder ausfüllen.")
+        }
+        else {
+            setError(null)
+            alert(`Registrieren mit Name: ${formData.name} und Passwort: ${formData.password} als ${formData.role} mit dem Icon ${formData.icon} und der Farbe ${formData.color}`)
+        }
+    }
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -29,7 +43,7 @@ function RegisterPage() {
         <div className="flex flex-col items-center justify-center h-screen gap-8 bg-linear-to-b from-gray-400 to-gray-200">
             <AnimatePresence mode="popLayout">
                 <motion.div key="register" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="flex flex-col items-center gap-4 justify-center">
-                    <div className="m-32 flex flex-row items-center gap-8">
+                    <div className="m-28 flex flex-row items-center gap-8">
                         <div className="p-16 flex flex-col gap-4 items-center">
                             <input 
                                 className="px-4 py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-lg"
@@ -81,25 +95,18 @@ function RegisterPage() {
                                 <div 
                                     key={key} 
                                     className={`w-24 h-24 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 ease-in-out transition-all hover:bg-gray-300 
-                                    ${formData.image === key ? "bg-gray-400" : "bg-gray-200"}`} 
-                                    onClick={() => setFormData({...formData, image: key})}>
+                                    ${formData.icon === key ? "bg-gray-400" : "bg-gray-200"}`} 
+                                    onClick={() => setFormData({...formData, icon: key})}>
                                     <Icon size={48} />
                                 </div>
                             ))}
                         </div>
                     </div>
+                    <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
+                        {error || "Platzhalter"}
+                    </p>
                     <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors border-3 border-gray-400 text-lg"
-                        onClick={() => {
-                            if (formData.password !== formData.passwordConfirm) {
-                                alert("Passwörter stimmen nicht überein.")
-                            }
-                            else if (formData.name === "" || formData.password === "") {
-                                alert("Bitte alle Felder ausfüllen.")
-                            }
-                            else {
-                                alert(`Registrieren mit Name: ${formData.name} und Passwort: ${formData.password} als ${formData.role} mit dem Icon ${formData.image} und der Farbe ${formData.color}`)
-                            }
-                    }}>Registrieren</button>
+                        onClick={() => {handleRegister()}}>Registrieren</button>
                     <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors ">
                         Zurück zur Nutzerauswahl
                     </button>
@@ -107,6 +114,6 @@ function RegisterPage() {
             </AnimatePresence>
         </div>
     )
-}
+}   
 
 export default RegisterPage
