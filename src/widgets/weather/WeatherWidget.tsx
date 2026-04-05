@@ -3,15 +3,12 @@ import { MapPin, Wind, Search } from "lucide-react"
 import { useContainerSize } from "../../hooks/useContainerSize"
 import { getWeatherGradient, getWeatherIcon } from "./weatherMappings"
 import type { KeyboardEvent } from "react"
-
 function WeatherWidget() {
 
     const { ref, width } = useContainerSize()
     const isCompact = width < 220
-
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-
     const [city, setCity] = useState("Mannheim")
     const [inputCity, setInputCity] = useState("Mannheim")
 
@@ -22,30 +19,27 @@ function WeatherWidget() {
     })
 
     useEffect(() => {
-
         const fetchWeatherData = async () => {
+            setIsLoading(true)
+            setError(null)
             try {
                 const response = await fetch(`http://localhost:8080/api/weather?city=${city}`)
-
                 if (!response.ok) {
                     throw new Error("Wetterdaten konnten nicht geladen werden.")
                 }
 
                 const data = await response.json()
-
                 setWeatherData({
                     temperature: data.current.temperature_2m,
                     windSpeed: data.current.wind_speed_10m,
                     weatherCode: data.current.weather_code,
                 })
-
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Unbekannter Fehler")
             } finally {
                 setIsLoading(false)
             }
         }
-
         fetchWeatherData()
     }, [city])
 
@@ -92,26 +86,36 @@ function WeatherWidget() {
                             </button>
                         </div>
                     </div> 
-                    <div className="flex flex-col items-center justify-center m-6">
-                        <div className="flex flex-row items-center justify-center gap-2 m-8 mb-12">
-                            <p className="text-white text-center text-7xl font-semibold mr-4 leading-none">{weatherData.temperature}°C</p>
-                            <div className="mt-2">
-                                {getWeatherIcon(weatherData.weatherCode, 80)}
+                    <div className="flex flex-col items-center justify-center m-6 transition-all">
+                        {isLoading ? (
+                            <div className="flex items-center justify-center m-8 mb-12">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
                             </div>
-                        </div>
-                        <div className="flex flex-row items-center gap-2 mb-4">
-                            <Wind color="white" size={32} />
-                            <p className="text-white text-center text-xl font-bold">Wind: {weatherData.windSpeed} km/h</p>
-                        </div>
-                        <div>
-                            {/* Platzhalter für Tagesvorhersage I guess */}
-                        </div>
+                        ) : error ? (
+                            <div className="flex items-center justify-center m-8 mb-12">
+                                <p className="text-white/80 text-center text-xl font-semibold">{error}</p>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center gap-2">
+                                <div className="flex flex-row items-center justify-center gap-2 m-6">
+                                    <p className="text-white text-center text-7xl font-semibold mr-4 leading-none transition-transform">{weatherData.temperature}°C</p>
+                                    <div className="mt-2">
+                                        {getWeatherIcon(weatherData.weatherCode, 80)}
+                                    </div>
+                                </div>   
+                                <div className="flex flex-row items-center gap-2 mb-4">
+                                    <Wind color="white" size={32} />
+                                    <p className="text-white text-center text-xl font-bold">Wind: {weatherData.windSpeed} km/h</p>
+                                </div>
+                                <div>
+                                    {/* Platzhalter für Tagesvorhersage I guess */}
+                                </div>   
+                            </div>                     
+                        )}
                     </div>
-                </div> 
-            ) }
-          
+                </div>
+             ) }
         </div>
     )
 }
-
 export default WeatherWidget;
