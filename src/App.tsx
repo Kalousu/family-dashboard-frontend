@@ -2,6 +2,7 @@ import ProfileSelectPage from './pages/ProfileSelectPage';
 import RegisterPage from './pages/RegisterPage';
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import TestPage from './pages/TestPage';
+import TestTimetablePage from './pages/TestTimetablePage';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
           <Route path="/" element={<ProfileSelectPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/test" element={<TestPage />} />
+          <Route path="/testtimetable" element={<TestTimetablePage />} />
         </Routes>
       </BrowserRouter>
     </>
