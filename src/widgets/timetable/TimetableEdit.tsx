@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Plus, X, Check } from "lucide-react"
-import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
-import imageIcons from "../../constants/imageIcons"
+import type { Profile, TimetableEvent } from "./timetableTypes"
+import { UserIcon } from "./TimetableComponents"
 
 const ALL_PROFILES: Profile[] = [
     { id: 1, name: "Kevin",  color: "blue",       icon: "gamepad" },
@@ -19,18 +19,6 @@ interface TimetableEditProps {
     onAddEvent: (event: TimetableEvent) => void
     onAddUser: (userId: number) => void
     onRemoveUser: (userId: number) => void
-}
-
-function UserIcon({ profile, size = 14 }: { profile: Profile; size?: number }) {
-    const Icon = imageIcons[profile.icon as keyof typeof imageIcons]
-    return (
-        <div
-            className="rounded-md flex items-center justify-center shrink-0"
-            style={{ backgroundColor: profile.color, width: size + 6, height: size + 6 }}
-        >
-            <Icon size={size} color="white" />
-        </div>
-    )
 }
 
 function TimetableEdit({ watchedIds, onAddEvent, onAddUser, onRemoveUser }: TimetableEditProps) {

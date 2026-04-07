@@ -1,10 +1,10 @@
 import { useState, Fragment } from "react"
 import { Pencil, Plus, X, Check } from "lucide-react"
-import imageIcons from "../../constants/imageIcons"
 import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
 import TimetableEdit from "./TimetableEdit"
+import { TabButton, EventCard } from "./TimetableComponents"
 
-// ─── Static data ──────────────────────────────────────────────────────────────
+// Mock-Daten
 
 const ALL_PROFILES: Profile[] = [
     { id: 1, name: "Kevin",  color: "blue",       icon: "gamepad" },
@@ -13,9 +13,6 @@ const ALL_PROFILES: Profile[] = [
     { id: 4, name: "Lea",    color: "pink",        icon: "flower"  },
     { id: 5, name: "Katrin", color: "lightblue",   icon: "cat"     },
 ]
-
-const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
-const SLOTS = Array.from({ length: 9 }, (_, i) => i + 1)
 
 const INITIAL_EVENTS: TimetableEvent[] = [
     { id: "1", title: "Mathe",    slot: 1, day: 0, userId: 1 },
@@ -32,7 +29,10 @@ const INITIAL_REMINDERS: Reminder[] = [
     { id: "r1", day: 0, text: "Sportsachen" },
 ]
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────
+
+const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
+const SLOTS = Array.from({ length: 9 }, (_, i) => i + 1)
 
 function getEventsForCell(
     events: TimetableEvent[],
@@ -54,76 +54,18 @@ function getEventsForCell(
         }))
     }
 
-    // In "Alle"-Ansicht: gleichnamige Events zusammenführen
-    const groups: Record<string, { ids: string[]; profiles: Profile[] }> = {}
+    // gleichnamige Events zusammenführen
+    const eventGroups: Record<string, { ids: string[]; profiles: Profile[] }> = {}
     for (const e of filtered) {
         const profile = ALL_PROFILES.find((p) => p.id === e.userId)
         if (!profile) continue
-        if (!groups[e.title]) groups[e.title] = { ids: [], profiles: [] }
-        groups[e.title].ids.push(e.id)
-        groups[e.title].profiles.push(profile)
+        if (!eventGroups[e.title]) eventGroups[e.title] = { ids: [], profiles: [] }
+        eventGroups[e.title].ids.push(e.id)
+        eventGroups[e.title].profiles.push(profile)
     }
 
-    return Object.entries(groups).map(([title, { ids, profiles }]) => ({ title, ids, profiles }))
+    return Object.entries(eventGroups).map(([title, { ids, profiles }]) => ({ title, ids, profiles }))
 }
-
-// ─── Small Components ─────────────────────────────────────────────────────────
-
-function UserIcon({ profile, size = 14 }: { profile: Profile; size?: number }) {
-    const Icon = imageIcons[profile.icon as keyof typeof imageIcons]
-    return (
-        <div
-            className="rounded-md flex items-center justify-center shrink-0"
-            style={{ backgroundColor: profile.color, width: size + 6, height: size + 6 }}
-        >
-            <Icon size={size} color="white" />
-        </div>
-    )
-}
-
-function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-    return (
-        <button
-            onClick={onClick}
-            className={`relative px-4 text-sm font-semibold rounded-t-lg border-t border-l border-r select-none transition-all ${
-                active
-                    ? "pt-1.5 pb-[9px] -mb-px z-10 bg-gradient-to-b from-white/40 to-white/10 border-white/35 text-white"
-                    : "py-1 bg-white/5 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
-            }`}
-        >
-            {active && (
-                <span className="absolute inset-x-1 top-0.5 h-[40%] rounded-t bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-            )}
-            <span className="relative">{children}</span>
-        </button>
-    )
-}
-
-function EventCard({ title, profiles, merged, editMode, onRemove }: {
-    title: string
-    profiles: Profile[]
-    merged: boolean
-    editMode: boolean
-    onRemove: () => void
-}) {
-    return (
-        <div className={`relative w-full flex flex-col px-2 py-1.5 rounded-lg bg-white/15 border transition-all ${
-            merged ? "border-white/40" : "border-white/20"
-        }`}>
-            {editMode && (
-                <button onClick={onRemove} className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 rounded-full p-0.5 text-white z-10">
-                    <X size={10} />
-                </button>
-            )}
-            <span className="text-white text-xs font-semibold break-words">{title}</span>
-            <div className="flex justify-end gap-0.5 mt-0.5">
-                {profiles.map((p) => <UserIcon key={p.id} profile={p} size={10} />)}
-            </div>
-        </div>
-    )
-}
-
-// ─── Widget ───────────────────────────────────────────────────────────────────
 
 function TimetableWidget() {
     const [events, setEvents]         = useState<TimetableEvent[]>(INITIAL_EVENTS)
@@ -165,7 +107,7 @@ function TimetableWidget() {
     return (
         <div className="w-full h-full bg-linear-to-b from-indigo-500/30 to-violet-900/40 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
 
-            {/* Tab-Leiste im Browser-Tab-Stil */}
+            {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
                 <div className="flex items-end gap-0.5">
                     <TabButton active={activeTab === "all"} onClick={() => setActiveTab("all")}>Alle</TabButton>
@@ -189,7 +131,7 @@ function TimetableWidget() {
                 </button>
             </div>
 
-            {/* Edit-Panel (ausgelagert) */}
+            {/* Edit-Panel */}
             {editMode && (
                 <TimetableEdit
                     watchedIds={watchedIds}
@@ -199,13 +141,12 @@ function TimetableWidget() {
                 />
             )}
 
-            {/* Grid — CSS Grid sorgt dafür, dass alle Zellen einer Zeile dieselbe Höhe haben */}
+            {/* Grid */}
             <div className="flex-1 overflow-auto min-h-0">
                 <div
                     className="grid"
                     style={{ gridTemplateColumns: "1.5rem 1px repeat(5, minmax(0, 1fr))" }}
                 >
-                    {/* ── Header-Zeile ── */}
                     <div className="border-b border-white/15" /> {/* Slot-Nummer-Platzhalter */}
                     <div className="bg-white/15 border-b border-white/15" /> {/* Trennlinie */}
                     {DAYS.map((day, dayIndex) => {
@@ -246,16 +187,13 @@ function TimetableWidget() {
                         )
                     })}
 
-                    {/* ── Slot-Zeilen ── */}
+                    {/* Mapping */}
                     {SLOTS.map((slot) => (
                         <Fragment key={slot}>
-                            {/* Slot-Nummer */}
                             <div className="flex items-center justify-center text-white/40 text-sm font-bold border-b border-white/10 last:border-b-0 py-1">
                                 {slot}
                             </div>
-                            {/* Vertikale Trennlinie */}
                             <div className="bg-white/15 border-b border-white/10" />
-                            {/* Tages-Zellen */}
                             {DAYS.map((_, dayIndex) => {
                                 const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds)
                                 return (
