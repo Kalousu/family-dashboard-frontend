@@ -1,29 +1,8 @@
-import { useState } from "react"
+import { useState, Fragment } from "react"
 import { Pencil, Plus, X, Check } from "lucide-react"
 import imageIcons from "../../constants/imageIcons"
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface Profile {
-    id: number
-    name: string
-    color: string
-    icon: string
-}
-
-interface TimetableEvent {
-    id: string
-    title: string
-    slot: number
-    day: number // 0=Mo, 1=Di, 2=Mi, 3=Do, 4=Fr
-    userId: number
-}
-
-interface Reminder {
-    id: string
-    day: number
-    text: string
-}
+import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
+import TimetableEdit from "./TimetableEdit"
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
@@ -67,7 +46,6 @@ function getEventsForCell(
         return activeTab === "all" ? watchedUserIds.includes(e.userId) : e.userId === activeTab
     })
 
-    // In "Alle"-Ansicht: gleichnamige Events zusammenführen
     if (activeTab !== "all") {
         return filtered.map((e) => ({
             title: e.title,
@@ -76,6 +54,7 @@ function getEventsForCell(
         }))
     }
 
+    // In "Alle"-Ansicht: gleichnamige Events zusammenführen
     const groups: Record<string, { ids: string[]; profiles: Profile[] }> = {}
     for (const e of filtered) {
         const profile = ALL_PROFILES.find((p) => p.id === e.userId)
@@ -106,11 +85,16 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
     return (
         <button
             onClick={onClick}
-            className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
-                active ? "bg-white/30 text-white shadow-sm" : "text-white/50 hover:text-white/80"
+            className={`relative px-4 text-sm font-semibold rounded-t-lg border-t border-l border-r select-none transition-all ${
+                active
+                    ? "pt-1.5 pb-[9px] -mb-px z-10 bg-gradient-to-b from-white/40 to-white/10 border-white/35 text-white"
+                    : "py-1 bg-white/5 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
             }`}
         >
-            {children}
+            {active && (
+                <span className="absolute inset-x-1 top-0.5 h-[40%] rounded-t bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
+            )}
+            <span className="relative">{children}</span>
         </button>
     )
 }
@@ -123,7 +107,7 @@ function EventCard({ title, profiles, merged, editMode, onRemove }: {
     onRemove: () => void
 }) {
     return (
-        <div className={`relative w-full flex items-end justify-between gap-1 px-2 py-1.5 rounded-lg bg-white/15 border transition-all ${
+        <div className={`relative w-full flex flex-col px-2 py-1.5 rounded-lg bg-white/15 border transition-all ${
             merged ? "border-white/40" : "border-white/20"
         }`}>
             {editMode && (
@@ -131,8 +115,8 @@ function EventCard({ title, profiles, merged, editMode, onRemove }: {
                     <X size={10} />
                 </button>
             )}
-            <span className="text-white text-xs font-semibold truncate">{title}</span>
-            <div className="flex gap-0.5 shrink-0">
+            <span className="text-white text-xs font-semibold break-words">{title}</span>
+            <div className="flex justify-end gap-0.5 mt-0.5">
                 {profiles.map((p) => <UserIcon key={p.id} profile={p} size={10} />)}
             </div>
         </div>
@@ -142,49 +126,20 @@ function EventCard({ title, profiles, merged, editMode, onRemove }: {
 // ─── Widget ───────────────────────────────────────────────────────────────────
 
 function TimetableWidget() {
-    const [events, setEvents]       = useState<TimetableEvent[]>(INITIAL_EVENTS)
-    const [reminders, setReminders] = useState<Reminder[]>(INITIAL_REMINDERS)
+    const [events, setEvents]         = useState<TimetableEvent[]>(INITIAL_EVENTS)
+    const [reminders, setReminders]   = useState<Reminder[]>(INITIAL_REMINDERS)
     const [watchedIds, setWatchedIds] = useState<number[]>([1, 2])
-    const [activeTab, setActiveTab] = useState<"all" | number>("all")
-    const [editMode, setEditMode]   = useState(false)
-    const [showForm, setShowForm]   = useState(false)
+    const [activeTab, setActiveTab]   = useState<"all" | number>("all")
+    const [editMode, setEditMode]     = useState(false)
 
-    // Formular-State für neues Event
-    const [newTitle,  setNewTitle]  = useState("")
-    const [newSlot,   setNewSlot]   = useState(1)
-    const [newDay,    setNewDay]    = useState(0)
-    const [newUserId, setNewUserId] = useState(watchedIds[0])
-
-    // Dropdown für neuen User
-    const [addUserId, setAddUserId] = useState(
-        ALL_PROFILES.find((p) => !watchedIds.includes(p.id))?.id ?? ALL_PROFILES[0].id
-    )
-
-    // Inline-Erinnerungsformular pro Tag
-    const [editingDay, setEditingDay]       = useState<number | null>(null)
-    const [reminderText, setReminderText]   = useState("")
+    const [editingDay, setEditingDay]     = useState<number | null>(null)
+    const [reminderText, setReminderText] = useState("")
 
     const watchedProfiles = ALL_PROFILES.filter((p) => watchedIds.includes(p.id))
-    const availableUsers  = ALL_PROFILES.filter((p) => !watchedIds.includes(p.id))
 
-    function addEvent() {
-        if (!newTitle.trim()) return
-        setEvents((prev) => [...prev, {
-            id: Date.now().toString(),
-            title: newTitle.trim(),
-            slot: newSlot,
-            day: newDay,
-            userId: newUserId,
-        }])
-        setNewTitle("")
-        setShowForm(false)
-    }
-
-    function addUser() {
-        if (watchedIds.includes(addUserId)) return
-        setWatchedIds((prev) => [...prev, addUserId])
-        const next = ALL_PROFILES.find((p) => !watchedIds.includes(p.id) && p.id !== addUserId)
-        if (next) setAddUserId(next.id)
+    function addUser(userId: number) {
+        if (watchedIds.includes(userId)) return
+        setWatchedIds((prev) => [...prev, userId])
     }
 
     function removeUser(userId: number) {
@@ -204,16 +159,15 @@ function TimetableWidget() {
 
     function toggleEdit() {
         setEditMode((v) => !v)
-        setShowForm(false)
         setEditingDay(null)
     }
 
     return (
         <div className="w-full h-full bg-linear-to-b from-indigo-500/30 to-violet-900/40 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
 
-            {/* Tabs + Edit-Button */}
-            <div className="flex items-center justify-between gap-2 shrink-0">
-                <div className="flex gap-1 bg-white/10 rounded-xl p-1">
+            {/* Tab-Leiste im Browser-Tab-Stil */}
+            <div className="flex items-end shrink-0 border-b border-white/20">
+                <div className="flex items-end gap-0.5">
                     <TabButton active={activeTab === "all"} onClick={() => setActiveTab("all")}>Alle</TabButton>
                     {watchedProfiles.map((p) => (
                         <TabButton key={p.id} active={activeTab === p.id} onClick={() => setActiveTab(p.id)}>
@@ -221,168 +175,108 @@ function TimetableWidget() {
                         </TabButton>
                     ))}
                 </div>
+                <div className="flex-1" />
                 <button
                     onClick={toggleEdit}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                        editMode ? "bg-indigo-400/60 text-white" : "bg-white/15 text-white/60 hover:bg-white/25 hover:text-white"
+                    className={`flex items-center gap-1.5 px-3 py-1 mb-px rounded-t-lg border-t border-l border-r text-xs font-semibold transition-all ${
+                        editMode
+                            ? "bg-indigo-400/50 border-indigo-400/50 text-white"
+                            : "bg-white/5 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
                     }`}
                 >
-                    <Pencil size={13} />
+                    <Pencil size={12} />
                     {editMode ? "Fertig" : "Bearbeiten"}
                 </button>
             </div>
 
-            {/* Edit-Panel */}
+            {/* Edit-Panel (ausgelagert) */}
             {editMode && (
-                <div className="bg-white/10 border border-white/15 rounded-xl p-3 flex flex-col gap-2.5 shrink-0">
-
-                    {/* User-Verwaltung */}
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-white/60 text-xs font-semibold shrink-0">User:</span>
-                        {watchedProfiles.map((p) => (
-                            <div key={p.id} className="flex items-center gap-1 bg-white/15 rounded-lg px-2 py-0.5">
-                                <UserIcon profile={p} size={10} />
-                                <span className="text-white text-xs">{p.name}</span>
-                                <button onClick={() => removeUser(p.id)} className="text-white/50 hover:text-white ml-0.5">
-                                    <X size={10} />
-                                </button>
-                            </div>
-                        ))}
-                        {availableUsers.length > 0 && (
-                            <div className="flex items-center gap-1">
-                                <select
-                                    value={addUserId}
-                                    onChange={(e) => setAddUserId(Number(e.target.value))}
-                                    className="bg-white/10 text-white text-xs rounded-lg px-2 py-0.5 border border-white/20 focus:outline-none"
-                                >
-                                    {availableUsers.map((p) => (
-                                        <option key={p.id} value={p.id} className="text-black">{p.name}</option>
-                                    ))}
-                                </select>
-                                <button onClick={addUser} className="p-1 rounded-lg bg-white/20 hover:bg-white/30 text-white">
-                                    <Plus size={12} />
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Event hinzufügen */}
-                    {showForm ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                            <input
-                                value={newTitle}
-                                onChange={(e) => setNewTitle(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && addEvent()}
-                                placeholder="Fach (z.B. Mathe)"
-                                autoFocus
-                                className="bg-white/10 text-white placeholder:text-white/40 text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none w-28"
-                            />
-                            <select value={newDay} onChange={(e) => setNewDay(Number(e.target.value))} className="bg-white/10 text-white text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none">
-                                {DAYS.map((d, i) => <option key={i} value={i} className="text-black">{d}</option>)}
-                            </select>
-                            <select value={newSlot} onChange={(e) => setNewSlot(Number(e.target.value))} className="bg-white/10 text-white text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none">
-                                {SLOTS.map((s) => <option key={s} value={s} className="text-black">{s}. Stunde</option>)}
-                            </select>
-                            <select value={newUserId} onChange={(e) => setNewUserId(Number(e.target.value))} className="bg-white/10 text-white text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none">
-                                {watchedProfiles.map((p) => <option key={p.id} value={p.id} className="text-black">{p.name}</option>)}
-                            </select>
-                            <button onClick={addEvent} className="p-1 rounded-lg bg-green-500/60 hover:bg-green-500/80 text-white">
-                                <Check size={13} />
-                            </button>
-                            <button onClick={() => setShowForm(false)} className="p-1 rounded-lg bg-red-500/50 hover:bg-red-500/70 text-white">
-                                <X size={13} />
-                            </button>
-                        </div>
-                    ) : (
-                        <button onClick={() => setShowForm(true)} className="flex items-center gap-1 text-white/60 hover:text-white text-xs font-semibold w-fit">
-                            <Plus size={13} /> Event hinzufügen
-                        </button>
-                    )}
-                </div>
+                <TimetableEdit
+                    watchedIds={watchedIds}
+                    onAddEvent={(e) => setEvents((prev) => [...prev, e])}
+                    onAddUser={addUser}
+                    onRemoveUser={removeUser}
+                />
             )}
 
-            {/* Grid */}
+            {/* Grid — CSS Grid sorgt dafür, dass alle Zellen einer Zeile dieselbe Höhe haben */}
             <div className="flex-1 overflow-auto min-h-0">
-                <div className="flex h-full">
-
-                    {/* Slot-Nummern links */}
-                    <div className="flex flex-col shrink-0">
-                        <div className="h-12" /> {/* Platzhalter für Spalten-Header */}
-                        {SLOTS.map((slot) => (
-                            <div key={slot} className="h-12 w-6 flex items-center justify-center text-white/40 text-sm font-bold">
-                                {slot}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="w-px bg-white/15 shrink-0 mx-1.5 self-stretch" />
-
-                    {/* Tages-Spalten */}
+                <div
+                    className="grid"
+                    style={{ gridTemplateColumns: "1.5rem 1px repeat(5, minmax(0, 1fr))" }}
+                >
+                    {/* ── Header-Zeile ── */}
+                    <div className="border-b border-white/15" /> {/* Slot-Nummer-Platzhalter */}
+                    <div className="bg-white/15 border-b border-white/15" /> {/* Trennlinie */}
                     {DAYS.map((day, dayIndex) => {
                         const reminder = reminders.find((r) => r.day === dayIndex)
                         return (
-                            <div key={dayIndex} className="flex-1 flex flex-col min-w-0 border-r border-white/10 last:border-r-0">
-
-                                {/* Spalten-Header */}
-                                <div className="h-12 flex flex-col items-center justify-center gap-0.5 px-1 shrink-0">
-                                    <span className="text-white/70 text-xs font-bold tracking-wide truncate">{day}</span>
-
-                                    {reminder ? (
-                                        <div className="flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md px-1.5 py-0.5 max-w-full">
-                                            <span className="text-white text-[10px] font-semibold truncate">! {reminder.text}</span>
-                                            {editMode && (
-                                                <button onClick={() => setReminders((prev) => prev.filter((r) => r.day !== dayIndex))} className="text-white/70 hover:text-white shrink-0">
-                                                    <X size={9} />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ) : editMode && (
-                                        editingDay === dayIndex ? (
-                                            <div className="flex items-center gap-0.5 w-full px-1">
-                                                <input
-                                                    value={reminderText}
-                                                    onChange={(e) => setReminderText(e.target.value)}
-                                                    onKeyDown={(e) => e.key === "Enter" && saveReminder(dayIndex)}
-                                                    placeholder="Erinnerung…"
-                                                    autoFocus
-                                                    className="bg-white/10 text-white placeholder:text-white/30 text-[10px] rounded px-1 py-0.5 border border-white/20 focus:outline-none w-full"
-                                                />
-                                                <button onClick={() => saveReminder(dayIndex)} className="text-green-400 hover:text-green-300 shrink-0"><Check size={10} /></button>
-                                                <button onClick={() => setEditingDay(null)} className="text-white/50 hover:text-white shrink-0"><X size={10} /></button>
-                                            </div>
-                                        ) : (
-                                            <button onClick={() => { setEditingDay(dayIndex); setReminderText("") }} className="text-white/25 hover:text-red-400">
-                                                <Plus size={11} />
+                            <div key={dayIndex} className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 border-b border-white/15 border-r border-white/10 last:border-r-0">
+                                <span className="text-white/70 text-xs font-bold tracking-wide text-center">{day}</span>
+                                {reminder ? (
+                                    <div className="flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md px-1.5 py-0.5 w-full">
+                                        <span className="text-white text-[10px] font-semibold break-words min-w-0">! {reminder.text}</span>
+                                        {editMode && (
+                                            <button onClick={() => setReminders((prev) => prev.filter((r) => r.day !== dayIndex))} className="text-white/70 hover:text-white shrink-0">
+                                                <X size={9} />
                                             </button>
-                                        )
-                                    )}
-                                </div>
-
-                                <div className="h-px bg-white/15 mx-1 shrink-0" />
-
-                                {/* Zeilen pro Slot */}
-                                {SLOTS.map((slot) => {
-                                    const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds)
-                                    return (
-                                        <div key={slot} className="h-12 px-1 py-1 flex flex-col gap-0.5 border-b border-white/10 last:border-b-0">
-                                            {cellEvents.length === 0 ? (
-                                                <div className="flex-1 rounded-lg border border-dashed border-white/10" />
-                                            ) : cellEvents.map((ev, i) => (
-                                                <EventCard
-                                                    key={i}
-                                                    title={ev.title}
-                                                    profiles={ev.profiles}
-                                                    merged={ev.profiles.length > 1}
-                                                    editMode={editMode}
-                                                    onRemove={() => setEvents((prev) => prev.filter((e) => !ev.ids.includes(e.id)))}
-                                                />
-                                            ))}
+                                        )}
+                                    </div>
+                                ) : editMode && (
+                                    editingDay === dayIndex ? (
+                                        <div className="flex items-center gap-0.5 w-full px-1">
+                                            <input
+                                                value={reminderText}
+                                                onChange={(e) => setReminderText(e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && saveReminder(dayIndex)}
+                                                placeholder="Erinnerung…"
+                                                autoFocus
+                                                className="bg-white/10 text-white placeholder:text-white/30 text-[10px] rounded px-1 py-0.5 border border-white/20 focus:outline-none w-full"
+                                            />
+                                            <button onClick={() => saveReminder(dayIndex)} className="text-green-400 hover:text-green-300 shrink-0"><Check size={10} /></button>
+                                            <button onClick={() => setEditingDay(null)} className="text-white/50 hover:text-white shrink-0"><X size={10} /></button>
                                         </div>
+                                    ) : (
+                                        <button onClick={() => { setEditingDay(dayIndex); setReminderText("") }} className="text-white/25 hover:text-red-400">
+                                            <Plus size={11} />
+                                        </button>
                                     )
-                                })}
+                                )}
                             </div>
                         )
                     })}
+
+                    {/* ── Slot-Zeilen ── */}
+                    {SLOTS.map((slot) => (
+                        <Fragment key={slot}>
+                            {/* Slot-Nummer */}
+                            <div className="flex items-center justify-center text-white/40 text-sm font-bold border-b border-white/10 last:border-b-0 py-1">
+                                {slot}
+                            </div>
+                            {/* Vertikale Trennlinie */}
+                            <div className="bg-white/15 border-b border-white/10" />
+                            {/* Tages-Zellen */}
+                            {DAYS.map((_, dayIndex) => {
+                                const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds)
+                                return (
+                                    <div key={dayIndex} className="min-h-12 px-1 py-1 flex flex-col gap-0.5 border-b border-white/10 border-r border-white/10 last:border-r-0">
+                                        {cellEvents.length === 0 ? (
+                                            <div className="flex-1 rounded-lg border border-dashed border-white/10" />
+                                        ) : cellEvents.map((ev, i) => (
+                                            <EventCard
+                                                key={i}
+                                                title={ev.title}
+                                                profiles={ev.profiles}
+                                                merged={ev.profiles.length > 1}
+                                                editMode={editMode}
+                                                onRemove={() => setEvents((prev) => prev.filter((e) => !ev.ids.includes(e.id)))}
+                                            />
+                                        ))}
+                                    </div>
+                                )
+                            })}
+                        </Fragment>
+                    ))}
                 </div>
             </div>
         </div>
