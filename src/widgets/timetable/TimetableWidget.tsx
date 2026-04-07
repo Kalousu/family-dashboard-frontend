@@ -70,7 +70,7 @@ function getEventsForCell(
 function TimetableWidget() {
     const [events, setEvents]         = useState<TimetableEvent[]>(INITIAL_EVENTS)
     const [reminders, setReminders]   = useState<Reminder[]>(INITIAL_REMINDERS)
-    const [watchedIds, setWatchedIds] = useState<number[]>([1, 2])
+    const [watchedIds, setWatchedIds] = useState<number[]>(ALL_PROFILES.map((p) => p.id)) //hier später nur die IDs der Profile, die in der Tab-Leiste angezeigt werden sollen (also z.B. nur Kinder & AuPair, aber nicht die Eltern)
     const [activeTab, setActiveTab]   = useState<"all" | number>("all")
     const [editMode, setEditMode]     = useState(false)
 
