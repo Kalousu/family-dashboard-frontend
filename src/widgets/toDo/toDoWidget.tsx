@@ -1,21 +1,29 @@
 import { CircleMinus, CirclePlus, Pencil } from "lucide-react"
 import { useRef, useState } from "react"
+import { motion } from "framer-motion"
 
 function EditButton({ onClick, show, alwaysVisible }: { onClick: () => void, show: boolean, alwaysVisible: boolean }) {
     if (!show) return null;
     return (
-        <button onClick={onClick} className={`shrink-0 transition-opacity ${alwaysVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+        <motion.button
+            onClick={onClick}
+            whileHover={{ scale: 1.2 }}
+            className={`shrink-0 transition-opacity ${alwaysVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+        >
             <Pencil size={20} className="text-amber-800/40" />
-        </button>
+        </motion.button>
     );
 }
 
 function DeleteButton({ onClick, show }: { onClick: () => void, show: boolean }) {
-    if (!show) return null;
     return (
-        <button onClick={onClick} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <motion.button
+            onClick={show ? onClick : undefined}
+            whileHover={show ? { scale: 1.2 } : {}}
+            className={`shrink-0 transition-opacity ${show ? "opacity-0 group-hover:opacity-100" : "opacity-0 pointer-events-none"}`}
+        >
             <CircleMinus size={20} className="text-amber-800/40" />
-        </button>
+        </motion.button>
     );
 }
 
@@ -39,11 +47,13 @@ function ToDoWidget() {
 
     function AddButton({ onClick }: { onClick: () => void }) {
         return (
-            <button
-                className="mt-2 block" onClick={onClick}
+            <motion.button
+                className="mt-2 block"
+                onClick={onClick}
+                whileHover={{ scale: 1.2 }}
             >
                 <CirclePlus size={20} className="text-amber-800/40" />
-            </button>
+            </motion.button>
         );
     }
 
@@ -95,16 +105,18 @@ function ToDoWidget() {
                 }
                 }}
                 rows={1}
-                className={`w-full px-1 rounded-sm focus:outline-none ${todo.isEditing ? "focus:ring-1 focus:ring-amber-600/50" : "cursor-default"}`}
+                className={`w-full pl-1 pr-4 bg-transparent border-0 rounded-sm focus:outline-none ${todo.isEditing ? "focus:ring-1 focus:ring-amber-600/50" : "cursor-default"}`}
                 style={{ resize: "none", overflow: "hidden" }}
                 autoFocus={todo.isEditing}
             />
-            <DeleteButton onClick={() => deleteToDo(todo.id)} show={!isAnyEditing} />
-            <EditButton
-                onClick={() => startEditing(todo.id)}
-                show={todo.isEditing || !isAnyEditing}
-                alwaysVisible={todo.isEditing}
-            />
+            <div className="flex shrink-0 gap-2 w-10">
+                <DeleteButton onClick={() => deleteToDo(todo.id)} show={!isAnyEditing} />
+                <EditButton
+                    onClick={() => startEditing(todo.id)}
+                    show={todo.isEditing || !isAnyEditing}
+                    alwaysVisible={todo.isEditing}
+                />
+            </div>
             </div>
         ))}
         <AddButton onClick={addToDo} />
