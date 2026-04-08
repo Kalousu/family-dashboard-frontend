@@ -23,6 +23,19 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridPro
     const dots = Array.from({ length: dotCols * dotRows })
     const gridStyle = { gridTemplateColumns: `repeat(${dotCols}, 1fr)`, gridTemplateRows: `repeat(${dotRows}, 1fr)` }
 
+    function canPlace(col: number, row: number): boolean {
+    if (!pendingWidget) return false
+
+    if (col + pendingWidget.colSpan > COLS || row + pendingWidget.rowSpan > ROWS) return false
+
+    return !placedWidgets.some((w) =>
+        col < w.col + w.colSpan &&
+        col + pendingWidget.colSpan > w.col &&
+        row < w.row + w.rowSpan &&
+        row + pendingWidget.rowSpan > w.row
+    )
+}
+
     return (
         <div className="flex-1 p-8 mt-10">
             <div className="relative w-full h-full">
@@ -44,7 +57,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridPro
                             const col = index % COLS
                             const row = Math.floor(index / COLS)
                             return (
-                                <div key={index} className="cursor-pointer hover:bg-white/10 rounded-xl transition-all" style={{ gridColumn: `${(col * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}`, gridRow: `${(row * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}` }} onClick={() => onCellClick(col, row)} />
+                                <div key={index} className={`cursor-pointer ${canPlace(col, row) ? ("hover:bg-white/10") : ("hover:bg-red-500/10")} rounded-xl transition-all`} style={{ gridColumn: `${(col * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}`, gridRow: `${(row * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}` }} onClick={() => canPlace(col, row) && onCellClick(col, row)} />
                             )
                         })}
                     </div>
