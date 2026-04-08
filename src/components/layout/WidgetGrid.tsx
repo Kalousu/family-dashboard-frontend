@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { motion, AnimatePresence} from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { X } from "lucide-react"
 
 interface PlacedWidget {
     id: string
@@ -13,13 +14,15 @@ interface WidgetGridProps {
     placedWidgets: PlacedWidget[]
     pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
     onCellClick: (col: number, row: number) => void
+    onRemoveWidget: (id: string) => void
 }
 const COLS = 10
 const ROWS = 5
 const DOTS_PER_SLOT = 3
 
-function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridProps) {
+function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget }: WidgetGridProps) {
     const [hoveredCell, setHoveredCell] = useState<{ col: number, row: number } | null>(null)
+    const [hoveredWidget, setHoveredWidget] = useState<string | null>(null)
     const dotCols = (COLS * DOTS_PER_SLOT) + 1
     const dotRows = (ROWS * DOTS_PER_SLOT) + 1
     const dots = Array.from({ length: dotCols * dotRows })
@@ -46,8 +49,22 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridPro
                 </div>
                 <div className="absolute inset-0 grid" style={gridStyle}>
                     {placedWidgets.map((widget) => (
-                        <div key={widget.id} className="bg-gray-700/40 rounded-2xl border border-white/10" style={{ gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(widget.colSpan * DOTS_PER_SLOT) - 1}`, gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(widget.rowSpan * DOTS_PER_SLOT) - 1}` }}>
+                        <div key={widget.id} className="relative bg-gray-700/40 rounded-2xl border border-white/10" style={{ gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(widget.colSpan * DOTS_PER_SLOT) - 1}`, gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(widget.rowSpan * DOTS_PER_SLOT) - 1}` }} onMouseEnter={() => setHoveredWidget(widget.id)} onMouseLeave={() => setHoveredWidget(null)}>
                             <p className="text-white p-2">{widget.type}</p>
+                            <AnimatePresence>
+                                {hoveredWidget === widget.id && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        transition={{ duration: 0.1 }}
+                                        className="absolute top-3 right-3 bg-white-500/80 text-white rounded-full cursor-pointer"
+                                        onClick={() => onRemoveWidget(widget.id)}
+                                    >
+                                        <X size={14} />
+                                    </motion.button>
+                                )}
+                            </AnimatePresence>
                         </div>
                     ))}
                     <AnimatePresence>

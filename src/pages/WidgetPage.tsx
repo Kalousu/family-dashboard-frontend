@@ -17,7 +17,8 @@ function WidgetPage() {
                     setPlacedWidgets([...placedWidgets, { id: Date.now().toString(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
                     setPendingWidget(null)
                 }
-            }} />
+            }} onRemoveWidget={(id) => setPlacedWidgets(placedWidgets.filter((w) => w.id !== id))} 
+            />
             <SideBar isOpen={sideBarOpen} onClose={() => setSideBarOpen(false)} isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} setPendingWidget={setPendingWidget}/>
         </div>
     )
