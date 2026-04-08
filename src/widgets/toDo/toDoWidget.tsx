@@ -1,5 +1,14 @@
 import { CircleMinus, CirclePlus, Pencil } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
+
+function EditButton({ onClick, show, alwaysVisible }: { onClick: () => void, show: boolean, alwaysVisible: boolean }) {
+    if (!show) return null;
+    return (
+        <button onClick={onClick} className={`shrink-0 transition-opacity ${alwaysVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+            <Pencil size={20} className="text-amber-800/40" />
+        </button>
+    );
+}
 
 
 interface ToDoItem {
@@ -12,6 +21,7 @@ interface ToDoItem {
 function ToDoWidget() {
     const [toDos, setToDos] = useState<ToDoItem[]>([]);
     const [nextId, setNextId] = useState(1);
+    const textareaRefs = useRef<Map<number, HTMLTextAreaElement>>(new Map());
 
     const addToDo = () => {
         setToDos([...toDos, {id: nextId, text: "", completed: false, isEditing: true}]);
@@ -32,6 +42,11 @@ function ToDoWidget() {
         setToDos(toDos.map((t) => (t.id === id ? { ...t, text: newText } : t)));
     };
 
+    const startEditing = (id: number) => {
+        setToDos(prev => prev.map(t => t.id === id ? { ...t, isEditing: true } : t));
+        setTimeout(() => textareaRefs.current.get(id)?.focus(), 0);
+    };
+
     const finishEditing = (id: number) => {
         setToDos(prev => {
             const item = prev.find(t => t.id === id);
@@ -39,6 +54,8 @@ function ToDoWidget() {
             return prev.map(t => t.id === id ? { ...t, isEditing: false } : t);
         });
     };
+
+    const isAnyEditing = toDos.some(t => t.isEditing);
 
     return(
         <div 
@@ -48,9 +65,11 @@ function ToDoWidget() {
                 scrollbarColor: "rgba(180,130,50,0.4) transparent"
         }}>
             {toDos.map((todo) => (
-            <div key={todo.id} className="border-b border-amber-800/20 pt-2 pb-0.5">
+            <div key={todo.id} className="group flex items-center gap-2 border-b border-amber-800/20 pt-2 pb-0.5 pr-2">
             <textarea
+                ref={(el) => { if (el) textareaRefs.current.set(todo.id, el); }}
                 value={todo.text}
+                readOnly={!todo.isEditing}
                 onChange={(e) => {updateText(todo.id, e.target.value);
                 e.target.style.height = "auto";
                 e.target.style.height = e.target.scrollHeight + "px";
@@ -63,9 +82,14 @@ function ToDoWidget() {
                 }
                 }}
                 rows={1}
-                className="w-full px-1 focus:outline-none focus:ring-1 focus:ring-amber-600/50 rounded-sm"
+                className={`w-full px-1 rounded-sm focus:outline-none ${todo.isEditing ? "focus:ring-1 focus:ring-amber-600/50" : "cursor-default"}`}
                 style={{ resize: "none", overflow: "hidden" }}
-                autoFocus
+                autoFocus={todo.isEditing}
+            />
+            <EditButton
+                onClick={() => startEditing(todo.id)}
+                show={todo.isEditing || !isAnyEditing}
+                alwaysVisible={todo.isEditing}
             />
             </div>
         ))}
