@@ -156,6 +156,11 @@ function ToDoWidget() {
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(180,130,50,0.4) transparent"
         }}>
+            <div>
+                <h1 className="text-2xl text-center font-bold text-amber-800/80 mb-2">
+                    Family To-Do Liste
+                </h1>
+            </div>
             <LayoutGroup>
                 <Reorder.Group axis="y" values={toDos} onReorder={setToDos} className="p-0 m-0">
                     {toDos.map((todo) => (
