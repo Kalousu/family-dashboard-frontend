@@ -1,4 +1,5 @@
 import { ChevronRight, User } from "lucide-react"
+import SideBarNav from "./SideBarNav"
 
 interface SideBarProps {
     isOpen: boolean
@@ -7,12 +8,16 @@ interface SideBarProps {
 
 function SideBar({ isOpen, onClose }: SideBarProps) {
     return(
-        <div className={`fixed right-0 top-0 h-full w-70 bg-linear-to-b from-gray-700 to-gray-600 rounded-l-2xl p-4 transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
-            <ChevronRight className="w-7 h-7 text-gray-400 hover:scale-105  hover:text-white transition-all" size={30} onClick={onClose}/>
-            <div className="flex flex-col items-center m-1">
-                <User className="mt-6 w-36 h-36 rounded-full bg-gray-500 text-gray-300 hover:scale-102 hover:bg-gray-400 hover:text-white transition-all border-4 border-gray-800/50" size={20}/>
-                <p className="m-2 text-gray-300 text-center text-lg font-bold">Willkommen zurück, User!</p>
+        <div className={`fixed right-0 top-0 h-full w-70 bg-linear-to-b from-gray-700 to-gray-600 rounded-l-2xl p-4 border-2 border-white/5 transition-transform duration-300 flex flex-col justify-between ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
+            <div>
+                <ChevronRight className="w-7 h-7 text-gray-400 hover:scale-105 hover:text-white transition-all" size={30} onClick={onClose}/>
+                <div className="flex flex-col items-center m-1">
+                    <User className="mt-6 w-36 h-36 rounded-full bg-gray-500 text-gray-300 hover:scale-102 hover:bg-gray-400 hover:text-white transition-all border-2 border-white/20" size={20}/>
+                    <p className="m-2 text-gray-300 text-center text-lg font-bold">Willkommen zurück, User!</p>
+                </div>
+                <SideBarNav />
             </div>
+            <button className="self-center mb-4 p-3 w-30 bg-linear-to-b from-gray-500/70 to-gray-600 text-gray-200 font-semibold rounded-xl border-2 border-white/10 hover:scale-102 hover:brightness-110 transition-all ease-in-out duration-200">Abmelden</button>
         </div>
     )
 }
