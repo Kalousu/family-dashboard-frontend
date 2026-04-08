@@ -10,6 +10,15 @@ function EditButton({ onClick, show, alwaysVisible }: { onClick: () => void, sho
     );
 }
 
+function DeleteButton({ onClick, show }: { onClick: () => void, show: boolean }) {
+    if (!show) return null;
+    return (
+        <button onClick={onClick} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+            <CircleMinus size={20} className="text-amber-800/40" />
+        </button>
+    );
+}
+
 
 interface ToDoItem {
     id: number;
@@ -33,7 +42,7 @@ function ToDoWidget() {
             <button
                 className="mt-2 block" onClick={onClick}
             >
-                <CirclePlus size={20} />
+                <CirclePlus size={20} className="text-amber-800/40" />
             </button>
         );
     }
@@ -45,6 +54,10 @@ function ToDoWidget() {
     const startEditing = (id: number) => {
         setToDos(prev => prev.map(t => t.id === id ? { ...t, isEditing: true } : t));
         setTimeout(() => textareaRefs.current.get(id)?.focus(), 0);
+    };
+
+    const deleteToDo = (id: number) => {
+        setToDos(prev => prev.filter(t => t.id !== id));
     };
 
     const finishEditing = (id: number) => {
@@ -74,7 +87,7 @@ function ToDoWidget() {
                 e.target.style.height = "auto";
                 e.target.style.height = e.target.scrollHeight + "px";
                 }}
-                onBlur={() => finishEditing(todo.id)}
+                onBlur={() => { if (todo.isEditing) finishEditing(todo.id); }}
                 onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -86,6 +99,7 @@ function ToDoWidget() {
                 style={{ resize: "none", overflow: "hidden" }}
                 autoFocus={todo.isEditing}
             />
+            <DeleteButton onClick={() => deleteToDo(todo.id)} show={!isAnyEditing} />
             <EditButton
                 onClick={() => startEditing(todo.id)}
                 show={todo.isEditing || !isAnyEditing}
