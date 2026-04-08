@@ -3,6 +3,7 @@ import { MapPin, Wind, Search } from "lucide-react"
 import { useContainerSize } from "../../hooks/useContainerSize"
 import { getWeatherGradient, getWeatherIcon } from "./weatherMappings"
 import type { KeyboardEvent } from "react"
+
 function WeatherWidget() {
 
     const { ref, width } = useContainerSize()

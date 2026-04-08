@@ -20,9 +20,9 @@ const registerWidget = (name: string, component: React.ComponentType, sizes: Wid
 }
 
 registerWidget("weather", WeatherWidget, [
-    { colSpan: 1, rowSpan: 1 },
     { colSpan: 2, rowSpan: 1 },
-    { colSpan: 2, rowSpan: 2 },
+    { colSpan: 2, rowSpan: 3 },
+    { colSpan: 3, rowSpan: 4 },
 ]);
 
 registerWidget("calendar", CalendarWidget, [

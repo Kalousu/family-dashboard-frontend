@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X } from "lucide-react"
+import { getWidget } from "../../widgets/WidgetRegistry"
 
 interface PlacedWidget {
     id: string
@@ -50,7 +51,10 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget 
                 <div className="absolute inset-0 grid" style={gridStyle}>
                     {placedWidgets.map((widget) => (
                         <div key={widget.id} className="relative bg-gray-700/40 rounded-2xl border border-white/10" style={{ gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(widget.colSpan * DOTS_PER_SLOT) - 1}`, gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(widget.rowSpan * DOTS_PER_SLOT) - 1}` }} onMouseEnter={() => setHoveredWidget(widget.id)} onMouseLeave={() => setHoveredWidget(null)}>
-                            <p className="text-white p-2">{widget.type}</p>
+                            {(() => {
+                                const WidgetComponent = getWidget(widget.type)
+                                return WidgetComponent ? <WidgetComponent /> : <p className="text-white p-2">{widget.type}</p>
+                            })()}
                             <AnimatePresence>
                                 {hoveredWidget === widget.id && (
                                     <motion.button
