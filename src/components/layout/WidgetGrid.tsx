@@ -7,25 +7,20 @@ interface PlacedWidget {
     rowSpan: number
 }
 
-const COLS = 6
+interface WidgetGridProps {
+    placedWidgets: PlacedWidget[]
+    pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
+    onCellClick: (col: number, row: number) => void
+}
+
+const COLS = 10
 const ROWS = 5
 const DOTS_PER_SLOT = 3
 
-const dummyWidgets: PlacedWidget[] = [
-    { id: "1", type: "weather", col: 0, row: 0, colSpan: 2, rowSpan: 2 },
-    { id: "2", type: "todo", col: 2, row: 0, colSpan: 2, rowSpan: 3 },
-    { id: "3", type: "calendar", col: 4, row: 0, colSpan: 2, rowSpan: 2 },
-    { id: "4", type: "timetable", col: 0, row: 2, colSpan: 2, rowSpan: 2 },
-    { id: "5", type: "weather", col: 4, row: 2, colSpan: 1, rowSpan: 1 },
-    { id: "6", type: "todo", col: 0, row: 4, colSpan: 3, rowSpan: 1 },
-    { id: "7", type: "calendar", col: 3, row: 3, colSpan: 3, rowSpan: 2 },
-]
-
-function WidgetGrid() {
+function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridProps) {
     const dotCols = (COLS * DOTS_PER_SLOT) + 1
     const dotRows = (ROWS * DOTS_PER_SLOT) + 1
     const dots = Array.from({ length: dotCols * dotRows })
-    const placedWidgets: PlacedWidget[] = dummyWidgets
     const gridStyle = { gridTemplateColumns: `repeat(${dotCols}, 1fr)`, gridTemplateRows: `repeat(${dotRows}, 1fr)` }
 
     return (
@@ -43,6 +38,17 @@ function WidgetGrid() {
                         </div>
                     ))}
                 </div>
+                {pendingWidget && (
+                    <div className="absolute inset-0 grid" style={gridStyle}>
+                        {Array.from({ length: COLS * ROWS }).map((_, index) => {
+                            const col = index % COLS
+                            const row = Math.floor(index / COLS)
+                            return (
+                                <div key={index} className="cursor-pointer hover:bg-white/10 rounded-xl transition-all" style={{ gridColumn: `${(col * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}`, gridRow: `${(row * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}` }} onClick={() => onCellClick(col, row)} />
+                            )
+                        })}
+                    </div>
+                )}
             </div>
         </div>
     )
