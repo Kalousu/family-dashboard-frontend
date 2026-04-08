@@ -3,6 +3,7 @@ import RegisterPage from './pages/RegisterPage';
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import TestPage from './pages/TestPage';
 import TestTimetablePage from './pages/TestTimetablePage';
+import TestPageToDo from './pages/TestPageToDo';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/test" element={<TestPage />} />
           <Route path="/testtimetable" element={<TestTimetablePage />} />
+          <Route path="/test-todo" element={<TestPageToDo />} />
         </Routes>
       </BrowserRouter>
     </>
