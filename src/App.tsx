@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import TestPage from './pages/TestPage';
 import TestTimetablePage from './pages/TestTimetablePage';
 import TestPageToDo from './pages/TestPageToDo';
+import WidgetPage from './pages/WidgetPage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/test" element={<TestPage />} />
           <Route path="/testtimetable" element={<TestTimetablePage />} />
           <Route path="/test-todo" element={<TestPageToDo />} />
+          <Route path="/dashboard" element={<WidgetPage />} />
         </Routes>
       </BrowserRouter>
     </>
