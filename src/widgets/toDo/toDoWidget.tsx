@@ -8,7 +8,7 @@ function EditButton({ onClick, show, alwaysVisible }: { onClick: () => void, sho
         <motion.button
             onClick={onClick}
             whileHover={{ scale: 1.2 }}
-            className={`shrink-0 transition-opacity ${alwaysVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+            className={`shrink-0 transition-opacity ${alwaysVisible ? "opacity-100" : "opacity-20 group-hover:opacity-100"}`}
         >
             <Pencil size={20} className="text-amber-800/40" />
         </motion.button>
@@ -20,7 +20,7 @@ function DeleteButton({ onClick, show }: { onClick: () => void, show: boolean })
         <motion.button
             onClick={show ? onClick : undefined}
             whileHover={show ? { scale: 1.2 } : {}}
-            className={`shrink-0 transition-opacity ${show ? "opacity-0 group-hover:opacity-100" : "opacity-0 pointer-events-none"}`}
+            className={`shrink-0 transition-opacity ${show ? "opacity-20 group-hover:opacity-100" : "opacity-20 pointer-events-none"}`}
         >
             <CircleMinus size={20} className="text-amber-800/40" />
         </motion.button>
@@ -52,7 +52,7 @@ function ToDoItemRow({ todo, isAnyEditing, textareaRefs, onUpdateText, onFinishE
         <Reorder.Item value={todo} dragControls={controls} dragListener={false} className="group flex items-center gap-2 border-b border-amber-800/20 pt-2 pb-0.5 pr-2 list-none">
             <GripVertical
                 size={16}
-                className="shrink-0 text-amber-800/30 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+                className="shrink-0 text-amber-800/30 cursor-grab active:cursor-grabbing opacity-40 group-hover:opacity-100 transition-opacity"
                 onPointerDown={(e) => { e.preventDefault(); controls.start(e); }}
             />
             <div
@@ -82,7 +82,7 @@ function ToDoItemRow({ todo, isAnyEditing, textareaRefs, onUpdateText, onFinishE
                     }
                 }}
                 rows={1}
-                className={`w-full pl-1 pr-4 bg-transparent border-0 rounded-sm focus:outline-none ${todo.isEditing ? "focus:ring-1 focus:ring-amber-600/50" : "cursor-default"} ${todo.completed ? "line-through text-amber-900/40" : ""}`}
+                className={`w-full pl-1 pr-4 bg-transparent border-0 rounded-sm focus:outline-none ${todo.isEditing ? "" : "cursor-default"} ${todo.completed ? "line-through text-amber-900/40" : ""}`}
                 style={{ resize: "none", overflow: "hidden" }}
                 autoFocus={todo.isEditing}
             />
@@ -104,7 +104,7 @@ function AddButton({ onClick }: { onClick: () => void }) {
             layout
             className="mt-2 block"
             onClick={onClick}
-            whileHover={{ scale: 1.2 }}
+            whileHover={{ scale: 1.075 }}
             transition={{ type: "spring", stiffness: 600, damping: 50 }}
         >
             <CirclePlus size={20} className="text-amber-800/40" />
@@ -158,7 +158,7 @@ function ToDoWidget() {
         }}>
             <div>
                 <h1 className="text-2xl text-center font-bold text-amber-800/80 mb-2">
-                    Family To-Do Liste
+                    To-Do Liste
                 </h1>
             </div>
             <LayoutGroup>
