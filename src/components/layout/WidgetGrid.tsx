@@ -1,3 +1,6 @@
+import { useState } from "react"
+import { motion, AnimatePresence} from "framer-motion"
+
 interface PlacedWidget {
     id: string
     type: string
@@ -6,35 +9,32 @@ interface PlacedWidget {
     colSpan: number
     rowSpan: number
 }
-
 interface WidgetGridProps {
     placedWidgets: PlacedWidget[]
     pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
     onCellClick: (col: number, row: number) => void
 }
-
 const COLS = 10
 const ROWS = 5
 const DOTS_PER_SLOT = 3
 
 function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridProps) {
+    const [hoveredCell, setHoveredCell] = useState<{ col: number, row: number } | null>(null)
     const dotCols = (COLS * DOTS_PER_SLOT) + 1
     const dotRows = (ROWS * DOTS_PER_SLOT) + 1
     const dots = Array.from({ length: dotCols * dotRows })
     const gridStyle = { gridTemplateColumns: `repeat(${dotCols}, 1fr)`, gridTemplateRows: `repeat(${dotRows}, 1fr)` }
 
     function canPlace(col: number, row: number): boolean {
-    if (!pendingWidget) return false
-
-    if (col + pendingWidget.colSpan > COLS || row + pendingWidget.rowSpan > ROWS) return false
-
-    return !placedWidgets.some((w) =>
-        col < w.col + w.colSpan &&
-        col + pendingWidget.colSpan > w.col &&
-        row < w.row + w.rowSpan &&
-        row + pendingWidget.rowSpan > w.row
-    )
-}
+        if (!pendingWidget) return false
+        if (col + pendingWidget.colSpan > COLS || row + pendingWidget.rowSpan > ROWS) return false
+        return !placedWidgets.some((w) =>
+            col < w.col + w.colSpan &&
+            col + pendingWidget.colSpan > w.col &&
+            row < w.row + w.rowSpan &&
+            row + pendingWidget.rowSpan > w.row
+        )
+    }
 
     return (
         <div className="flex-1 p-8 mt-10">
@@ -50,6 +50,19 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridPro
                             <p className="text-white p-2">{widget.type}</p>
                         </div>
                     ))}
+                    <AnimatePresence>
+                        {pendingWidget && hoveredCell && (
+                            <motion.div
+                                key={`${hoveredCell.col}-${hoveredCell.row}`}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.1 }}
+                                className={`${canPlace(hoveredCell.col, hoveredCell.row) ? "bg-white/20" : "bg-red-500/20"} rounded-2xl pointer-events-none`}
+                                style={{ gridColumn: `${(hoveredCell.col * DOTS_PER_SLOT) + 2} / span ${(pendingWidget.colSpan * DOTS_PER_SLOT) - 1}`, gridRow: `${(hoveredCell.row * DOTS_PER_SLOT) + 2} / span ${(pendingWidget.rowSpan * DOTS_PER_SLOT) - 1}` }}
+                            />
+                        )}
+                    </AnimatePresence>
                 </div>
                 {pendingWidget && (
                     <div className="absolute inset-0 grid" style={gridStyle}>
@@ -57,7 +70,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridPro
                             const col = index % COLS
                             const row = Math.floor(index / COLS)
                             return (
-                                <div key={index} className={`cursor-pointer ${canPlace(col, row) ? ("hover:bg-white/10") : ("hover:bg-red-500/10")} rounded-xl transition-all`} style={{ gridColumn: `${(col * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}`, gridRow: `${(row * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}` }} onClick={() => canPlace(col, row) && onCellClick(col, row)} />
+                                <div key={index} className="cursor-pointer rounded-xl" style={{ gridColumn: `${(col * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}`, gridRow: `${(row * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}` }} onMouseEnter={() => setHoveredCell({ col, row })} onMouseLeave={() => setHoveredCell(null)} onClick={() => canPlace(col, row) && onCellClick(col, row)} />
                             )
                         })}
                     </div>
@@ -66,5 +79,4 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick }: WidgetGridPro
         </div>
     )
 }
-
 export default WidgetGrid
