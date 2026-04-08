@@ -1,5 +1,6 @@
 import AppHeader from "../components/mainpage/AppHeader"
 import SideBar from "../components/mainpage/sidebar/SideBar"
+import WidgetGrid from "../components/layout/WidgetGrid"
 import { useState } from "react"
 
 function WidgetPage() {
@@ -10,6 +11,7 @@ function WidgetPage() {
     return (
         <div className={`flex flex-col w-screen h-screen bg-linear-to-b ${isDarkMode ? "from-gray-400 to-gray-200" : "from-gray-900 to-gray-800"}`}>
             <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)}/>
+            <WidgetGrid/>
             <SideBar isOpen={sideBarOpen} onClose={() => setSideBarOpen(false)} isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}/>
         </div>
     )

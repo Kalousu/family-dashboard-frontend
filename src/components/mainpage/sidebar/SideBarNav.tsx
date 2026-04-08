@@ -18,12 +18,12 @@ function SideBarNav({ isDarkMode, onToggleDarkMode }: SideBarNavProps) {
                 <div className="flex justify-between items-center w-full">
                     <span>{isDarkMode ? "Dark Mode" : "Light Mode"}</span>
                     <div className="w-12 h-6 rounded-full bg-gray-500 flex items-center p-1 cursor-pointer" onClick={onToggleDarkMode}>
-                    <motion.div
-                        className="w-5 h-5 rounded-full bg-white"
-                        animate={{ x: isDarkMode ? 0 : 20 }}
-                        transition={{ duration: 0.2 }}>            
-                    </motion.div> 
-                </div>
+                        <motion.div
+                            className="w-5 h-5 rounded-full bg-white"
+                            animate={{ x: isDarkMode ? 0 : 20 }}
+                            transition={{ duration: 0.2 }}>            
+                        </motion.div> 
+                    </div>
                 </div>
             </button>
         </div>

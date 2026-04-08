@@ -10,7 +10,7 @@ interface SideBarProps {
 
 function SideBar({ isOpen, onClose, isDarkMode, onToggleDarkMode }: SideBarProps) {
     return(
-        <div className={`fixed right-0 top-0 h-full w-70 bg-linear-to-b from-gray-700 to-gray-600 rounded-l-2xl p-4 border-2 border-white/5 transition-transform duration-300 flex flex-col justify-between ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className={`fixed z-20 right-0 top-0 h-full w-70 bg-linear-to-b from-gray-700 to-gray-600 rounded-l-2xl p-4 border-2 border-white/5 transition-transform duration-300 flex flex-col justify-between ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
             <div>
                 <ChevronRight className="w-7 h-7 text-gray-400 hover:scale-105 hover:text-white transition-all" size={30} onClick={onClose}/>
                 <div className="flex flex-col items-center m-1">
