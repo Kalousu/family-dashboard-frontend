@@ -1,5 +1,5 @@
 import { useState, Fragment } from "react"
-import { Pencil, Plus, X, Check } from "lucide-react"
+import { Pencil } from "lucide-react"
 import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
 import TimetableEdit from "./TimetableEdit"
 import { TabButton, EventCard } from "./TimetableComponents"
@@ -74,9 +74,6 @@ function TimetableWidget() {
     const [activeTab, setActiveTab]   = useState<"all" | number>("all")
     const [editMode, setEditMode]     = useState(false)
 
-    const [editingDay, setEditingDay]     = useState<number | null>(null)
-    const [reminderText, setReminderText] = useState("")
-
     const watchedProfiles = ALL_PROFILES.filter((p) => watchedIds.includes(p.id))
 
     function addUser(userId: number) {
@@ -89,19 +86,15 @@ function TimetableWidget() {
         if (activeTab === userId) setActiveTab("all")
     }
 
-    function saveReminder(day: number) {
-        if (!reminderText.trim()) return
+    function saveReminder(day: number, text: string) {
         setReminders((prev) => [
             ...prev.filter((r) => r.day !== day),
-            { id: Date.now().toString(), day, text: reminderText.trim() },
+            { id: Date.now().toString(), day, text },
         ])
-        setEditingDay(null)
-        setReminderText("")
     }
 
     function toggleEdit() {
         setEditMode((v) => !v)
-        setEditingDay(null)
     }
 
     return (
@@ -135,9 +128,12 @@ function TimetableWidget() {
             {editMode && (
                 <TimetableEdit
                     watchedIds={watchedIds}
+                    reminders={reminders}
                     onAddEvent={(e) => setEvents((prev) => [...prev, e])}
                     onAddUser={addUser}
                     onRemoveUser={removeUser}
+                    onSetReminder={saveReminder}
+                    onRemoveReminder={(day) => setReminders((prev) => prev.filter((r) => r.day !== day))}
                 />
             )}
 
@@ -157,32 +153,8 @@ function TimetableWidget() {
                                 {reminder ? (
                                     <div className="flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md px-1.5 py-0.5 w-full">
                                         <span className="text-white text-[10px] font-semibold break-words min-w-0">! {reminder.text}</span>
-                                        {editMode && (
-                                            <button onClick={() => setReminders((prev) => prev.filter((r) => r.day !== dayIndex))} className="text-white/70 hover:text-white shrink-0">
-                                                <X size={9} />
-                                            </button>
-                                        )}
                                     </div>
-                                ) : editMode && (
-                                    editingDay === dayIndex ? (
-                                        <div className="flex items-center gap-0.5 w-full px-1">
-                                            <input
-                                                value={reminderText}
-                                                onChange={(e) => setReminderText(e.target.value)}
-                                                onKeyDown={(e) => e.key === "Enter" && saveReminder(dayIndex)}
-                                                placeholder="Erinnerung…"
-                                                autoFocus
-                                                className="bg-white/10 text-white placeholder:text-white/30 text-[10px] rounded px-1 py-0.5 border border-white/20 focus:outline-none w-full"
-                                            />
-                                            <button onClick={() => saveReminder(dayIndex)} className="text-green-400 hover:text-green-300 shrink-0"><Check size={10} /></button>
-                                            <button onClick={() => setEditingDay(null)} className="text-white/50 hover:text-white shrink-0"><X size={10} /></button>
-                                        </div>
-                                    ) : (
-                                        <button onClick={() => { setEditingDay(dayIndex); setReminderText("") }} className="text-white/25 hover:text-red-400">
-                                            <Plus size={11} />
-                                        </button>
-                                    )
-                                )}
+                                ) : null}
                             </div>
                         )
                     })}
