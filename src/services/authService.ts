@@ -11,7 +11,7 @@ export interface User {
 
 export interface AuthResponse {
   token: string;
-  user?: User; // Optional, da Backend nur token zurückgibt
+  user?: User;
 }
 
 export interface LoginRequest {
@@ -23,19 +23,19 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
-  familyId?: number; // Optional, wird automatisch auf 1 gesetzt
+  familyId?: number;
+  userPfp?: string;
+  pfpColour?: string;
 }
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await fetchApi<{ token: string }>('/api/auth/login', 'POST', credentials);
+    const response = await fetchApi<{ token: string }>('/api/auth/authenticate', 'POST', credentials);
     
-    // Store token in localStorage
     localStorage.setItem('auth_token', response.token);
     
-    // Create a minimal user object from credentials
     const user: User = {
-      id: 0, // Will be updated when we fetch user data
+      id: 0,
       name: credentials.name,
       email: '',
       familyId: 1,
@@ -48,16 +48,13 @@ export const authService = {
   },
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    // Add familyId: 1 for now (existing family from DataSeeder)
     const requestData = { ...data, familyId: 1 };
     const response = await fetchApi<{ token: string }>('/api/auth/register', 'POST', requestData);
     
-    // Store token in localStorage
     localStorage.setItem('auth_token', response.token);
     
-    // Create user object from registration data
     const user: User = {
-      id: 0, // Will be updated when we fetch user data
+      id: 0,
       name: data.name,
       email: data.email,
       familyId: 1,

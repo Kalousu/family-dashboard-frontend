@@ -1,9 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
 import ProfileSelectPage from './pages/ProfileSelectPage';
+import RegisterPage from './pages/RegisterPage';
 import TestPage from './pages/TestPage';
 import TestTimetablePage from './pages/TestTimetablePage';
 import TestPageToDo from './pages/TestPageToDo';
@@ -14,20 +13,12 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<ProfileSelectPage />} />
           <Route path="/register" element={<RegisterPage />} />
           
-          {/* Protected routes */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <WidgetPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/profile-select" element={
-            <ProtectedRoute>
-              <ProfileSelectPage />
             </ProtectedRoute>
           } />
           
@@ -49,7 +40,6 @@ function App() {
             </ProtectedRoute>
           } />
           
-          {/* Redirect root to login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>

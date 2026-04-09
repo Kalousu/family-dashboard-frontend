@@ -8,7 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (name: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, icon?: string, color?: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -18,7 +18,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is already logged in on mount
   useEffect(() => {
     const initAuth = () => {
       const storedUser = authService.getUser();
@@ -44,9 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, icon?: string, color?: string) => {
     try {
-      const response = await authService.register({ name, email, password });
+      const response = await authService.register({ name, email, password, userPfp: icon, pfpColour: color });
       setUser(response.user || null);
     } catch (error) {
       console.error('Registration failed:', error);

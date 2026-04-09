@@ -36,7 +36,7 @@ function RegisterPage() {
         setIsLoading(true)
         
         try {
-            await register(formData.name, formData.email, formData.password)
+            await register(formData.name, formData.email, formData.password, formData.icon, formData.color)
             navigate("/dashboard")
         } catch (err) {
             setError("Registrierung fehlgeschlagen. Bitte versuche es erneut.")
@@ -57,26 +57,26 @@ function RegisterPage() {
     }, [showColorPicker])
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen gap-8 bg-linear-to-b from-gray-400 to-gray-200">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-b from-gray-400 to-gray-200 p-4 overflow-y-auto">
             <AnimatePresence mode="popLayout">
-                <motion.div key="register" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="flex flex-col items-center gap-4 justify-center">
-                    <div className="m-28 flex flex-row items-center gap-8">
-                        <div className="p-16 flex flex-col gap-4 items-center">
+                <motion.div key="register" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="flex flex-col items-center gap-4 justify-center w-full max-w-5xl my-4">
+                    <div className="flex flex-row items-center gap-4 md:gap-8">
+                        <div className="p-4 md:p-8 flex flex-col gap-3 md:gap-4 items-center">
                             <input 
-                                className="px-4 py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-lg"
+                                className="px-3 py-2 md:px-4 md:py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-base md:text-lg w-48 md:w-64"
                                 type="text" 
                                 placeholder="Name" value={formData.name} 
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                             />
                             <input 
-                                className="px-4 py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-lg"
+                                className="px-3 py-2 md:px-4 md:py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-base md:text-lg w-48 md:w-64"
                                 type="email" 
                                 placeholder="Email" value={formData.email} 
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                             />
-                            <div className="flex flex-row items-center gap-2">
+                            <div className="flex flex-row items-center gap-2 w-full">
                                 <select 
-                                    className="px-3 py-1.5 rounded-xl border border-gray-400 focus:outline-none bg-gray-400"
+                                    className="px-2 py-1.5 md:px-3 md:py-1.5 rounded-xl border border-gray-400 focus:outline-none bg-gray-400 text-xs md:text-sm flex-1"
                                     value={formData.role}
                                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                                 >
@@ -101,43 +101,45 @@ function RegisterPage() {
                                 </div>
                             </div>
                             <input
-                                className="px-4 py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-lg"
+                                className="px-3 py-2 md:px-4 md:py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-base md:text-lg w-48 md:w-64"
                                 type="password" 
                                 placeholder="Passwort" value={formData.password}
                                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                             />
                             <input 
-                                className="px-4 py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-lg"
+                                className="px-3 py-2 md:px-4 md:py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-base md:text-lg w-48 md:w-64"
                                 type="password" 
                                 placeholder="Passwort bestätigen" value={formData.passwordConfirm}
                                 onChange={(e) => setFormData({...formData, passwordConfirm: e.target.value})}
                             />
                         </div>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-3 gap-2 md:gap-3">
                             {Object.entries(imageIcons).map(([key, Icon]) => (
                                 <div 
                                     key={key} 
-                                    className={`w-24 h-24 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 ease-in-out transition-all hover:bg-gray-300 
+                                    className={`w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 ease-in-out transition-all hover:bg-gray-300 
                                     ${formData.icon === key ? "bg-gray-400" : "bg-gray-200"}`} 
                                     onClick={() => setFormData({...formData, icon: key})}>
-                                    <Icon size={48} />
+                                    <Icon className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12" />
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
-                        {error || "Platzhalter"}
-                    </p>
-                    <button 
-                        className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors border-3 border-gray-400 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => {handleRegister()}}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "Registriere..." : "Registrieren"}
-                    </button>
-                    <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors" onClick={() => navigate("/login")}>
-                        Bereits registriert? Zum Login
-                    </button>
+                    <div className="flex flex-col items-center gap-2 md:gap-3">
+                        <p className={`text-xs md:text-sm font-semibold text-center ${error ? "text-red-500" : "text-transparent"}`}>
+                            {error || "Platzhalter"}
+                        </p>
+                        <button 
+                            className="px-6 py-2 md:px-8 md:py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors border-3 border-gray-400 text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() => {handleRegister()}}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Registriere..." : "Registrieren"}
+                        </button>
+                        <button className="px-4 py-1.5 md:px-4 md:py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors text-xs md:text-sm" onClick={() => navigate("/login")}>
+                            Bereits registriert? Zum Login
+                        </button>
+                    </div>
                 </motion.div>
             </AnimatePresence>
         </div>

@@ -14,7 +14,6 @@ function WidgetPage() {
     const [isLoading, setIsLoading] = useState(true)
     const { user } = useAuth()
 
-    // Load dashboard from backend
     useEffect(() => {
         const loadDashboard = async () => {
             if (!user?.familyId) return
@@ -22,7 +21,6 @@ function WidgetPage() {
             try {
                 const dashboard = await dashboardService.getDashboard(user.familyId)
                 
-                // Convert backend widgets to frontend format
                 const widgets = dashboard.widgets.map((widget: Widget) => ({
                     id: widget.id.toString(),
                     type: widget.type,
@@ -54,12 +52,45 @@ function WidgetPage() {
     return (
         <div className={`flex flex-col w-screen h-screen bg-linear-to-b ${isDarkMode ? "from-gray-400 to-gray-200" : "from-gray-900 to-gray-800"}`}>
             <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)}/>
-            <WidgetGrid placedWidgets={placedWidgets} pendingWidget={pendingWidget} onCellClick={(col, row) => {
-                if (pendingWidget) {
-                    setPlacedWidgets([...placedWidgets, { id: Date.now().toString(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
-                    setPendingWidget(null)
+            <WidgetGrid placedWidgets={placedWidgets} pendingWidget={pendingWidget} onCellClick={async (col, row) => {
+                if (pendingWidget && user?.familyId) {
+                    try {
+                        const newWidget = await dashboardService.addWidget(user.familyId, {
+                            type: pendingWidget.type,
+                            position: {
+                                col: col.toString(),
+                                row: row.toString(),
+                                colSpan: pendingWidget.colSpan.toString(),
+                                rowSpan: pendingWidget.rowSpan.toString()
+                            },
+                            config: {}
+                        })
+                        
+                        setPlacedWidgets([...placedWidgets, { 
+                            id: newWidget.id.toString(), 
+                            type: newWidget.type, 
+                            col, 
+                            row, 
+                            colSpan: pendingWidget.colSpan, 
+                            rowSpan: pendingWidget.rowSpan 
+                        }])
+                        setPendingWidget(null)
+                    } catch (error) {
+                        console.error('Failed to add widget:', error)
+                        alert('Widget konnte nicht hinzugefügt werden')
+                    }
                 }
-            }} onRemoveWidget={(id) => setPlacedWidgets(placedWidgets.filter((w) => w.id !== id))} 
+            }} onRemoveWidget={async (id) => {
+                if (user?.familyId) {
+                    try {
+                        await dashboardService.removeWidget(user.familyId, parseInt(id))
+                        setPlacedWidgets(placedWidgets.filter((w) => w.id !== id))
+                    } catch (error) {
+                        console.error('Failed to remove widget:', error)
+                        alert('Widget konnte nicht entfernt werden')
+                    }
+                }
+            }} 
             />
             <SideBar isOpen={sideBarOpen} onClose={() => setSideBarOpen(false)} isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} setPendingWidget={setPendingWidget}/>
         </div>

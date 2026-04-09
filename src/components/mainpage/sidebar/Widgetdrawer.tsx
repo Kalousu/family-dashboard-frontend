@@ -18,13 +18,11 @@ function Widgetdrawer({ onBack, setPendingWidget }: WidgetdrawerProps) {
                     <div className="mt-2 flex flex-col">
                         {widgets.map((item) => (<button className="mt-1 mb-1 p-3 w-full bg-linear-to-b from-gray-500/70 to-gray-600 text-gray-200 text-left font-semibold rounded-xl border-2 border-white/10 hover:scale-102 hover:brightness-110 transition-all ease-in-out duration-200"
                         key={item} onClick={() => setSelectedType(item)}>{item}</button>))}
-                        {/*hier noch einmal das design rauswerfen/überarbeiten, damit */}
                     </div>
                 ) : (
                     <div>
                         <div className="mt-2 flex flex-col">
                             <p className="flex flex-col items-center text-gray-300 font-semibold mb-2">{selectedType}</p>
-                            {/* <p> bitte wieder rauswerfen, widgetart ist sichtbar nach design*/}
                             {getWidgetSizes(selectedType).map((size) => (
                                 <button key={`${size.colSpan}x${size.rowSpan}`} className="mt-1 mb-1 p-3 w-full bg-linear-to-b from-gray-500/70 to-gray-600 text-gray-200 text-left font-semibold rounded-xl border-2 border-white/10 hover:scale-102 hover:brightness-110 transition-all ease-in-out duration-200" onClick={() => setPendingWidget({ type: selectedType, colSpan: size.colSpan, rowSpan: size.rowSpan })}>
                                     {size.colSpan}x{size.rowSpan}

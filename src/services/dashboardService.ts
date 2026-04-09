@@ -37,6 +37,14 @@ export interface DashboardResponse {
 
 export const dashboardService = {
   async getDashboard(familyId: number): Promise<DashboardResponse> {
-    return fetchApi<DashboardResponse>(`/api/family/${familyId}/dashboard`, 'GET');
+    return fetchApi<DashboardResponse>(`/api/families/${familyId}/dashboard`, 'GET');
+  },
+
+  async addWidget(familyId: number, widget: { type: string, position: WidgetPosition, config: any }): Promise<Widget> {
+    return fetchApi<Widget>(`/api/families/${familyId}/dashboard/widgets`, 'POST', widget);
+  },
+
+  async removeWidget(familyId: number, widgetId: number): Promise<void> {
+    return fetchApi<void>(`/api/families/${familyId}/dashboard/widgets/${widgetId}`, 'DELETE');
   }
 };

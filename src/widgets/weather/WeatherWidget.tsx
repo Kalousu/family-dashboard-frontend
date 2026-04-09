@@ -25,7 +25,6 @@ function WeatherWidget() {
             setIsLoading(true)
             setError(null)
             try {
-                // 1. Search for city to get coordinates
                 const locations = await fetchApi<any[]>(`/api/weather/search?city=${city}`, 'GET')
                 
                 if (!locations || locations.length === 0) {
@@ -34,7 +33,6 @@ function WeatherWidget() {
                 
                 const location = locations[0]
                 
-                // 2. Get weather data with coordinates
                 const data = await fetchApi<any>(
                     `/api/weather?latitude=${location.latitude}&longitude=${location.longitude}&timezone=${encodeURIComponent(location.timezone)}`,
                     'GET'

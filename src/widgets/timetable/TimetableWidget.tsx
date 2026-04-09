@@ -4,8 +4,6 @@ import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
 import TimetableEdit from "./TimetableEdit"
 import { TabButton, EventCard } from "./TimetableComponents"
 
-// Mock-Daten
-
 const ALL_PROFILES: Profile[] = [
     { id: 1, name: "Kevin",  color: "blue",       icon: "gamepad" },
     { id: 2, name: "Jonas",  color: "red",         icon: "dog"     },
@@ -28,8 +26,6 @@ const INITIAL_EVENTS: TimetableEvent[] = [
 const INITIAL_REMINDERS: Reminder[] = [
     { id: "r1", day: 0, text: "Sportsachen" },
 ]
-
-// ────────────────────────────────────────────────────────────────
 
 const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
 const SLOTS = Array.from({ length: 9 }, (_, i) => i + 1)
@@ -54,7 +50,6 @@ function getEventsForCell(
         }))
     }
 
-    // gleichnamige Events zusammenführen
     const eventGroups: Record<string, { ids: string[]; profiles: Profile[] }> = {}
     for (const e of filtered) {
         const profile = ALL_PROFILES.find((p) => p.id === e.userId)
@@ -70,7 +65,7 @@ function getEventsForCell(
 function TimetableWidget() {
     const [events, setEvents]         = useState<TimetableEvent[]>(INITIAL_EVENTS)
     const [reminders, setReminders]   = useState<Reminder[]>(INITIAL_REMINDERS)
-    const [watchedIds, setWatchedIds] = useState<number[]>(ALL_PROFILES.map((p) => p.id)) //hier später nur die IDs der Profile, die in der Tab-Leiste angezeigt werden sollen (also z.B. nur Kinder & AuPair, aber nicht die Eltern)
+    const [watchedIds, setWatchedIds] = useState<number[]>(ALL_PROFILES.map((p) => p.id))
     const [activeTab, setActiveTab]   = useState<"all" | number>("all")
     const [editMode, setEditMode]     = useState(false)
 
@@ -107,7 +102,6 @@ function TimetableWidget() {
     return (
         <div className="w-full h-full bg-linear-to-b from-indigo-500/30 to-violet-900/40 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
 
-            {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
                 <div className="flex items-end gap-0.5">
                     <TabButton active={activeTab === "all"} onClick={() => setActiveTab("all")}>Alle</TabButton>
@@ -131,7 +125,6 @@ function TimetableWidget() {
                 </button>
             </div>
 
-            {/* Edit-Panel */}
             {editMode && (
                 <TimetableEdit
                     watchedIds={watchedIds}
@@ -141,14 +134,13 @@ function TimetableWidget() {
                 />
             )}
 
-            {/* Grid */}
             <div className="flex-1 overflow-auto min-h-0">
                 <div
                     className="grid"
                     style={{ gridTemplateColumns: "1.5rem 1px repeat(5, minmax(0, 1fr))" }}
                 >
-                    <div className="border-b border-white/15" /> {/* Slot-Nummer-Platzhalter */}
-                    <div className="bg-white/15 border-b border-white/15" /> {/* Trennlinie */}
+                    <div className="border-b border-white/15" />
+                    <div className="bg-white/15 border-b border-white/15" />
                     {DAYS.map((day, dayIndex) => {
                         const reminder = reminders.find((r) => r.day === dayIndex)
                         return (
@@ -187,7 +179,6 @@ function TimetableWidget() {
                         )
                     })}
 
-                    {/* Mapping */}
                     {SLOTS.map((slot) => (
                         <Fragment key={slot}>
                             <div className="flex items-center justify-center text-white/40 text-sm font-bold border-b border-white/10 last:border-b-0 py-1">

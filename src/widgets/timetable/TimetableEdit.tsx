@@ -56,7 +56,6 @@ function TimetableEdit({ watchedIds, onAddEvent, onAddUser, onRemoveUser }: Time
     return (
         <div className="bg-white/10 border border-white/15 rounded-xl p-3 flex flex-col gap-2.5 shrink-0">
 
-            {/* User-Verwaltung */}
             <div className="flex flex-wrap items-center gap-2">
                 <span className="text-white/60 text-xs font-semibold shrink-0">User:</span>
                 {watchedProfiles.map((p) => (
@@ -86,7 +85,6 @@ function TimetableEdit({ watchedIds, onAddEvent, onAddUser, onRemoveUser }: Time
                 )}
             </div>
 
-            {/* Event hinzufügen */}
             {showForm ? (
                 <div className="flex flex-wrap items-center gap-2">
                     <input
