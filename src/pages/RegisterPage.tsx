@@ -2,11 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { HslStringColorPicker } from "react-colorful";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import imageIcons from "../constants/imageIcons";
 
 function RegisterPage() {
     const [formData, setFormData] = useState({
         name: "",
+        email: "",
         role: "Mitglied",
         password: "",
         passwordConfirm: "",
@@ -14,20 +16,33 @@ function RegisterPage() {
         color: "hsl(0, 0%, 50%)"
     })
     const [error, setError] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
     const [showColorPicker, setShowColorPicker] = useState(false)
     const colorPickerRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
+    const { register } = useAuth()
 
-    function handleRegister() {
+    async function handleRegister() {
         if (formData.password !== formData.passwordConfirm) {
             setError("Passwörter stimmen nicht überein.")
+            return
         }
-        else if (formData.name === "" || formData.password === "") {
+        if (formData.name === "" || formData.email === "" || formData.password === "") {
             setError("Bitte alle Felder ausfüllen.")
+            return
         }
-        else {
-            setError(null)
-            alert(`Registrieren mit Name: ${formData.name} und Passwort: ${formData.password} als ${formData.role} mit dem Icon ${formData.icon} und der Farbe ${formData.color}`)
+        
+        setError(null)
+        setIsLoading(true)
+        
+        try {
+            await register(formData.name, formData.email, formData.password)
+            navigate("/dashboard")
+        } catch (err) {
+            setError("Registrierung fehlgeschlagen. Bitte versuche es erneut.")
+            console.error("Registration error:", err)
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -52,6 +67,12 @@ function RegisterPage() {
                                 type="text" 
                                 placeholder="Name" value={formData.name} 
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                            <input 
+                                className="px-4 py-2 rounded-xl border-2 border-gray-400 focus:outline-none bg-gray-200 text-lg"
+                                type="email" 
+                                placeholder="Email" value={formData.email} 
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
                             />
                             <div className="flex flex-row items-center gap-2">
                                 <select 
@@ -107,10 +128,15 @@ function RegisterPage() {
                     <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
                         {error || "Platzhalter"}
                     </p>
-                    <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors border-3 border-gray-400 text-lg"
-                        onClick={() => {handleRegister()}}>Registrieren</button>
-                    <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors" onClick={() => navigate("/")}>
-                        Zurück zur Nutzerauswahl
+                    <button 
+                        className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors border-3 border-gray-400 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => {handleRegister()}}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Registriere..." : "Registrieren"}
+                    </button>
+                    <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors" onClick={() => navigate("/login")}>
+                        Bereits registriert? Zum Login
                     </button>
                 </motion.div>
             </AnimatePresence>
