@@ -41,7 +41,12 @@ function ProfileSelectPage() {
                             <p className={`text-sm font-semibold mt-2 ${error ? "text-red-500" : "text-transparent"}`}>
                                 {error || "Platzhalter"}
                             </p>
-                        <button className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition-colors border-2 border-gray-400" onClick={() => setSelectedProfile(null)}>Benutzer wechseln</button>
+                            <div className="rounded-2xl p-0.5 bg-gray-400/70 hover:scale-102 hover:brightness-105 transition-all ease-in-out duration-200">
+                                <button className="relative px-4 py-2 text-gray-600 bg-linear-to-b from-gray-200/60 via-gray-300/50 to-gray-400 font-semibold rounded-xl overflow-hidden" onClick={() => setSelectedProfile(null)}>
+                                    Benutzer wechseln
+                                    <div className="absolute rounded-xl inset-x-0 top-0 h-1/2 bg-white/15 rounded-t-xl pointer-events-none" />
+                                </button>
+                            </div>
                     </motion.div>
                 ) : (
                     <motion.div key="profiles" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}}>
