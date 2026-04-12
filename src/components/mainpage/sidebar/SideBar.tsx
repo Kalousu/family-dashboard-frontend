@@ -20,12 +20,22 @@ function SideBar({ isOpen, onClose, isDarkMode, onToggleDarkMode, setPendingWidg
                 <div className="flex flex-col h-full">
                     <div>
                         <ChevronRight className="w-7 h-7 text-gray-400 hover:scale-105 hover:text-white transition-all" size={30} onClick={onClose}/>
-                        <div className="flex flex-col items-center m-1">
-                            <div className="relative mt-6 w-36 h-36 rounded-full overflow-hidden">
+                        <div className="m-3 flex flex-col items-center">
+                            {/*profile card wurde für design copy pasted, vllt bessere lösung später?*/}
+                            <div className="rounded-2xl p-0.5 bg-gray-400/50 transition-all hover:scale-103 hover:brightness-105">
+                                <div className="relative rounded-xl p-1 bg-linear-to-b from-gray-300 via-slate-500/50 to-gray-300/20 transition-colors">
+                                    <div className="absolute rounded-xl inset-x-0 top-0 h-1/2 bg-white/15 rounded-t-xl pointer-events-none" />
+                                    <div className="rounded-xl p-0.5 bg-gray-400/50">
+                                        <User className="w-24 h-24 p-2 rounded-xl border bg-blue-500 border-white/30" size={48} />
+                                    </div>
+                                </div>                
+                            </div>
+                            <p className="m-2 text-gray-300 text-center text-lg font-bold">Willkommen zurück, User!</p>
+                            {/*<div className="relative mt-6 w-36 h-36 rounded-full overflow-hidden border border-white">
                                 <User className="w-36 h-36 rounded-full bg-gray-500 text-gray-300 hover:scale-102 hover:bg-gray-400 hover:text-white transition-all border-2 border-white/20" size={20} />
                                 <div className="absolute inset-x-0 top-0 h-2/3 rounded-full bg-white/10 pointer-events-none" />
                             </div>
-                            <p className="m-2 text-gray-300 text-center text-lg font-bold">Willkommen zurück, User!</p>
+                            <p className="m-2 text-gray-300 text-center text-lg font-bold">Willkommen zurück, User!</p>*/}
                         </div>
                         <SideBarNav isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} onWidgetsClick={() => setSideBarView("widgets")}/>
                     </div>

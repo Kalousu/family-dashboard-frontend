@@ -41,8 +41,8 @@ function ProfileSelectPage() {
                             <p className={`text-sm font-semibold mt-2 ${error ? "text-red-500" : "text-transparent"}`}>
                                 {error || "Platzhalter"}
                             </p>
-                            <div className="rounded-2xl p-0.5 bg-gray-400/70 hover:scale-102 hover:brightness-105 transition-all ease-in-out duration-200">
-                                <button className="relative px-4 py-2 text-gray-600 bg-linear-to-b from-gray-200/60 via-gray-300/50 to-gray-400 font-semibold rounded-xl overflow-hidden" onClick={() => setSelectedProfile(null)}>
+                            <div className="rounded-xl p-0.5 bg-linear-to-b to-gray-400/50 via-gray-500/50 from-gray-400/40 hover:brightness-103 transition-all">
+                                <button className="relative border border-white/10 px-4 py-2 text-gray-600 bg-linear-to-b from-gray-200/60 via-gray-400/70 to-slate-300/40 font-semibold rounded-xl overflow-hidden" onClick={() => setSelectedProfile(null)}>
                                     Benutzer wechseln
                                     <div className="absolute rounded-xl inset-x-0 top-0 h-1/2 bg-white/15 rounded-t-xl pointer-events-none" />
                                 </button>
