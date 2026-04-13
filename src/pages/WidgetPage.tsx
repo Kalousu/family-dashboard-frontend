@@ -2,6 +2,8 @@ import AppHeader from "../components/mainpage/AppHeader"
 import SideBar from "../components/mainpage/sidebar/SideBar"
 import WidgetGrid from "../components/layout/WidgetGrid"
 import { useState } from "react"
+import dashboardBgDark from "../assets/dashboardbgdark.png"
+import dashboardbgLight from "../assets/dashboardbglight.png"
 
 function WidgetPage() {
     const [isDarkMode, setIsDarkMode] = useState(true)
@@ -10,7 +12,7 @@ function WidgetPage() {
     const [placedWidgets, setPlacedWidgets] = useState<{ id: string, type: string, col: number, row: number, colSpan: number, rowSpan: number }[]>([])
 
     return (
-        <div className={`flex flex-col w-screen h-screen bg-linear-to-b ${isDarkMode ? "from-gray-400 to-gray-200" : "from-gray-900 to-gray-800"}`}>
+        <div className={`flex flex-col w-screen h-screen bg-cover bg-center bg-no-repeat"`} style={isDarkMode ? { backgroundImage: `url(${dashboardbgLight})`} : { backgroundImage: `url(${dashboardBgDark})` }}>
             <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)}/>
             <WidgetGrid placedWidgets={placedWidgets} pendingWidget={pendingWidget} onCellClick={(col, row) => {
                 if (pendingWidget) {

@@ -20,7 +20,6 @@ function ProfileCard({ name, color, icon, onSelect }: ProfileCardProps) {
                     </div>
                 </div>                
             </div>
-
             <p className="text-lg font-semibold text-gray-800">{name}</p>
         </div>
     )
