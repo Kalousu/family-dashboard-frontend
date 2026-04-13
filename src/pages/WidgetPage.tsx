@@ -32,7 +32,7 @@ function WidgetPage() {
             />
             <div className="relative flex flex-col w-full h-full">
                 <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)} isDarkMode={isDarkMode}/>
-                <WidgetGrid placedWidgets={placedWidgets} pendingWidget={pendingWidget} onCellClick={(col, row) => {
+                <WidgetGrid isDarkMode={isDarkMode} placedWidgets={placedWidgets} pendingWidget={pendingWidget} onCellClick={(col, row) => {
                     if (pendingWidget) {
                         setPlacedWidgets([...placedWidgets, { id: Date.now().toString(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
                         setPendingWidget(null)
