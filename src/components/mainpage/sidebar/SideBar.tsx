@@ -1,6 +1,7 @@
 import { ChevronRight, User } from "lucide-react"
 import SideBarNav from "./SideBarNav"
 import Widgetdrawer from "./Widgetdrawer"
+import GlassButton from "../../ui/GlassButton"
 import { useState } from "react"
 
 interface SideBarProps {
@@ -36,10 +37,9 @@ function SideBar({ isOpen, onClose, isDarkMode, onToggleDarkMode, setPendingWidg
                         <SideBarNav isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} onWidgetsClick={() => setSideBarView("widgets")}/>
                     </div>
                     <div className="flex flex-col items-center mt-auto">
-                        <button className={`relative self-center mb-4 p-3 w-30 font-semibold rounded-xl border-2 hover:scale-102 hover:brightness-110 transition-all ease-in-out duration-200 ${isDarkMode ? "bg-linear-to-b from-sky-200/30 via-slate-400/15 to-blue-400/20 text-gray-700 border-2 border-cyan-950/5" : "bg-linear-to-b from-gray-500/50 via-gray-600/20 to-blue-400/20 text-gray-200 border-white/10"}`}>
-                            <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${isDarkMode ? "bg-white/30" : "bg-white/5"}`} />
+                        <GlassButton isDarkMode={isDarkMode} className="self-center mb-4 p-3 w-30">
                             Abmelden
-                        </button>                                 
+                        </GlassButton>
                     </div>
                 </div>
             ) : (
