@@ -36,6 +36,13 @@ function RegisterPage() {
     }
 
     useEffect(() => {
+        const img1 = new Image()
+        const img2 = new Image()
+        img1.src = dashboardBgDark
+        img2.src = dashboardBgLight
+    }, [])
+
+    useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
                 setShowColorPicker(false)
@@ -52,8 +59,19 @@ function RegisterPage() {
         : "bg-linear-to-b from-sky-200/50 via-slate-400/15 to-blue-400/30"
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen gap-8 bg-cover bg-center bg-no-repeat transition-all duration-300" style={isDarkMode ? { backgroundImage: `url(${dashboardBgDark})` } : { backgroundImage: `url(${dashboardBgLight})` }}>
-            {/* Dark Mode Toggle */}
+        <div className="relative flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
+            <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: `url(${dashboardBgDark})` }}
+            />
+            <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ease-out"
+                style={{
+                    backgroundImage: `url(${dashboardBgLight})`,
+                    opacity: isDarkMode ? 0 : 1,
+                }}
+            />
+        <div className="relative flex flex-col items-center justify-center w-full h-full gap-8">
             <div className="fixed top-4 right-4 flex items-center gap-2">
                 <span className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
                     {isDarkMode ? "Dark Mode" : "Light Mode"}
@@ -159,6 +177,7 @@ function RegisterPage() {
                     </GlassButton>
                 </motion.div>
             </AnimatePresence>
+        </div>
         </div>
     )
 }
