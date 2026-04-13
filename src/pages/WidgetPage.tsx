@@ -13,7 +13,7 @@ function WidgetPage() {
 
     return (
         <div className={`flex flex-col w-screen h-screen bg-cover bg-center bg-no-repeat"`} style={isDarkMode ? { backgroundImage: `url(${dashboardbgLight})`} : { backgroundImage: `url(${dashboardBgDark})` }}>
-            <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)}/>
+            <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)} isDarkMode={isDarkMode}/>
             <WidgetGrid placedWidgets={placedWidgets} pendingWidget={pendingWidget} onCellClick={(col, row) => {
                 if (pendingWidget) {
                     setPlacedWidgets([...placedWidgets, { id: Date.now().toString(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
