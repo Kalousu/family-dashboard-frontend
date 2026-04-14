@@ -18,3 +18,6 @@ export interface Reminder {
     day: number
     text: string
 }
+
+export const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"] as const
+export const SLOTS = Array.from({ length: 9 }, (_, i) => i + 1)

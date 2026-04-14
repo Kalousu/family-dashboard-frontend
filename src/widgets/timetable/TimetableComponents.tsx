@@ -1,6 +1,6 @@
-import { X } from "lucide-react"
+import { X, Check, Plus } from "lucide-react"
 import imageIcons from "../../constants/imageIcons"
-import type { Profile } from "./timetableTypes"
+import type { Profile, Reminder } from "./timetableTypes"
 
 export function UserIcon({ profile, size = 14 }: { profile: Profile; size?: number }) {
     const Icon = imageIcons[profile.icon as keyof typeof imageIcons]
@@ -52,6 +52,55 @@ export function EventCard({ title, profiles, merged, editMode, onRemove }: {
             <div className="flex justify-end gap-0.5 mt-0.5">
                 {profiles.map((p) => <UserIcon key={p.id} profile={p} size={10} />)}
             </div>
+        </div>
+    )
+}
+
+export function DayHeader({ day, reminder, editMode, isEditing, reminderText, onReminderTextChange, onSave, onCancelEdit, onStartEdit, onRemove }: {
+    day: string
+    reminder?: Reminder
+    editMode: boolean
+    isEditing: boolean
+    reminderText: string
+    onReminderTextChange: (text: string) => void
+    onSave: () => void
+    onCancelEdit: () => void
+    onStartEdit: () => void
+    onRemove: () => void
+}) {
+    return (
+        <div className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 border-b border-white/15 border-r border-white/10 last:border-r-0">
+            <span className="text-white/70 text-xs font-bold tracking-wide text-center">{day}</span>
+
+            {reminder ? (
+                <div className="flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md px-1.5 py-0.5 w-full">
+                    <span className="text-white text-[10px] font-semibold break-words min-w-0">! {reminder.text}</span>
+                    {editMode && (
+                        <button onClick={onRemove} className="text-white/70 hover:text-white shrink-0">
+                            <X size={9} />
+                        </button>
+                    )}
+                </div>
+            ) : editMode && (
+                isEditing ? (
+                    <div className="flex items-center gap-0.5 w-full px-1">
+                        <input
+                            value={reminderText}
+                            onChange={(e) => onReminderTextChange(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && onSave()}
+                            placeholder="Erinnerung…"
+                            autoFocus
+                            className="bg-white/10 text-white placeholder:text-white/30 text-[10px] rounded px-1 py-0.5 border border-white/20 focus:outline-none w-full"
+                        />
+                        <button onClick={onSave} className="text-green-400 hover:text-green-300 shrink-0"><Check size={10} /></button>
+                        <button onClick={onCancelEdit} className="text-white/50 hover:text-white shrink-0"><X size={10} /></button>
+                    </div>
+                ) : (
+                    <button onClick={onStartEdit} className="text-white/25 hover:text-red-400">
+                        <Plus size={11} />
+                    </button>
+                )
+            )}
         </div>
     )
 }

@@ -1,29 +1,20 @@
 import { useState } from "react"
 import { Plus, X, Check } from "lucide-react"
 import type { Profile, TimetableEvent } from "./timetableTypes"
+import { DAYS, SLOTS } from "./timetableTypes"
 import { UserIcon } from "./TimetableComponents"
 
-const ALL_PROFILES: Profile[] = [
-    { id: 1, name: "Kevin",  color: "blue",       icon: "gamepad" },
-    { id: 2, name: "Jonas",  color: "red",         icon: "dog"     },
-    { id: 3, name: "Daniel", color: "lightgreen",  icon: "sun"     },
-    { id: 4, name: "Lea",    color: "pink",        icon: "flower"  },
-    { id: 5, name: "Katrin", color: "lightblue",   icon: "cat"     },
-]
-
-const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
-const SLOTS = Array.from({ length: 9 }, (_, i) => i + 1)
-
 interface TimetableEditProps {
+    profiles: Profile[]
     watchedIds: number[]
     onAddEvent: (event: TimetableEvent) => void
     onAddUser: (userId: number) => void
     onRemoveUser: (userId: number) => void
 }
 
-function TimetableEdit({ watchedIds, onAddEvent, onAddUser, onRemoveUser }: TimetableEditProps) {
-    const watchedProfiles = ALL_PROFILES.filter((p) => watchedIds.includes(p.id))
-    const availableUsers  = ALL_PROFILES.filter((p) => !watchedIds.includes(p.id))
+function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUser }: TimetableEditProps) {
+    const watchedProfiles = profiles.filter((p) => watchedIds.includes(p.id))
+    const availableUsers  = profiles.filter((p) => !watchedIds.includes(p.id))
 
     const [showForm, setShowForm] = useState(false)
     const [newTitle,  setNewTitle]  = useState("")
@@ -31,7 +22,7 @@ function TimetableEdit({ watchedIds, onAddEvent, onAddUser, onRemoveUser }: Time
     const [newDay,    setNewDay]    = useState(0)
     const [newUserId, setNewUserId] = useState(watchedIds[0])
     const [addUserId, setAddUserId] = useState(
-        availableUsers[0]?.id ?? ALL_PROFILES[0].id
+        availableUsers[0]?.id ?? profiles[0].id
     )
 
     function handleAddEvent() {
