@@ -31,9 +31,9 @@ registerWidget("calendar", CalendarWidget, [
 ]);
 
 registerWidget("timetable", TimetableWidget, [
-    { colSpan: 1, rowSpan: 1 },
-    { colSpan: 2, rowSpan: 1 },
-    { colSpan: 2, rowSpan: 2 },
+    { colSpan: 3, rowSpan: 4 },
+    { colSpan: 4, rowSpan: 4 },
+    { colSpan: 5, rowSpan: 4 },
 ]);
 
 registerWidget("todo", ToDoWidget, [
