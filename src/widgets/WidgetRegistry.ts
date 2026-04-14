@@ -40,7 +40,7 @@ registerWidget("timetable", TimetableWidget, [
 registerWidget("todo", ToDoWidget, [
     { colSpan: 1, rowSpan: 1 },
     { colSpan: 2, rowSpan: 1 },
-    { colSpan: 2, rowSpan: 2 },
+    { colSpan: 3, rowSpan: 3 },
 ]);
 
 export const getWidget = (name: string) => {
