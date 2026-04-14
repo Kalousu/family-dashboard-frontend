@@ -2,7 +2,7 @@ import ProfileSelectPage from './pages/ProfileSelectPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import TestPage from './pages/TestPage';
+import TestPage from './pages/TestWeatherPage';
 import TestTimetablePage from './pages/TestTimetablePage';
 import TestPageToDo from './pages/TestPageToDo';
 import WidgetPage from './pages/WidgetPage';
