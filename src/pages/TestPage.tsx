@@ -13,7 +13,7 @@ function WeatherCodeCard({ code, isNight }: { code: number; isNight: boolean }) 
 
 function TestPage() {
     return (
-        <div className="min-h-screen bg-gray-900 p-8 flex flex-col gap-8">
+        <div className="min-h-screen bg-sky-200 p-8 flex flex-col gap-8">
             <div>
                 <h2 className="text-white text-xl font-bold mb-4">☀️ Tag</h2>
                 <div className="flex flex-wrap gap-4">

@@ -1,4 +1,4 @@
-import { Sun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudFog, CloudDrizzle, CloudSun, Moon, CloudMoon, CloudMoonRain } from "lucide-react"
+import { Sun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudFog, CloudDrizzle, CloudSun, Moon, CloudMoon } from "lucide-react"
 
 export function getWeatherIcon(code: number, size: number = 48, isNight: boolean = false) {
     const props = { color: "white", size }
@@ -7,35 +7,35 @@ export function getWeatherIcon(code: number, size: number = 48, isNight: boolean
     if (code === 3) return <Cloud {...props} />
     if (code === 45 || code === 48) return <CloudFog {...props} />
     if (code >= 51 && code <= 55) return <CloudDrizzle {...props} />
-    if (code >= 61 && code <= 65) return isNight ? <CloudMoonRain {...props} /> : <CloudRain {...props} />
+    if (code >= 61 && code <= 65) return <CloudRain {...props} />
     if (code >= 71 && code <= 77) return <CloudSnow {...props} />
-    if (code >= 80 && code <= 82) return isNight ? <CloudMoonRain {...props} /> : <CloudRain {...props} />
+    if (code >= 80 && code <= 82) return <CloudRain {...props} />
     if (code >= 95 && code <= 99) return <CloudLightning {...props} />
     return <Cloud {...props} />
 }
 
 export function getWeatherGradient(code: number, isNight: boolean = false): string {
     if (isNight) {
-        if (code === 0) return "from-indigo-950/80 to-blue-900/60"
-        if (code <= 2) return "from-indigo-900/80 to-slate-800/60"
-        if (code === 3) return "from-slate-900/80 to-indigo-900/60"
-        if (code === 45 || code === 48) return "from-slate-900/80 to-slate-700/60"
-        if (code >= 51 && code <= 55) return "from-slate-900/80 to-blue-900/60"
-        if (code >= 61 && code <= 65) return "from-slate-950/80 to-blue-950/60"
-        if (code >= 71 && code <= 77) return "from-indigo-950/80 to-slate-800/60"
-        if (code >= 80 && code <= 82) return "from-slate-950/80 to-blue-950/60"
-        if (code >= 95 && code <= 99) return "from-purple-950/80 to-indigo-950/60"
-        return "from-indigo-950/80 to-blue-900/60"
+        if (code === 0) return "from-indigo-950/30 to-blue-900/30"
+        if (code <= 2) return "from-indigo-900/30 to-slate-800/30"
+        if (code === 3) return "from-slate-900/30 to-indigo-900/30"
+        if (code === 45 || code === 48) return "from-slate-900/30 to-slate-700/30"
+        if (code >= 51 && code <= 55) return "from-slate-900/30 to-blue-900/30"
+        if (code >= 61 && code <= 65) return "from-slate-950/30 to-blue-950/30"
+        if (code >= 71 && code <= 77) return "from-indigo-950/30 to-slate-800/30"
+        if (code >= 80 && code <= 82) return "from-slate-950/30 to-blue-950/30"
+        if (code >= 95 && code <= 99) return "from-purple-950/30 to-indigo-950/30"
+        return "from-indigo-950/30 to-blue-900/30"
     }
 
     if (code === 0) return "from-blue-400/30 to-yellow-200/30"
     if (code <= 2) return "from-sky-500/30 to-sky-200/30"
-    if (code === 3) return "from-slate-500/30 to-slate-300/30"
+    if (code === 3) return "from-slate-500/40 to-slate-300/30"
     if (code === 45 || code === 48) return "from-gray-500/30 to-gray-300/30"
     if (code >= 51 && code <= 55) return "from-gray-500/30 to-blue-300/30"
     if (code >= 61 && code <= 65) return "from-slate-700/30 to-slate-400/30"
     if (code >= 71 && code <= 77) return "from-slate-300/30 to-blue-100/30"
-    if (code >= 80 && code <= 82) return "from-slate-700/30 to-blue-800/30"
+    if (code >= 80 && code <= 82) return "from-slate-700/40 to-blue-800/30"
     if (code >= 95 && code <= 99) return "from-purple-900/30 to-gray-700/30"
     return "from-sky-500/30 to-sky-200/30"
 }
