@@ -32,6 +32,7 @@ registerWidget("calendar", CalendarWidget, [
 
 registerWidget("timetable", TimetableWidget, [
     { colSpan: 3, rowSpan: 4 },
+    { colSpan: 4, rowSpan: 3 },
     { colSpan: 4, rowSpan: 4 },
     { colSpan: 5, rowSpan: 4 },
 ]);
