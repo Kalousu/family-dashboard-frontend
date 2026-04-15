@@ -13,6 +13,14 @@ export interface Current {
     weather_code: number
 }
 
+export interface Daily {
+    time: string[]
+    temperature_2m_max: number[]
+    windspeed_10m_max: number[]
+    weathercode: number[]
+}
+
 export interface WeatherResponse {
     current: Current
+    daily: Daily
 }
