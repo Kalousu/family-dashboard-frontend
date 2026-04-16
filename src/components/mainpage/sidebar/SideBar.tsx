@@ -45,7 +45,7 @@ function SideBar({ isOpen, onClose, isDarkMode, onToggleDarkMode, setPendingWidg
                 </div>
             ) : sideBarView === "admin" ? (
                 <div>
-                    <AdminDrawer onBack={() => setSideBarView("nav")} setPendingWidget={setPendingWidget} isDarkMode={isDarkMode} />
+                    <AdminDrawer onBack={() => setSideBarView("nav")} isDarkMode={isDarkMode} />
                 </div>
             ) : (
                 <div>

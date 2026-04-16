@@ -1,7 +1,27 @@
-import { ChevronLeft, Copy, Check } from "lucide-react"
-import { useState } from "react"
+import { ChevronLeft, Copy, Check, Trash2 } from "lucide-react"
+import { useState, useEffect } from "react"
 import GlassButton from "../../ui/GlassButton"
-import { handleInviteToggle } from "./handleInviteToggle"
+import { handleToggle } from "./handleToggle"
+import imageIcons from "../../../constants/imageIcons"
+import ConfirmModal from "./ConfirmModal"
+
+
+//Mock Daten
+interface Member {
+    id: number
+    name: string
+    icon: keyof typeof imageIcons
+    color: string
+}
+
+const mockMembers: Member[] = [
+    { id: 1, name: "Kevin",  color: "#3b82f6", icon: "gamepad" }, //Kind
+    { id: 2, name: "Jonas",  color: "#ef4444", icon: "dog"     }, //Kind2
+    { id: 3, name: "Daniel", color: "#4ade80", icon: "sun"     },
+    { id: 4, name: "Lea",    color: "#f472b6", icon: "flower"  }, //AuPair
+    { id: 5, name: "Katrin", color: "#7dd3fc", icon: "cat"     },
+]
+//------------
 
 interface AdminDrawerProps {
     onBack: () => void
@@ -9,26 +29,48 @@ interface AdminDrawerProps {
 }
 
 function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
-    const [selectedType, setSelectedType] = useState<string | null>(null)
+    const [isInviteOpen, setIsInviteOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [copied, setCopied] = useState(false)
+    const [members, setMembers] = useState<Member[]>(mockMembers) //durch API ersetzen
+    const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
 
     const inviteLink = `${window.location.origin}/invite/abc123`
 
     function handleCopy() {
         navigator.clipboard.writeText(inviteLink)
         setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
+    }
+
+    useEffect(() => {
+        if (!copied) return
+        const timer = setTimeout(() => setCopied(false), 2000)
+        return () => clearTimeout(timer)
+    }, [copied])
+
+    function handleDelete() {
+        if (memberToDelete) {
+            setMembers(prev => prev.filter(m => m.id !== memberToDelete.id))
+            setMemberToDelete(null)
+        }
     }
 
     return (
         <div className="flex flex-col h-full">
-            <ChevronLeft className={`w-7 h-7 hover:scale-105 transition-all ${isDarkMode ? "text-sky-900 hover:text-cyan-600" : "text-gray-400 hover:text-white"}`} size={30} onClick={onBack}/>
+            <ChevronLeft
+                className={`w-7 h-7 hover:scale-105 transition-all ${isDarkMode ? "text-sky-900 hover:text-cyan-600" : "text-gray-400 hover:text-white"}`}
+                size={30}
+                onClick={onBack}
+            />
+
             <div className="mt-2 flex flex-col">
-                <GlassButton isDarkMode={isDarkMode} onClick={() => handleInviteToggle(selectedType, setSelectedType)} className="mt-1 mb-1 p-3 w-full text-left">
+
+                {/* Neues Mitglied einladen */}
+                <GlassButton isDarkMode={isDarkMode} onClick={() => handleToggle(setIsInviteOpen)} className="mt-1 mb-1 p-3 w-full text-left">
                     neues Mitglied einladen
                 </GlassButton>
 
-                {selectedType === "invite" && (
+                {isInviteOpen && (
                     <div className={`mx-1 mb-2 p-3 rounded-xl border ${isDarkMode ? "bg-sky-100/40 border-cyan-950/20" : "bg-white/5 border-white/10"}`}>
                         <p className={`text-xs font-semibold mb-2 ${isDarkMode ? "text-gray-600" : "text-gray-300"}`}>Einladungslink</p>
                         <div className="flex items-center gap-2">
@@ -50,13 +92,59 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                     </div>
                 )}
 
-                <GlassButton isDarkMode={isDarkMode} onClick={() => setSelectedType("manage")} className="mt-1 mb-1 p-3 w-full text-left">
+                {/* Mitglied löschen */}
+                <GlassButton isDarkMode={isDarkMode} onClick={() => handleToggle(setIsDeleteOpen)} className="mt-1 mb-1 p-3 w-full text-left">
                     Mitglied löschen
                 </GlassButton>
-                <GlassButton isDarkMode={isDarkMode} onClick={() => setSelectedType("manage")} className="mt-1 mb-1 p-3 w-full text-left">
+
+                {isDeleteOpen && (
+                    <div className={`mx-1 mb-2 p-3 rounded-xl border ${isDarkMode ? "bg-sky-100/40 border-cyan-950/20" : "bg-white/5 border-white/10"}`}>
+                        <div className="flex flex-wrap gap-3">
+                            {members.map(member => {
+                                const Icon = imageIcons[member.icon]
+                                return (
+                                    <div key={member.id} className="flex flex-col items-center gap-1">
+                                        <div className="relative group">
+                                            <div
+                                                className="w-12 h-12 rounded-xl flex items-center justify-center border border-white/10"
+                                                style={{ backgroundColor: member.color + "33" }}
+                                            >
+                                                <Icon size={24} style={{ color: member.color }} />
+                                            </div>
+                                            <div
+                                                className="absolute inset-0 rounded-xl flex items-center justify-center bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                onClick={() => setMemberToDelete(member)}
+                                            >
+                                                <Trash2 size={18} className="text-white" />
+                                            </div>
+                                        </div>
+                                        <span className={`text-xs truncate max-w-12 text-center ${isDarkMode ? "text-gray-600" : "text-gray-400"}`}>
+                                            {member.name}
+                                        </span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Rollen verwalten */}
+                <GlassButton isDarkMode={isDarkMode} className="mt-1 mb-1 p-3 w-full text-left">
                     Rollen verwalten
                 </GlassButton>
+
             </div>
+
+            {/* Confirmation Modal */}
+            {memberToDelete && (
+                <ConfirmModal
+                    isDarkMode={isDarkMode}
+                    message={<>Wollen Sie <span className="font-bold">{memberToDelete.name}</span> wirklich löschen?</>}
+                    subMessage="Unwiderruflich."
+                    onConfirm={handleDelete}
+                    onCancel={() => setMemberToDelete(null)}
+                />
+            )}
         </div>
     )
 }
