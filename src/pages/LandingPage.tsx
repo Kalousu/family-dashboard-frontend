@@ -91,8 +91,8 @@ function LandingPage() {
             {/* ── NAVBAR ── */}
             <nav className={`flex items-center justify-between px-6 sm:px-10 py-4 border-b ${navBorder}`}>
                 <div className="flex items-center gap-2.5">
-                    <img src={logo} alt="FamilyConnect" className="w-7 h-7 object-contain" />
-                    <span className={`font-semibold text-sm tracking-tight ${text}`}>FamilyConnect</span>
+                    <img src={logo} alt="FamilyConnect" className="w-10 h-10 object-contain" />
+                    <span className={`font-semibold text-xl tracking-tight ${text}`}>FamilyConnect</span>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -136,33 +136,38 @@ function LandingPage() {
                     </div>
                 </motion.div>
 
-                {/* Right — dark card with floating icons */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
-                    className={`flex-1 w-full max-w-xl aspect-[4/3] rounded-3xl ${cardBg} relative overflow-hidden`}
-                >
-                    {/* Beam / glow in center */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-64 h-64 rounded-full bg-sky-500/10 blur-3xl" />
-                        <div className="absolute w-40 h-96 bg-white/4 rotate-[30deg] blur-2xl" />
-                        <div className="absolute w-40 h-96 bg-sky-300/5 -rotate-[20deg] blur-2xl" />
-                    </div>
+                {/* Right — dark card with floating icons + caption */}
+                <div className="flex-1 flex flex-col items-center gap-4 w-full max-w-xl">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+                        className={`w-full aspect-[4/3] rounded-3xl ${cardBg} relative overflow-hidden`}
+                    >
+                        {/* Beam / glow in center */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-64 h-64 rounded-full bg-sky-500/10 blur-3xl" />
+                            <div className="absolute w-40 h-96 bg-white/4 rotate-[30deg] blur-2xl" />
+                            <div className="absolute w-40 h-96 bg-sky-300/5 -rotate-[20deg] blur-2xl" />
+                        </div>
 
-                    {/* Floating icon tiles */}
-                    {ICON_CONFIGS.map((item) => (
-                        <FloatingIconTile
-                            key={item.key}
-                            iconKey={item.key}
-                            color={item.color}
-                            initialX={item.x}
-                            initialY={item.y}
-                            duration={item.duration}
-                            delay={item.delay}
-                        />
-                    ))}
-                </motion.div>
+                        {/* Floating icon tiles */}
+                        {ICON_CONFIGS.map((item) => (
+                            <FloatingIconTile
+                                key={item.key}
+                                iconKey={item.key}
+                                color={item.color}
+                                initialX={item.x}
+                                initialY={item.y}
+                                duration={item.duration}
+                                delay={item.delay}
+                            />
+                        ))}
+                    </motion.div>
+                    <p className={`text-center text-sm ${muted}`}>
+                        Genauso spielerisch und intuitiv, dass die ganze Familie sofort loslegt!
+                    </p>
+                </div>
             </main>
 
             {/* ── FEATURES ── */}
