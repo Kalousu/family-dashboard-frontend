@@ -51,12 +51,6 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                     members={members}
                 />
 
-                <AddDeleteSection
-                    isDarkMode={isDarkMode}
-                    members={members}
-                    onDelete={setMembers}
-                />
-
             </div>
         </div>
     )
