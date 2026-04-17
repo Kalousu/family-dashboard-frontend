@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import GlassButton from "../components/ui/GlassButton";
 import FormInput from "../components/ui/FormInput";
-import { HslStringColorPicker } from "react-colorful";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import imageIcons from "../constants/imageIcons";
+import IconSelect from "../components/IconSelect";
 import AuthPageLayout from "../components/layout/AuthPageLayout";
 import useDarkMode from "../hooks/useDarkMode";
 import { fadeSlideUp } from "../constants/animations";
+import ColorPickerButton from "../components/ui/ColorPickerButton";
 
 function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -54,93 +54,66 @@ function RegisterPage() {
 
     return (
         <AuthPageLayout>
-                    <motion.div key="register" {...fadeSlideUp} className="flex flex-col items-center gap-4 justify-center">
-                        <div className="m-28 flex flex-row items-center gap-8">
-                            <div className="p-16 flex flex-col gap-4 items-center">
-                                <FormInput
-                                    isDarkMode={isDarkMode}
-                                    type="text"
-                                    placeholder="Name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                />
-                                <div className="flex flex-row items-center gap-2">
-                                    <div className={`relative hover:brightness-103 transition-all rounded-xl p-0.5 ${inputWrapper}`}>
-                                        <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${glossClass}`} />
-                                        <select
-                                            className={`px-2 py-2 border font-semibold rounded-xl overflow-hidden bg-linear-to-b ${isDarkMode ? "from-gray-700/60 via-gray-800/70 to-slate-700/40 text-gray-300 border-white/10" : "from-sky-200/30 via-slate-400/15 to-blue-400/20 text-gray-700 border-cyan-950/5"}`}
-                                            value={formData.role}
-                                            onChange={(e) => setFormData({...formData, role: e.target.value})}
-                                        >
-                                            <option value="Mitglied">Mitglied</option>
-                                            <option value="Familienadministrator">Familienadministrator</option>
-                                            <option value="Systemadministrator">Systemadministrator</option>
-                                        </select>
-                                    </div>
-                                    <div className="relative" ref={colorPickerRef}>
-                                        <div
-                                            className={`w-9 h-9 rounded-xl cursor-pointer border-2 ${isDarkMode ? "border-gray-600" : "border-gray-400"}`}
-                                            style={{ backgroundColor: formData.color }}
-                                            onClick={() => setShowColorPicker(!showColorPicker)}
-                                        />
-                                        {showColorPicker && (
-                                            <motion.div key="colorpicker" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -10}}
-                                                        className={`absolute top-12 left-0 z-50 rounded-xl p-2 bg-linear-to-b ${isDarkMode ? "from-gray-700 to-gray-800" : "from-sky-200/60 to-blue-300/40"}`}>
-                                                <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${glossClass}`} />
-                                                <HslStringColorPicker
-                                                    color={formData.color}
-                                                    onChange={(newColor) => setFormData({...formData, color: newColor})}
-                                                    className="border-2 rounded-xl border-white/40"
-                                                />
-                                            </motion.div>
-                                        )}
-                                    </div>
-                                </div>
-                                <FormInput
-                                    isDarkMode={isDarkMode}
-                                    type="password"
-                                    placeholder="Passwort"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                />
-                                <FormInput
-                                    isDarkMode={isDarkMode}
-                                    type="password"
-                                    placeholder="Passwort bestätigen"
-                                    value={formData.passwordConfirm}
-                                    onChange={(e) => setFormData({...formData, passwordConfirm: e.target.value})}
-                                />
+            <motion.div key="register" {...fadeSlideUp} className="flex flex-col items-center gap-4 justify-center">
+                <div className="flex flex-row items-center gap-8">
+                    <div className="px-8 flex flex-col gap-4 items-center">
+                        <FormInput
+                            isDarkMode={isDarkMode}
+                            type="text"
+                            placeholder="Name"
+                            value={formData.name}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        />
+                        <div className="flex flex-row items-center gap-2">
+                            <div className={`relative hover:brightness-103 transition-all rounded-xl p-0.5 ${inputWrapper}`}>
+                                <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${glossClass}`} />
+                                <select
+                                    className={`px-2 py-2 border font-semibold rounded-xl overflow-hidden bg-linear-to-b ${isDarkMode ? "from-gray-700/60 via-gray-800/70 to-slate-700/40 text-gray-300 border-white/10" : "from-sky-200/30 via-slate-400/15 to-blue-400/20 text-gray-700 border-cyan-950/5"}`}
+                                    value={formData.role}
+                                    onChange={(e) => setFormData({...formData, role: e.target.value})}
+                                >
+                                    <option value="Mitglied">Mitglied</option>
+                                    <option value="Familienadministrator">Familienadministrator</option>
+                                    <option value="Systemadministrator">Systemadministrator</option>
+                                </select>
                             </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                {Object.entries(imageIcons).map(([key, Icon]) => (
-                                    <div key={key} className={`border rounded-2xl transition-all ease-in-out duration-200 hover:scale-105 hover:brightness-103 ${isDarkMode ? "border-slate-700/20" : "border-slate-700/20"}`}>
-                                        <div className={`relative border border-white/10 p-1 font-semibold rounded-2xl overflow-hidden bg-linear-to-b ${isDarkMode ? "from-gray-500/50 via-gray-600/20 to-blue-400/20 text-gray-300" : "from-sky-200/30 via-slate-400/15 to-blue-400/20 text-gray-700"}`}>
-                                            <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
-                                            <div
-                                                className={`relative border w-24 h-24 rounded-xl flex items-center justify-center cursor-pointer transition-all ease-in-out duration-200
-                                                ${formData.icon === key
-                                                    ? isDarkMode ? "bg-indigo-500/25 border-white/10 hover:bg-indigo-400/35" : "bg-sky-300/50 border-sky-400/20 hover:bg-sky-300/70"
-                                                    : isDarkMode ? "bg-slate-700/40 border-white/5 hover:bg-slate-600/55" : "bg-white/50 border-cyan-950/5 hover:bg-sky-100/70"
-                                                }`}
-                                                onClick={() => setFormData({...formData, icon: key})}>
-                                                <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/40"}`} />
-                                                <Icon size={48} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <ColorPickerButton
+                                color={formData.color}
+                                isDarkMode={isDarkMode}
+                                onChange={(newColor) => setFormData({...formData, color: newColor})}
+                            />
                         </div>
-                        <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
-                            {error || "Platzhalter"}
-                        </p>
-                        <GlassButton isDarkMode={!isDarkMode} onClick={handleRegister} className="px-4 py-2 backdrop-blur-sm">
-                            Registrieren
-                        </GlassButton>
-                        <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/")} className="px-4 py-2 backdrop-blur-sm">
-                            Zurück zur Nutzerauswahl
-                        </GlassButton>
-                    </motion.div>
+                        <FormInput
+                            isDarkMode={isDarkMode}
+                            type="password"
+                            placeholder="Passwort"
+                            value={formData.password}
+                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                        />
+                        <FormInput
+                            isDarkMode={isDarkMode}
+                            type="password"
+                            placeholder="Passwort bestätigen"
+                            value={formData.passwordConfirm}
+                            onChange={(e) => setFormData({...formData, passwordConfirm: e.target.value})}
+                        />
+                    </div>
+                    <IconSelect
+                        selectedIcon={formData.icon}
+                        isDarkMode={isDarkMode}
+                        onSelect={(key) => setFormData({...formData, icon: key})}
+                    />
+                </div>
+                <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
+                    {error || "Platzhalter"}
+                </p>
+                <GlassButton isDarkMode={!isDarkMode} onClick={handleRegister} className="px-4 py-2 backdrop-blur-sm">
+                    Registrieren
+                </GlassButton>
+                <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/")} className="px-4 py-2 backdrop-blur-sm">
+                    Zurück zur Nutzerauswahl
+                </GlassButton>
+            </motion.div>
         </AuthPageLayout>
     )
 }

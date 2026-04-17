@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import WidgetPage from './pages/WidgetPage';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { UserProvider } from './context/UserContext';
+import UserProfileEditPage from './pages/UserProfileEditPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<WidgetPage />} />
+          <Route path="/profile/edit" element={<UserProfileEditPage />} />
         </Routes>
       </BrowserRouter>
     </DarkModeProvider>
