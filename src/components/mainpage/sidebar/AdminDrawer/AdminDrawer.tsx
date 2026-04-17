@@ -2,8 +2,8 @@ import { ChevronLeft } from "lucide-react"
 import { useState } from "react"
 import imageIcons from "../../../../constants/imageIcons"
 import InviteSection from "./InviteSection"
-import DeleteSection from "./DeleteSection"
 import RoleSection from "./RoleSection"
+import AddDeleteSection from "./AddDeleteSection"
 
 export interface Member {
     id: number
@@ -40,7 +40,7 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
 
                 <InviteSection isDarkMode={isDarkMode} />
 
-                <DeleteSection
+                <AddDeleteSection
                     isDarkMode={isDarkMode}
                     members={members}
                     onDelete={setMembers}
@@ -49,6 +49,12 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                 <RoleSection
                     isDarkMode={isDarkMode}
                     members={members}
+                />
+
+                <AddDeleteSection
+                    isDarkMode={isDarkMode}
+                    members={members}
+                    onDelete={setMembers}
                 />
 
             </div>
