@@ -7,9 +7,11 @@ import TestTimetablePage from './pages/TestTimetablePage';
 import TestPageToDo from './pages/TestPageToDo';
 import WidgetPage from './pages/WidgetPage';
 import { DarkModeProvider } from './context/DarkModeContext';
+import { UserProvider } from './context/UserContext';
 
 function App() {
   return (
+    <UserProvider>
     <DarkModeProvider>
       <BrowserRouter>
         <Routes>
@@ -23,6 +25,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </DarkModeProvider>
+    </UserProvider>
   )
 }
 

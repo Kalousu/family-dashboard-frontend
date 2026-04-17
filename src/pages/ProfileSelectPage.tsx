@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { useState } from "react"
 import AuthPageLayout from "../components/layout/AuthPageLayout"
 import useDarkMode from "../hooks/useDarkMode"
+import useUser from "../hooks/useUser"
 import { fadeSlideUp } from "../constants/animations"
 
 const profiles = [
@@ -25,6 +26,7 @@ function ProfileSelectPage() {
     const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null)
     const [error, setError] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
+    const { setCurrentUser } = useUser()
 
     function handleLogin(password: string) {
         if (password === "") {
@@ -32,6 +34,9 @@ function ProfileSelectPage() {
         } else {
             setError(null)
             alert(`Logging in with username: ${selectedProfile?.name} and password: ${password}`)
+            if (selectedProfile) {
+                setCurrentUser(selectedProfile)
+            }
         }
     }
 
