@@ -6,6 +6,7 @@ import DarkModeToggle from "../components/ui/DarkModeToggle"
 import useDarkMode from "../hooks/useDarkMode"
 import logo from "../assets/logo.png"
 import imageIcons from "../constants/imageIcons"
+import { LayoutGrid, SquareDashedMousePointer, Baby, MonitorSmartphone, Heart } from "lucide-react"
 
 const ICON_CONFIGS: {
     key: keyof typeof imageIcons
@@ -176,19 +177,20 @@ function LandingPage() {
                         className="mb-16"
                     >
                         <h2 className={`text-3xl sm:text-4xl font-bold tracking-tight ${text}`}>
-                            Alles was deine Familie braucht
+                            Dein Familien-Dashboard – so individuell wie eure Familie
                         </h2>
-                        <p className={`mt-3 text-base max-w-lg ${muted}`}>
-                            Ein Dashboard. Alle Familienmitglieder. Keine Zettelwirtschaft mehr.
+                        <p className={`mt-3 text-base max-w-full ${muted}`}>
+                            Erinnerst du dich an das Gefühl, als Technik noch einfach, klar und irgendwie vertraut war? Genau dieses Gefühl bringt unser Familien-Dashboard zurück, kombiniert mit modernen Apps.
                         </p>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         {[
-                            { icon: "📅", title: "Familienkalender", desc: "Alle Termine auf einen Blick – von der Schule bis zum Zahnarzt." },
-                            { icon: "✅", title: "Aufgaben", desc: "Verteilt und verfolgt To-Dos gemeinsam als Familie." },
-                            { icon: "🔁", title: "Routinen", desc: "Tägliche Abläufe für Kinder und Erwachsene strukturiert festhalten." },
-                            { icon: "👨‍👩‍👧", title: "Familienprofile", desc: "Jedes Mitglied hat sein eigenes Profil und seine eigene Ansicht." },
+                            { icon: LayoutGrid,                title: "Alles im Blick", desc: "Ob Termine, Aufgaben, Wetter oder der Schultag deines Kindes – dein gesamter Familienalltag wird übersichtlich an einem Ort gebündelt. Auf dem großen Bildschirm wird das Dashboard zum zentralen Treffpunkt eurer Organisation. Unterwegs hast du jederzeit mobil Zugriff und bleibst auf dem Laufenden." },
+                            { icon: SquareDashedMousePointer,  title: "So intuitiv wie möglich – dank Drag & Drop", desc: "Gestalte euer Dashboard genau so, wie es zu eurem Alltag passt. Widgets lassen sich einfach per Drag & Drop verschieben, anpassen und kombinieren. Kinderleicht." },
+                            { icon: Baby,                      title: "Ein Design, das Spaß macht – für Groß und Klein", desc: "Mit seinem charmanten Retro-Look im Stil klassischer Benutzeroberflächen deiner Kindheit bringt das Dashboard nicht nur Struktur, sondern auch Persönlichkeit in euren Alltag. Klare Formen, freundliche Farben und kindgerechte Icons sorgen dafür, dass sich jedes Familienmitglied sofort zurechtfindet." },
+                            { icon: MonitorSmartphone,         title: "Desktop-first gedacht. Mobil umgesetzt", desc: "Auf großen Bildschirmen entfaltet das Dashboard seine volle Stärke als zentrale Steuerzentrale im Zuhause. Gleichzeitig sorgt die optimierte mobile Ansicht dafür, dass Eltern auch unterwegs jederzeit den Überblick behalten." },
+                            { icon: Heart,                     title: "Mehr als nur Organisation ", desc: "Dieses Dashboard ist nicht einfach ein Tool. Es ist ein digitaler Treffpunkt für eure Familie. Ein Ort, an dem alles zusammenkommt, was euren Alltag ausmacht." },
                         ].map((f, i) => (
                             <motion.div
                                 key={f.title}
@@ -198,7 +200,7 @@ function LandingPage() {
                                 transition={{ delay: i * 0.08, duration: 0.4 }}
                                 className={`rounded-2xl p-6 border ${navBorder} hover:border-sky-400/40 transition-colors`}
                             >
-                                <span className="text-3xl">{f.icon}</span>
+                                <f.icon size={28} className={muted} />
                                 <h3 className={`mt-4 font-semibold text-base ${text}`}>{f.title}</h3>
                                 <p className={`mt-2 text-sm leading-relaxed ${muted}`}>{f.desc}</p>
                             </motion.div>
