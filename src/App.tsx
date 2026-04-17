@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import WidgetPage from './pages/WidgetPage';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { UserProvider } from './context/UserContext';
+import NewFamilyRegisterPage from './pages/newFamilyRegisterPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<WidgetPage />} />
+          <Route path="/newfamily" element={<NewFamilyRegisterPage />} />
         </Routes>
       </BrowserRouter>
     </DarkModeProvider>

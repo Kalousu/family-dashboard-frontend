@@ -147,8 +147,8 @@ function LandingPage() {
                         {/* Beam / glow in center */}
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <div className="w-64 h-64 rounded-full bg-sky-500/10 blur-3xl" />
-                            <div className="absolute w-40 h-96 bg-white/4 rotate-[30deg] blur-2xl" />
-                            <div className="absolute w-40 h-96 bg-sky-300/5 -rotate-[20deg] blur-2xl" />
+                            <div className="absolute w-40 h-96 bg-white/4 rotate-30 blur-2xl" />
+                            <div className="absolute w-40 h-96 bg-sky-300/5 -rotate-20 blur-2xl" />
                         </div>
 
                         {/* Floating icon tiles */}
