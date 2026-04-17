@@ -1,4 +1,4 @@
-import { ChevronLeft, Copy, Check, Trash2 } from "lucide-react"
+import { ChevronLeft, Copy, Check, Trash2, ChevronDown } from "lucide-react"
 import { useState, useEffect } from "react"
 import GlassButton from "../../ui/GlassButton"
 import { handleToggle } from "./handleToggle"
@@ -35,6 +35,10 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
     const [copied, setCopied] = useState(false)
     const [members, setMembers] = useState<Member[]>(mockMembers) //durch API ersetzen
     const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
+    const [memberRoles, setMemberRoles] = useState<Record<number, string>>(
+        () => Object.fromEntries(mockMembers.map(m => [m.id, "Systemadmin"])) //Rolle muss durch API kommen, hier Default auf Systemadmin gesetzt
+    )
+    const [openDropdownId, setOpenDropdownId] = useState<number | null>(null)
 
     const inviteLink = `${window.location.origin}/invite/abc123`
 
@@ -48,6 +52,13 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
         const timer = setTimeout(() => setCopied(false), 2000)
         return () => clearTimeout(timer)
     }, [copied])
+
+    useEffect(() => {
+        if (openDropdownId === null) return
+        const handleClick = () => setOpenDropdownId(null)
+        document.addEventListener("click", handleClick)
+        return () => document.removeEventListener("click", handleClick)
+    }, [openDropdownId])
 
     function handleDelete() {
         if (memberToDelete) {
@@ -149,7 +160,32 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                                         <span className={`text-sm text-center ${isDarkMode ? "text-gray-600" : "text-gray-400"}`}>
                                             {member.name}
                                         </span>
-                                        {/* Hier könnten z.B. Dropdowns oder Buttons zum Ändern der Rolle eingefügt werden */}
+                                        {/* Rolle Dropdown */}
+                                        <div
+                                            className="relative ml-auto"
+                                            onClick={e => e.stopPropagation()}
+                                        >
+                                            <button
+                                                onClick={() => setOpenDropdownId(openDropdownId === member.id ? null : member.id)}
+                                                className={`flex items-center gap-1 px-2 py-1 rounded-md border text-sm ${isDarkMode ? "bg-white/60 border-cyan-950/20 text-gray-600 hover:text-cyan-600" : "bg-white/5 border-white/10 text-gray-300 hover:text-white"}`}
+                                            >
+                                                {memberRoles[member.id]}
+                                                <ChevronDown size={14} />
+                                            </button>
+                                            {openDropdownId === member.id && (
+                                                <div className={`absolute right-0 top-full mt-1 z-10 rounded-md shadow-lg border ${isDarkMode ? "bg-white border-cyan-950/20" : "bg-gray-800 border-white/10"}`}>
+                                                    {["Systemadmin", "Mitglied", "Gast"].map(role => (
+                                                        <button
+                                                            key={role}
+                                                            onClick={() => { setMemberRoles(prev => ({ ...prev, [member.id]: role })); setOpenDropdownId(null) }}
+                                                            className={`block w-full text-left px-3 py-1.5 text-sm ${isDarkMode ? "text-gray-600 hover:bg-gray-100" : "text-gray-300 hover:bg-white/10"}`}
+                                                        >
+                                                            {role}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )
                             })}
