@@ -110,7 +110,7 @@ function RegisterPage() {
                 <GlassButton isDarkMode={!isDarkMode} onClick={handleRegister} className="px-4 py-2 backdrop-blur-sm">
                     Registrieren
                 </GlassButton>
-                <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/")} className="px-4 py-2 backdrop-blur-sm">
+                <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/home")} className="px-4 py-2 backdrop-blur-sm">
                     Zurück zur Nutzerauswahl
                 </GlassButton>
             </motion.div>
