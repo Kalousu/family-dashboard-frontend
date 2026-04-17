@@ -18,10 +18,10 @@ export function TabButton({ active, onClick, children }: { active: boolean; onCl
     return (
         <button
             onClick={onClick}
-            className={`relative px-4 text-sm font-semibold rounded-t-lg border-t border-l border-r select-none transition-all ${
+            className={`relative px-4 pt-1.5 pb-2.25 text-sm font-semibold rounded-t-lg border-t border-l border-r select-none transition-colors ${
                 active
-                    ? "pt-1.5 pb-[9px] -mb-px z-10 bg-gradient-to-b from-white/40 to-white/10 border-white/35 text-white"
-                    : "py-1 bg-white/5 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
+                    ? "-mb-px z-10 bg-linear-to-b from-white/40 to-white/10 border-white/35 text-white"
+                    : "bg-white/5 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
             }`}
         >
             {active && (

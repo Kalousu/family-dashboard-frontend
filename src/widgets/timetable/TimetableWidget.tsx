@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react"
+import { useState, Fragment, useRef } from "react"
 import { Pencil } from "lucide-react"
 import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
 import { DAYS, SLOTS } from "./timetableTypes"
@@ -83,6 +83,8 @@ function TimetableWidget() {
     const [activeTab, setActiveTab]   = useState<"all" | number>("all")
     const [editMode, setEditMode]     = useState(false)
 
+    const scrollRef = useRef<HTMLDivElement>(null)
+
     const [editingDay, setEditingDay]     = useState<number | null>(null)
     const [reminderText, setReminderText] = useState("")
 
@@ -152,8 +154,7 @@ function TimetableWidget() {
             )}
 
             {/* Grid */}
-            <div className="flex-1 overflow-auto min-h-0">
-                <div
+            <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{ overflowAnchor: "none" }}>                <div
                     className="grid"
                     style={{ gridTemplateColumns: "1.5rem 1px repeat(5, minmax(0, 1fr))" }}
                 >
@@ -183,8 +184,11 @@ function TimetableWidget() {
                             <div className="bg-white/15 border-b border-white/10" />
                             {DAYS.map((_, dayIndex) => {
                                 const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds, ALL_PROFILES)
+                                // lock row height to the "all" view so rows don't shift on tab change
+                                const allViewCount = getEventsForCell(events, slot, dayIndex, "all", watchedIds, ALL_PROFILES).length
+                                const minHeight = `${Math.max(1, allViewCount) * 3}rem`
                                 return (
-                                    <div key={dayIndex} className="min-h-12 px-1 py-1 flex flex-col gap-0.5 border-b border-white/10 border-r border-white/10 last:border-r-0">
+                                    <div key={dayIndex} className="px-1 py-1 flex flex-col gap-0.5 border-b border-white/10 border-r border-white/10 last:border-r-0" style={{ minHeight }}>
                                         {cellEvents.length === 0 ? (
                                             <div className="flex-1 rounded-lg border border-dashed border-white/10" />
                                         ) : cellEvents.map((ev) => (
