@@ -30,17 +30,23 @@ function NewFamilyRegisterPage() {
             setError("Bitte eine gültige E-Mail-Adresse eingeben.")
             return
         }
+        if (formData.passwort.length < 3) { //in der demo hochsetzen nur zu demozwecken
+            setError("Passwort muss mindestens 8 Zeichen lang sein.")
+            return
+        }
         if (formData.passwort !== formData.passwortWiederholen) {
             setError("Passwörter stimmen nicht überein.")
             return
         }
         setError(null)
-        alert(`Registrierung für: ${formData.familienname}`)
+        navigate("/dashboard")
     }
 
     return (
         <AuthPageLayout>
-            <motion.div key="register" {...fadeSlideUp} className="flex flex-col items-center gap-4 justify-center">
+            <motion.div key="register" {...fadeSlideUp} className="flex flex-col items-center gap-4 justify-center"
+            onKeyDown={(e) => e.key === "Enter" && handleRegister()}
+        >
 
                 <h1 className={`text-2xl font-bold tracking-tight ${text}`}>Account erstellen</h1>
 
@@ -53,7 +59,7 @@ function NewFamilyRegisterPage() {
                             type="text"
                             placeholder="Euer Familienname"
                             value={formData.familienname}
-                            onChange={(e) => setFormData({ ...formData, familienname: e.target.value })}
+                            onChange={(e) => { setFormData({ ...formData, familienname: e.target.value }); setError(null) }}
                         />
                     </div>
 
@@ -64,7 +70,7 @@ function NewFamilyRegisterPage() {
                             type="email"
                             placeholder="beispiel@mail.de"
                             value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            onChange={(e) => { setFormData({ ...formData, email: e.target.value }); setError(null) }}
                         />
                     </div>
 
@@ -75,7 +81,7 @@ function NewFamilyRegisterPage() {
                             type="password"
                             placeholder="Passwort"
                             value={formData.passwort}
-                            onChange={(e) => setFormData({ ...formData, passwort: e.target.value })}
+                            onChange={(e) => { setFormData({ ...formData, passwort: e.target.value }); setError(null) }}
                         />
                     </div>
 
@@ -86,7 +92,7 @@ function NewFamilyRegisterPage() {
                             type="password"
                             placeholder="Passwort wiederholen"
                             value={formData.passwortWiederholen}
-                            onChange={(e) => setFormData({ ...formData, passwortWiederholen: e.target.value })}
+                            onChange={(e) => { setFormData({ ...formData, passwortWiederholen: e.target.value }); setError(null) }}
                         />
                     </div>
 
