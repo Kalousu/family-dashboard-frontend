@@ -21,25 +21,29 @@ function NewFamilyRegisterPage() {
     const text = isDarkMode ? "text-white" : "text-gray-900"
     const muted = isDarkMode ? "text-gray-400" : "text-gray-500"
 
+    function validate(): string | null {
+        if (!formData.familienname || !formData.email || !formData.passwort || !formData.passwortWiederholen)
+            return "Bitte alle Felder ausfüllen."
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+            return "Bitte eine gültige E-Mail-Adresse eingeben."
+        if (formData.passwort.length < 3)
+            return "Passwort muss mindestens 8 Zeichen lang sein."
+        if (formData.passwort !== formData.passwortWiederholen)
+            return "Passwörter stimmen nicht überein."
+        return null
+    }
+
+    function handleChange(field: keyof typeof formData) {
+        return (e: React.ChangeEvent<HTMLInputElement>) => {
+            setFormData({ ...formData, [field]: e.target.value })
+            setError(null)
+        }
+    }
+
     function handleRegister() {
-        if (!formData.familienname || !formData.email || !formData.passwort || !formData.passwortWiederholen) {
-            setError("Bitte alle Felder ausfüllen.")
-            return
-        }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            setError("Bitte eine gültige E-Mail-Adresse eingeben.")
-            return
-        }
-        if (formData.passwort.length < 3) { //in der demo hochsetzen nur zu demozwecken
-            setError("Passwort muss mindestens 8 Zeichen lang sein.")
-            return
-        }
-        if (formData.passwort !== formData.passwortWiederholen) {
-            setError("Passwörter stimmen nicht überein.")
-            return
-        }
-        setError(null)
-        navigate("/dashboard")
+        const err = validate()
+        if (err) { setError(err); return }
+        navigate("/register")
     }
 
     return (
@@ -59,7 +63,7 @@ function NewFamilyRegisterPage() {
                             type="text"
                             placeholder="Euer Familienname"
                             value={formData.familienname}
-                            onChange={(e) => { setFormData({ ...formData, familienname: e.target.value }); setError(null) }}
+                            onChange={handleChange("familienname")}
                         />
                     </div>
 
@@ -70,7 +74,7 @@ function NewFamilyRegisterPage() {
                             type="email"
                             placeholder="beispiel@mail.de"
                             value={formData.email}
-                            onChange={(e) => { setFormData({ ...formData, email: e.target.value }); setError(null) }}
+                            onChange={handleChange("email")}
                         />
                     </div>
 
@@ -81,7 +85,7 @@ function NewFamilyRegisterPage() {
                             type="password"
                             placeholder="Passwort"
                             value={formData.passwort}
-                            onChange={(e) => { setFormData({ ...formData, passwort: e.target.value }); setError(null) }}
+                            onChange={handleChange("passwort")}
                         />
                     </div>
 
@@ -92,7 +96,7 @@ function NewFamilyRegisterPage() {
                             type="password"
                             placeholder="Passwort wiederholen"
                             value={formData.passwortWiederholen}
-                            onChange={(e) => { setFormData({ ...formData, passwortWiederholen: e.target.value }); setError(null) }}
+                            onChange={handleChange("passwortWiederholen")}
                         />
                     </div>
 
