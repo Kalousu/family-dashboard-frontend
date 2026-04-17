@@ -1,11 +1,11 @@
 import PasswortInput from "../components/PasswordInput"
 import ProfileCard from "../components/ProfileCard"
 import GlassButton from "../components/ui/GlassButton"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useState } from "react"
-import DarkModeBackground from "../components/ui/DarkModeBackground"
-import DarkModeToggle from "../components/ui/DarkModeToggle"
+import AuthPageLayout from "../components/layout/AuthPageLayout"
 import useDarkMode from "../hooks/useDarkMode"
+import { fadeSlideUp } from "../constants/animations"
 
 const profiles = [
     { id: 1, name: "Kevin", color: "blue", icon: "gamepad" },
@@ -36,13 +36,9 @@ function ProfileSelectPage() {
     }
 
     return (
-        <div className="relative flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
-            <DarkModeBackground />
-            <div className="relative flex flex-col items-center justify-center w-full h-full gap-8">
-                <DarkModeToggle />
-                <AnimatePresence mode="popLayout">
+        <AuthPageLayout>
                     {selectedProfile ? (
-                        <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="p-4 flex flex-col items-center gap-8">
+                        <motion.div key="login" {...fadeSlideUp} className="p-4 flex flex-col items-center gap-8">
                             <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Willkommen zurück, {selectedProfile.name}!</p>
                             <ProfileCard name={selectedProfile.name} color={selectedProfile.color} icon={selectedProfile.icon} onSelect={() => setSelectedProfile(null)} isDarkMode={isDarkMode} />
                             <PasswortInput onLogin={handleLogin} isDarkMode={isDarkMode} />
@@ -54,7 +50,7 @@ function ProfileSelectPage() {
                             </GlassButton>
                         </motion.div>
                     ) : (
-                        <motion.div key="profiles" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}}>
+                        <motion.div key="profiles" {...fadeSlideUp}>
                             <div className="p-2 flex flex-col items-center gap-8">
                                 <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Wer bist du?</p>
                             </div>
@@ -65,9 +61,7 @@ function ProfileSelectPage() {
                             </div>
                         </motion.div>
                     )}
-                </AnimatePresence>
-            </div>
-        </div>
+        </AuthPageLayout>
     )
 }
 

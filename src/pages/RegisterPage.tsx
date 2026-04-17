@@ -2,12 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import GlassButton from "../components/ui/GlassButton";
 import FormInput from "../components/ui/FormInput";
 import { HslStringColorPicker } from "react-colorful";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import imageIcons from "../constants/imageIcons";
-import DarkModeBackground from "../components/ui/DarkModeBackground";
-import DarkModeToggle from "../components/ui/DarkModeToggle";
+import AuthPageLayout from "../components/layout/AuthPageLayout";
 import useDarkMode from "../hooks/useDarkMode";
+import { fadeSlideUp } from "../constants/animations";
 
 function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -53,13 +53,8 @@ function RegisterPage() {
         : "bg-linear-to-b from-sky-200/50 via-slate-400/15 to-blue-400/30"
 
     return (
-        <div className="relative flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
-            <DarkModeBackground />
-            <div className="relative flex flex-col items-center justify-center w-full h-full gap-8">
-                <DarkModeToggle />
-
-                <AnimatePresence mode="popLayout">
-                    <motion.div key="register" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="flex flex-col items-center gap-4 justify-center">
+        <AuthPageLayout>
+                    <motion.div key="register" {...fadeSlideUp} className="flex flex-col items-center gap-4 justify-center">
                         <div className="m-28 flex flex-row items-center gap-8">
                             <div className="p-16 flex flex-col gap-4 items-center">
                                 <FormInput
@@ -146,9 +141,7 @@ function RegisterPage() {
                             Zurück zur Nutzerauswahl
                         </GlassButton>
                     </motion.div>
-                </AnimatePresence>
-            </div>
-        </div>
+        </AuthPageLayout>
     )
 }
 
