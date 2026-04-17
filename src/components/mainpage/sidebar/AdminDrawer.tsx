@@ -31,6 +31,7 @@ interface AdminDrawerProps {
 function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
     const [isInviteOpen, setIsInviteOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isRoleOpen, setIsRoleOpen] = useState(false)
     const [copied, setCopied] = useState(false)
     const [members, setMembers] = useState<Member[]>(mockMembers) //durch API ersetzen
     const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
@@ -113,8 +114,8 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                                             </div>
                                             <div
                                                 className="absolute inset-0 rounded-xl flex items-center justify-center bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                                                onClick={() => setMemberToDelete(member)}
-                                            >
+                                               //onClick={() => setMemberToDelete(member)} 
+                                               >
                                                 <Trash2 size={18} className="text-white" />
                                             </div>
                                         </div>
@@ -129,9 +130,32 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                 )}
 
                 {/* Rollen verwalten */}
-                <GlassButton isDarkMode={isDarkMode} className="mt-1 mb-1 p-3 w-full text-left">
+                <GlassButton isDarkMode={isDarkMode} onClick={() => handleToggle(setIsRoleOpen)} className="mt-1 mb-1 p-3 w-full text-left">
                     Rollen verwalten
                 </GlassButton>
+                {isRoleOpen && (
+                    <div className={`mx-1 mb-2 p-3 rounded-xl border ${isDarkMode ? "bg-sky-100/40 border-cyan-950/20" : "bg-white/5 border-white/10"}`}>
+                        <div className="flex-col flex-wrap gap-3">
+                            {members.map(member => {
+                                const Icon = imageIcons[member.icon]
+                                return (
+                                    <div key={member.id} className="flex items-center gap-3 mb-3">
+                                        <div
+                                            className="w-12 h-12 rounded-xl flex items-center justify-center border border-white/10"
+                                            style={{ backgroundColor: member.color + "33" }}
+                                        >
+                                            <Icon size={24} style={{ color: member.color }} />
+                                        </div>
+                                        <span className={`text-sm text-center ${isDarkMode ? "text-gray-600" : "text-gray-400"}`}>
+                                            {member.name}
+                                        </span>
+                                        {/* Hier könnten z.B. Dropdowns oder Buttons zum Ändern der Rolle eingefügt werden */}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )}
 
             </div>
 
