@@ -8,10 +8,11 @@ import useDarkMode from "../../../hooks/useDarkMode"
 interface SideBarProps {
     isOpen: boolean
     onClose: () => void
+    pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
     setPendingWidget: (widget: { type: string, colSpan: number, rowSpan: number } | null) => void
 }
 
-function SideBar({ isOpen, onClose, setPendingWidget }: SideBarProps) {
+function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarProps) {
     const [sideBarView, setSideBarView] = useState<"nav" | "widgets">("nav")
     const { isDarkMode } = useDarkMode()
 
@@ -39,7 +40,7 @@ function SideBar({ isOpen, onClose, setPendingWidget }: SideBarProps) {
                 </div>
             ) : (
                 <div>
-                    <WidgetDrawer onBack={() => setSideBarView("nav")} setPendingWidget={setPendingWidget} />
+                    <WidgetDrawer onBack={() => setSideBarView("nav")} pendingWidget={pendingWidget} setPendingWidget={setPendingWidget} />
                 </div>
             )}
         </div>

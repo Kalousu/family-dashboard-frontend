@@ -6,10 +6,11 @@ import useDarkMode from "../../../hooks/useDarkMode"
 
 interface WidgetDrawerProps {
     onBack: () => void
+    pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
     setPendingWidget: (widget: { type: string, colSpan: number, rowSpan: number } | null) => void
 }
 
-function WidgetDrawer({ onBack, setPendingWidget }: WidgetDrawerProps) {
+function WidgetDrawer({ onBack, pendingWidget, setPendingWidget }: WidgetDrawerProps) {
     const [selectedType, setSelectedType] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
     const widgets = Object.keys(registry)
@@ -35,6 +36,11 @@ function WidgetDrawer({ onBack, setPendingWidget }: WidgetDrawerProps) {
                                     {size.colSpan}x{size.rowSpan}
                                 </GlassButton>
                             ))}
+                            {pendingWidget && (
+                                <GlassButton isDarkMode={!isDarkMode} onClick={() => { setPendingWidget(null); setSelectedType(null) }} className="mt-3 mb-1 p-3 w-full text-left text-red-400">
+                                    Abbrechen
+                                </GlassButton>
+                            )}
                         </div>
                     </div>
                 )}
