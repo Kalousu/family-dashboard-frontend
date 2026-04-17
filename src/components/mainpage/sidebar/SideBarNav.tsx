@@ -4,16 +4,17 @@ import useDarkMode from "../../../hooks/useDarkMode"
 
 interface SideBarNavProps {
     onWidgetsClick: () => void
+    onAdminClick: () => void
 }
 
-function SideBarNav({ onWidgetsClick }: SideBarNavProps) {
+function SideBarNav({ onWidgetsClick, onAdminClick }: SideBarNavProps) {
     const { isDarkMode, toggleDarkMode } = useDarkMode()
     const navItems = ["Widgets verwalten", "Family verwalten", "Profil bearbeiten"]
 
     return (
         <div className="m-2 flex flex-col items-stretch">
             {navItems.map((item) => (
-                <GlassButton key={item} isDarkMode={!isDarkMode} onClick={item === "Widgets verwalten" ? onWidgetsClick : undefined} className="mt-1 mb-1 p-3 w-full text-left">
+                <GlassButton key={item} isDarkMode={!isDarkMode} onClick={item === "Widgets verwalten" ? onWidgetsClick : item === "Familie verwalten" ? onAdminClick : undefined} className="mt-1 mb-1 p-3 w-full text-left">
                     {item}
                 </GlassButton>
             ))}

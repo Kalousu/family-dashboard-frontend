@@ -1,6 +1,7 @@
 import { ChevronRight, User } from "lucide-react"
 import SideBarNav from "./SideBarNav"
 import WidgetDrawer from "./WidgetDrawer"
+import AdminDrawer from "./AdminDrawer/AdminDrawer"
 import GlassButton from "../../ui/GlassButton"
 import { useState } from "react"
 import useDarkMode from "../../../hooks/useDarkMode"
@@ -13,7 +14,7 @@ interface SideBarProps {
 }
 
 function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarProps) {
-    const [sideBarView, setSideBarView] = useState<"nav" | "widgets">("nav")
+    const [sideBarView, setSideBarView] = useState<"nav" | "widgets" | "admin">("nav")
     const { isDarkMode } = useDarkMode()
 
     return(
@@ -30,13 +31,17 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarPr
                             </div>
                             <p className={`m-2 text-center text-lg font-bold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>Willkommen zurück, User!</p>
                         </div>
-                        <SideBarNav onWidgetsClick={() => setSideBarView("widgets")}/>
+                        <SideBarNav onWidgetsClick={() => setSideBarView("widgets")} onAdminClick={() => setSideBarView("admin")}/>
                     </div>
                     <div className="flex flex-col items-center mt-auto">
                         <GlassButton isDarkMode={!isDarkMode} className="self-center mb-4 p-3 w-30">
                             Abmelden
                         </GlassButton>
                     </div>
+                </div>
+            ) : sideBarView === "admin" ? (
+                <div>
+                    <AdminDrawer onBack={() => setSideBarView("nav")} isDarkMode={isDarkMode} />
                 </div>
             ) : (
                 <div>
