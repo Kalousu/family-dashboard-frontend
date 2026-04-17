@@ -1,7 +1,7 @@
 import { ChevronRight, User } from "lucide-react"
 import SideBarNav from "./SideBarNav"
 import Widgetdrawer from "./Widgetdrawer"
-import AdminDrawer from "./AdminDrawer"
+import AdminDrawer from "./AdminDrawer/AdminDrawer"
 import GlassButton from "../../ui/GlassButton"
 import { useState } from "react"
 

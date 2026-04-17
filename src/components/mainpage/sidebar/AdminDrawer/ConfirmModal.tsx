@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom"
 import { type ReactNode } from "react"
-import GlassButton from "../../ui/GlassButton"
+import GlassButton from "../../../ui/GlassButton"
 
 interface ConfirmModalProps {
     message: ReactNode
