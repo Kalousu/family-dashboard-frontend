@@ -31,7 +31,7 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
     return (
         <div className="flex flex-col h-full">
             <ChevronLeft
-                className={`w-7 h-7 hover:scale-105 transition-all ${isDarkMode ? "text-sky-900 hover:text-cyan-600" : "text-gray-400 hover:text-white"}`}
+                className={`w-7 h-7 hover:scale-105 transition-all ${isDarkMode ? "text-gray-400 hover:text-white" : "text-sky-900 hover:text-cyan-600"}`}
                 size={30}
                 onClick={onBack}
             />

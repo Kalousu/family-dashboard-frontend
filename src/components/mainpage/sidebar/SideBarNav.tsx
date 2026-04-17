@@ -9,7 +9,7 @@ interface SideBarNavProps {
 
 function SideBarNav({ onWidgetsClick, onAdminClick }: SideBarNavProps) {
     const { isDarkMode, toggleDarkMode } = useDarkMode()
-    const navItems = ["Widgets verwalten", "Family verwalten", "Profil bearbeiten"]
+    const navItems = ["Widgets verwalten", "Familie verwalten", "Profil bearbeiten"]
 
     return (
         <div className="m-2 flex flex-col items-stretch">

@@ -25,12 +25,12 @@ function DeleteSection({ isDarkMode, members, onDelete }: DeleteSectionProps) {
 
     return (
         <>
-            <GlassButton isDarkMode={isDarkMode} onClick={() => handleToggle(setIsOpen)} className="mt-1 mb-1 p-3 w-full text-left">
+            <GlassButton isDarkMode={!isDarkMode} onClick={() => handleToggle(setIsOpen)} className="mt-1 mb-1 p-3 w-full text-left">
                 Mitglied löschen
             </GlassButton>
 
             {isOpen && (
-                <div className={`mx-1 mb-2 p-3 rounded-xl border ${isDarkMode ? "bg-sky-100/40 border-cyan-950/20" : "bg-white/5 border-white/10"}`}>
+                <div className={`mx-1 mb-2 p-3 rounded-xl border ${isDarkMode ? "bg-white/5 border-white/10" : "bg-sky-100/40 border-cyan-950/20"}`}>
                     <div className="flex flex-wrap gap-3">
                         {members.map(member => {
                             const Icon = imageIcons[member.icon]
@@ -50,7 +50,7 @@ function DeleteSection({ isDarkMode, members, onDelete }: DeleteSectionProps) {
                                             <Trash2 size={18} className="text-white" />
                                         </div>
                                     </div>
-                                    <span className={`text-xs truncate max-w-12 text-center ${isDarkMode ? "text-gray-600" : "text-gray-400"}`}>
+                                    <span className={`text-xs truncate max-w-12 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                                         {member.name}
                                     </span>
                                 </div>

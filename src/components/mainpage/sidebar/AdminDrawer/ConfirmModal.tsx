@@ -23,10 +23,10 @@ function ConfirmModal({ message, subMessage, onConfirm, onCancel, isDarkMode }: 
                     </p>
                 )}
                 <div className="flex gap-3 justify-center mt-1">
-                    <GlassButton isDarkMode={isDarkMode} onClick={onConfirm} className="px-6 py-2">
+                    <GlassButton isDarkMode={!isDarkMode} onClick={onConfirm} className="px-6 py-2">
                         Ja
                     </GlassButton>
-                    <GlassButton isDarkMode={isDarkMode} onClick={onCancel} className="px-6 py-2">
+                    <GlassButton isDarkMode={!isDarkMode} onClick={onCancel} className="px-6 py-2">
                         Nein
                     </GlassButton>
                 </div>
