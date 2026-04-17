@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useNavigate } from "react-router-dom"
 import GlassButton from "../components/ui/GlassButton"
 import FormInput from "../components/ui/FormInput"
 import AuthPageLayout from "../components/layout/AuthPageLayout"
@@ -13,6 +14,7 @@ function LoginPage() {
     })
     const [error, setError] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
+    const navigate = useNavigate()
 
     function handleLogin() {
         if (formData.name === "" || formData.password === "") {
@@ -48,6 +50,14 @@ function LoginPage() {
                 <GlassButton isDarkMode={!isDarkMode} onClick={handleLogin} className="px-4 py-2 backdrop-blur-sm">
                     Anmelden
                 </GlassButton>
+
+                <div className="flex flex-col items-center gap-2 mt-2">
+                    <span className="text-xs text-gray-400">Neu hier?</span>
+                    <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/newfamily")} className="px-4 py-1.5 text-sm backdrop-blur-sm">
+                        Account erstellen
+                    </GlassButton>
+                </div>
+
             </motion.div>
         </AuthPageLayout>
     )
