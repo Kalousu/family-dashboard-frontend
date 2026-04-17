@@ -1,3 +1,5 @@
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { X, Check, Plus } from "lucide-react"
 import imageIcons from "../../constants/imageIcons"
 import type { Profile, Reminder } from "./timetableTypes"
@@ -18,15 +20,13 @@ export function TabButton({ active, onClick, children }: { active: boolean; onCl
     return (
         <button
             onClick={onClick}
-            className={`relative px-4 text-sm font-semibold rounded-t-lg border-t border-l border-r select-none transition-all ${
+            className={`relative px-4 pt-1.5 pb-2.25 text-sm font-semibold rounded-t-lg border-t border-l border-r select-none transition-all overflow-hidden ${
                 active
-                    ? "pt-1.5 pb-[9px] -mb-px z-10 bg-gradient-to-b from-white/40 to-white/10 border-white/35 text-white"
-                    : "py-1 bg-white/5 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
+                    ? "-mb-px z-10 bg-linear-to-b from-purple-900/50 to-indigo-400/30 border-white/25 text-white"
+                    : "bg-linear-to-b from-purple-900/20 to-indigo-400/10 border-white/10 text-white/50 hover:from-purple-900/35 hover:to-indigo-400/20 hover:text-white/70"
             }`}
         >
-            {active && (
-                <span className="absolute inset-x-1 top-0.5 h-[40%] rounded-t bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-            )}
+            <span className="absolute inset-x-0 top-0 h-1/2 bg-white/7 pointer-events-none rounded-b-xl" />
             <span className="relative">{children}</span>
         </button>
     )
@@ -39,17 +39,33 @@ export function EventCard({ title, profiles, merged, editMode, onRemove }: {
     editMode: boolean
     onRemove: () => void
 }) {
+    const [hovered, setHovered] = useState(false)
+
     return (
-        <div className={`relative w-full flex flex-col px-2 py-1.5 rounded-lg bg-white/15 border transition-all ${
-            merged ? "border-white/40" : "border-white/20"
-        }`}>
-            {editMode && (
-                <button onClick={onRemove} className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 rounded-full p-0.5 text-white z-10">
-                    <X size={10} />
-                </button>
-            )}
-            <span className="text-white text-xs font-semibold break-words">{title}</span>
-            <div className="flex justify-end gap-0.5 mt-0.5">
+        <div
+            className={`relative w-full flex flex-col px-2 py-1.5 rounded-lg bg-linear-to-b from-purple-900/25 to-indigo-400/15 border transition-all overflow-hidden ${
+                merged ? "border-white/25" : "border-white/20"
+            }`}
+            onMouseEnter={() => editMode && setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+        >
+            <div className="absolute inset-x-0 top-0 h-1/2 bg-white/7 rounded-b-xl pointer-events-none" />
+            <AnimatePresence>
+                {editMode && hovered && (
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.1 }}
+                        onClick={onRemove}
+                        className="absolute top-1 right-1 bg-white/20 hover:bg-red-500 text-white rounded-full p-0.5 z-10 cursor-pointer"
+                    >
+                        <X size={10} />
+                    </motion.button>
+                )}
+            </AnimatePresence>
+            <span className="relative text-white text-xs font-semibold wrap-break-word">{title}</span>
+            <div className="relative flex justify-end gap-0.5 mt-0.5">
                 {profiles.map((p) => <UserIcon key={p.id} profile={p} size={10} />)}
             </div>
         </div>
