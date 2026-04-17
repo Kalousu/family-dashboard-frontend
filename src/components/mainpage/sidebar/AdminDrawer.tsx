@@ -125,7 +125,7 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                                             </div>
                                             <div
                                                 className="absolute inset-0 rounded-xl flex items-center justify-center bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                                               //onClick={() => setMemberToDelete(member)} 
+                                                onClick={() => setMemberToDelete(member)}
                                                >
                                                 <Trash2 size={18} className="text-white" />
                                             </div>
@@ -174,7 +174,7 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                                             </button>
                                             {openDropdownId === member.id && (
                                                 <div className={`absolute right-0 top-full mt-1 z-10 rounded-md shadow-lg border ${isDarkMode ? "bg-white border-cyan-950/20" : "bg-gray-800 border-white/10"}`}>
-                                                    {["Systemadmin", "Mitglied", "Gast"].map(role => (
+                                                    {["Admin", "Mitglied", "Gast"].map(role => (
                                                         <button
                                                             key={role}
                                                             onClick={() => { setMemberRoles(prev => ({ ...prev, [member.id]: role })); setOpenDropdownId(null) }}
