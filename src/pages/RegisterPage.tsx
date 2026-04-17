@@ -3,7 +3,7 @@ import GlassButton from "../components/ui/GlassButton";
 import { HslStringColorPicker } from "react-colorful";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import imageIcons from "../constants/imageIcons";
+import IconSelect from "../components/IconSelect";
 import dashboardBgLight from "../assets/dashboardbglight.png";
 import dashboardBgDark from "../assets/dashboardbgdark.png";
 
@@ -146,25 +146,11 @@ function RegisterPage() {
                                 />
                             </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-3">
-                            {Object.entries(imageIcons).map(([key, Icon]) => (
-                                <div key={key} className={`border rounded-2xl transition-all ease-in-out duration-200 hover:scale-105 hover:brightness-103 ${isDarkMode ? "border-slate-700/20" : "border-slate-700/20"}`}>
-                                    <div className={`relative border border-white/10 p-1 font-semibold rounded-2xl overflow-hidden bg-linear-to-b ${isDarkMode ? "from-gray-500/50 via-gray-600/20 to-blue-400/20 text-gray-300" : "from-sky-200/30 via-slate-400/15 to-blue-400/20 text-gray-700"}`}>
-                                        <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
-                                        <div
-                                            className={`relative border w-24 h-24 rounded-xl flex items-center justify-center cursor-pointer transition-all ease-in-out duration-200
-                                            ${formData.icon === key
-                                                ? isDarkMode ? "bg-indigo-500/25 border-white/10 hover:bg-indigo-400/35" : "bg-sky-300/50 border-sky-400/20 hover:bg-sky-300/70"
-                                                : isDarkMode ? "bg-slate-700/40 border-white/5 hover:bg-slate-600/55" : "bg-white/50 border-cyan-950/5 hover:bg-sky-100/70"
-                                            }`}
-                                            onClick={() => setFormData({...formData, icon: key})}>
-                                            <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/40"}`} />
-                                            <Icon size={48} />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <IconSelect
+                            selectedIcon={formData.icon}
+                            isDarkMode={isDarkMode}
+                            onSelect={(key) => setFormData({...formData, icon: key})}
+                        />
                     </div>
                     <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
                         {error || "Platzhalter"}

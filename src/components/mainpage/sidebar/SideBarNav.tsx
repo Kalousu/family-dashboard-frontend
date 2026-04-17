@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import { useNavigate } from "react-router-dom"
 import GlassButton from "../../ui/GlassButton"
 
 interface SideBarNavProps {
@@ -8,12 +9,18 @@ interface SideBarNavProps {
 }
 
 function SideBarNav({ isDarkMode, onToggleDarkMode, onWidgetsClick }: SideBarNavProps) {
+    const navigate = useNavigate()
     const navItems = ["Widgets verwalten", "Family verwalten", "Profil bearbeiten"]
+
+    function handleNavClick(item: string) {
+        if (item === "Widgets verwalten") return onWidgetsClick()
+        if (item === "Profil bearbeiten") return navigate("/profile/edit")
+    }
 
     return (
         <div className="m-2 flex flex-col items-stretch">
             {navItems.map((item) => (
-                <GlassButton key={item} isDarkMode={isDarkMode} onClick={item === "Widgets verwalten" ? onWidgetsClick : undefined} className="mt-1 mb-1 p-3 w-full text-left">
+                <GlassButton key={item} isDarkMode={isDarkMode} onClick={() => handleNavClick(item)} className="mt-1 mb-1 p-3 w-full text-left">
                     {item}
                 </GlassButton>
             ))}
