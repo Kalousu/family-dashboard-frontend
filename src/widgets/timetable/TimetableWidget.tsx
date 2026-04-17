@@ -116,7 +116,7 @@ function TimetableWidget() {
     }
 
     return (
-        <div className="w-full h-full bg-linear-to-b from-indigo-500/30 to-violet-900/40 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
+        <div className="w-full h-full bg-linear-to-b from-purple-900/50 to-indigo-400/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
 
             {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
@@ -134,7 +134,7 @@ function TimetableWidget() {
                     className={`flex items-center gap-1.5 px-3 py-1 mb-px rounded-t-lg border-t border-l border-r text-xs font-semibold transition-all ${
                         editMode
                             ? "bg-indigo-400/50 border-indigo-400/50 text-white"
-                            : "bg-white/5 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
+                            : "bg-white/7 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
                     }`}
                 >
                     <Pencil size={12} />
@@ -184,7 +184,6 @@ function TimetableWidget() {
                             <div className="bg-white/15 border-b border-white/10" />
                             {DAYS.map((_, dayIndex) => {
                                 const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds, ALL_PROFILES)
-                                // lock row height to the "all" view so rows don't shift on tab change
                                 const allViewCount = getEventsForCell(events, slot, dayIndex, "all", watchedIds, ALL_PROFILES).length
                                 const minHeight = `${Math.max(1, allViewCount) * 3}rem`
                                 return (
