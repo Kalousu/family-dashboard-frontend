@@ -32,7 +32,6 @@ function MemeWidget() {
                 ? "bg-linear-to-b from-sky-100/10 via-blue-400/20 to-blue-300/20 border border-cyan-950/5"
                 : "bg-linear-to-b from-gray-500/50 via-gray-600/20 to-blue-400/20 border border-white/25"
             }`}>
-            <div className={`absolute inset-x-0 top-0 h-1/13 rounded-2xl pointer-events-none ${!isDarkMode ? "bg-white/15" : "bg-white/5"}`} />
             {loading ? (
                 <div className="flex-1 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
