@@ -5,15 +5,16 @@ interface SideBarNavProps {
     isDarkMode: boolean
     onToggleDarkMode: () => void
     onWidgetsClick: () => void
+    onAdminClick: () => void
 }
 
-function SideBarNav({ isDarkMode, onToggleDarkMode, onWidgetsClick }: SideBarNavProps) {
-    const navItems = ["Widgets verwalten", "Family verwalten", "Profil bearbeiten"]
+function SideBarNav({ isDarkMode, onToggleDarkMode, onWidgetsClick, onAdminClick }: SideBarNavProps) {
+    const navItems = ["Widgets verwalten", "Familie verwalten", "Profil bearbeiten"]
 
     return (
         <div className="m-2 flex flex-col items-stretch">
             {navItems.map((item) => (
-                <GlassButton key={item} isDarkMode={isDarkMode} onClick={item === "Widgets verwalten" ? onWidgetsClick : undefined} className="mt-1 mb-1 p-3 w-full text-left">
+                <GlassButton key={item} isDarkMode={isDarkMode} onClick={item === "Widgets verwalten" ? onWidgetsClick : item === "Familie verwalten" ? onAdminClick : undefined} className="mt-1 mb-1 p-3 w-full text-left">
                     {item}
                 </GlassButton>
             ))}

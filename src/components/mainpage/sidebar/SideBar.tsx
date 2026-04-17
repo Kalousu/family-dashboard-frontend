@@ -1,6 +1,7 @@
 import { ChevronRight, User } from "lucide-react"
 import SideBarNav from "./SideBarNav"
 import Widgetdrawer from "./Widgetdrawer"
+import AdminDrawer from "./AdminDrawer/AdminDrawer"
 import GlassButton from "../../ui/GlassButton"
 import { useState } from "react"
 
@@ -13,7 +14,7 @@ interface SideBarProps {
 }
 
 function SideBar({ isOpen, onClose, isDarkMode, onToggleDarkMode, setPendingWidget }: SideBarProps) {
-    const [sideBarView, setSideBarView] = useState<"nav" | "widgets">("nav")
+    const [sideBarView, setSideBarView] = useState<"nav" | "widgets" | "admin">("nav")
 
     return(
         <div className={`fixed z-20 right-0 top-0 h-full w-70 rounded-l-2xl p-4 transition-all duration-300 flex flex-col justify-between backdrop-blur-md ${isOpen ? "translate-x-0" : "translate-x-full"} ${isDarkMode ? "bg-linear-to-b to-sky-100 from-blue-200 border-2 border-gray-400/20" : "bg-linear-to-b from-gray-950/90 via-gray-900/85 to-slate-900/80 border-2 border-white/5"}`}>
@@ -34,13 +35,17 @@ function SideBar({ isOpen, onClose, isDarkMode, onToggleDarkMode, setPendingWidg
                             </div>
                             <p className="m-2 text-gray-300 text-center text-lg font-bold">Willkommen zurück, User!</p>*/}
                         </div>
-                        <SideBarNav isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} onWidgetsClick={() => setSideBarView("widgets")}/>
+                        <SideBarNav isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} onWidgetsClick={() => setSideBarView("widgets")} onAdminClick={() => setSideBarView("admin")}/>
                     </div>
                     <div className="flex flex-col items-center mt-auto">
                         <GlassButton isDarkMode={isDarkMode} className="self-center mb-4 p-3 w-30">
                             Abmelden
                         </GlassButton>
                     </div>
+                </div>
+            ) : sideBarView === "admin" ? (
+                <div>
+                    <AdminDrawer onBack={() => setSideBarView("nav")} isDarkMode={isDarkMode} />
                 </div>
             ) : (
                 <div>
