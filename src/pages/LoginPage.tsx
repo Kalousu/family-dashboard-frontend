@@ -1,5 +1,6 @@
 import { useState } from "react"
 import GlassButton from "../components/ui/GlassButton"
+import FormInput from "../components/ui/FormInput"
 import { motion, AnimatePresence } from "framer-motion"
 import dashboardBgLight from "../assets/dashboardbglight.png"
 import dashboardBgDark from "../assets/dashboardbgdark.png"
@@ -20,11 +21,6 @@ function LoginPage() {
             alert(`Login mit Name: ${formData.name} und Passwort: ${formData.password}`)
         }
     }
-
-    const inputBg = isDarkMode ? "bg-gray-800 text-gray-200 border-white/10" : "bg-white text-gray-700 border-cyan-950/5"
-    const inputWrapper = isDarkMode
-        ? "bg-linear-to-b to-gray-700 via-gray-800/50 from-gray-700/50"
-        : "bg-linear-to-b from-sky-200/50 via-slate-400/15 to-blue-400/30"
 
     return (
         <div className="relative flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
@@ -55,24 +51,20 @@ function LoginPage() {
                 <AnimatePresence mode="popLayout">
                     <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="flex flex-col items-center gap-4 justify-center">
                         <div className="flex flex-col gap-4 items-center p-16">
-                            <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                <input
-                                    className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
-                                    type="text"
-                                    placeholder="Name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                />
-                            </div>
-                            <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                <input
-                                    className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
-                                    type="password"
-                                    placeholder="Passwort"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                />
-                            </div>
+                            <FormInput
+                                isDarkMode={isDarkMode}
+                                type="text"
+                                placeholder="Name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                            <FormInput
+                                isDarkMode={isDarkMode}
+                                type="password"
+                                placeholder="Passwort"
+                                value={formData.password}
+                                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            />
                         </div>
                         <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
                             {error || "Platzhalter"}

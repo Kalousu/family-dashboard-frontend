@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import GlassButton from "../components/ui/GlassButton";
+import FormInput from "../components/ui/FormInput";
 import { HslStringColorPicker } from "react-colorful";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -53,7 +54,6 @@ function RegisterPage() {
     }, [showColorPicker])
 
     const glossClass = isDarkMode ? "bg-white/5" : "bg-white/30"
-    const inputBg = isDarkMode ? "bg-gray-800 text-gray-200 border-white/10" : "bg-white text-gray-700 border-cyan-950/5"
     const inputWrapper = isDarkMode
         ? "bg-linear-to-b to-gray-700 via-gray-800/50 from-gray-700/50"
         : "bg-linear-to-b from-sky-200/50 via-slate-400/15 to-blue-400/30"
@@ -89,14 +89,13 @@ function RegisterPage() {
                 <motion.div key="register" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="flex flex-col items-center gap-4 justify-center">
                     <div className="m-28 flex flex-row items-center gap-8">
                         <div className="p-16 flex flex-col gap-4 items-center">
-                            <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                <input
-                                    className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
-                                    type="text"
-                                    placeholder="Name" value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                />
-                            </div>
+                            <FormInput
+                                isDarkMode={isDarkMode}
+                                type="text"
+                                placeholder="Name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
                             <div className="flex flex-row items-center gap-2">
                                 <div className={`relative hover:brightness-103 transition-all rounded-xl p-0.5 ${inputWrapper}`}>
                                     <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${glossClass}`} />
@@ -129,22 +128,20 @@ function RegisterPage() {
                                     )}
                                 </div>
                             </div>
-                            <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                <input
-                                    className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
-                                    type="password"
-                                    placeholder="Passwort" value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                />
-                            </div>
-                            <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                <input
-                                    className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
-                                    type="password"
-                                    placeholder="Passwort bestätigen" value={formData.passwordConfirm}
-                                    onChange={(e) => setFormData({...formData, passwordConfirm: e.target.value})}
-                                />
-                            </div>
+                            <FormInput
+                                isDarkMode={isDarkMode}
+                                type="password"
+                                placeholder="Passwort"
+                                value={formData.password}
+                                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            />
+                            <FormInput
+                                isDarkMode={isDarkMode}
+                                type="password"
+                                placeholder="Passwort bestätigen"
+                                value={formData.passwordConfirm}
+                                onChange={(e) => setFormData({...formData, passwordConfirm: e.target.value})}
+                            />
                         </div>
                         <div className="grid grid-cols-3 gap-3">
                             {Object.entries(imageIcons).map(([key, Icon]) => (
