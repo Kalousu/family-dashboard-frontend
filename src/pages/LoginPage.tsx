@@ -2,8 +2,9 @@ import { useState } from "react"
 import GlassButton from "../components/ui/GlassButton"
 import FormInput from "../components/ui/FormInput"
 import { motion, AnimatePresence } from "framer-motion"
-import dashboardBgLight from "../assets/dashboardbglight.png"
-import dashboardBgDark from "../assets/dashboardbgdark.png"
+import DarkModeBackground from "../components/ui/DarkModeBackground"
+import DarkModeToggle from "../components/ui/DarkModeToggle"
+import useDarkMode from "../hooks/useDarkMode"
 
 function LoginPage() {
     const [formData, setFormData] = useState({
@@ -11,7 +12,7 @@ function LoginPage() {
         password: "",
     })
     const [error, setError] = useState<string | null>(null)
-    const [isDarkMode, setIsDarkMode] = useState(false)
+    const { isDarkMode } = useDarkMode()
 
     function handleLogin() {
         if (formData.name === "" || formData.password === "") {
@@ -24,30 +25,9 @@ function LoginPage() {
 
     return (
         <div className="relative flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url(${dashboardBgDark})` }}
-            />
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ease-out"
-                style={{
-                    backgroundImage: `url(${dashboardBgLight})`,
-                    opacity: isDarkMode ? 0 : 1,
-                }}
-            />
+            <DarkModeBackground />
             <div className="relative flex flex-col items-center justify-center w-full h-full gap-8">
-                <div className="fixed top-4 right-4 flex items-center gap-2">
-                    <span className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                        {isDarkMode ? "Dark Mode" : "Light Mode"}
-                    </span>
-                    <div className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer ${isDarkMode ? "bg-slate-500/50" : "bg-cyan-950/20"}`} onClick={() => setIsDarkMode(!isDarkMode)}>
-                        <motion.div
-                            className={`w-5 h-5 rounded-full ${isDarkMode ? "bg-gray-300" : "bg-white"}`}
-                            animate={{ x: isDarkMode ? 20 : 0 }}
-                            transition={{ duration: 0.2 }}
-                        />
-                    </div>
-                </div>
+                <DarkModeToggle />
                 <AnimatePresence mode="popLayout">
                     <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="flex flex-col items-center gap-4 justify-center">
                         <div className="flex flex-col gap-4 items-center p-16">

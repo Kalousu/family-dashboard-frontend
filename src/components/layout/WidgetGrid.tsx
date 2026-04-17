@@ -2,6 +2,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X } from "lucide-react"
 import { getWidget } from "../../widgets/WidgetRegistry"
+import useDarkMode from "../../hooks/useDarkMode"
 
 interface PlacedWidget {
     id: string
@@ -16,15 +17,15 @@ interface WidgetGridProps {
     pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
     onCellClick: (col: number, row: number) => void
     onRemoveWidget: (id: string) => void
-    isDarkMode: boolean
 }
 const COLS = 10
 const ROWS = 5
 const DOTS_PER_SLOT = 3
 
-function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget, isDarkMode }: WidgetGridProps) {
+function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget }: WidgetGridProps) {
     const [hoveredCell, setHoveredCell] = useState<{ col: number, row: number } | null>(null)
     const [hoveredWidget, setHoveredWidget] = useState<string | null>(null)
+    const { isDarkMode } = useDarkMode()
     const dotCols = (COLS * DOTS_PER_SLOT) + 1
     const dotRows = (ROWS * DOTS_PER_SLOT) + 1
     const dots = Array.from({ length: dotCols * dotRows })
@@ -46,7 +47,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
             <div className="relative w-full h-full">
                 <div className="absolute inset-0 grid place-items-center" style={gridStyle}>
                     {dots.map((_, index) => (
-                        <div key={index} className={`w-1 h-1 rounded-full ${isDarkMode ? "bg-blue-300/70" : "bg-slate-700/50"}`} />
+                        <div key={index} className={`w-1 h-1 rounded-full ${isDarkMode ? "bg-slate-700/50" : "bg-blue-300/70"}`} />
                     ))}
                 </div>
                 <div className="absolute inset-0 grid" style={gridStyle}>

@@ -6,10 +6,11 @@ import TestPage from './pages/TestWeatherPage';
 import TestTimetablePage from './pages/TestTimetablePage';
 import TestPageToDo from './pages/TestPageToDo';
 import WidgetPage from './pages/WidgetPage';
+import { DarkModeProvider } from './context/DarkModeContext';
 
 function App() {
   return (
-    <>
+    <DarkModeProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<ProfileSelectPage />} />
@@ -21,7 +22,7 @@ function App() {
           <Route path="/dashboard" element={<WidgetPage />} />
         </Routes>
       </BrowserRouter>
-    </>
+    </DarkModeProvider>
   )
 }
 

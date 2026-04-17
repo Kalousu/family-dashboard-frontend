@@ -2,9 +2,10 @@ import PasswortInput from "../components/PasswordInput"
 import ProfileCard from "../components/ProfileCard"
 import GlassButton from "../components/ui/GlassButton"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useEffect } from "react"
-import dashboardBgDark from "../assets/dashboardbgdark.png"
-import dashboardBgLight from "../assets/dashboardbglight.png"
+import { useState } from "react"
+import DarkModeBackground from "../components/ui/DarkModeBackground"
+import DarkModeToggle from "../components/ui/DarkModeToggle"
+import useDarkMode from "../hooks/useDarkMode"
 
 const profiles = [
     { id: 1, name: "Kevin", color: "blue", icon: "gamepad" },
@@ -23,14 +24,7 @@ interface Profile {
 function ProfileSelectPage() {
     const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null)
     const [error, setError] = useState<string | null>(null)
-    const [isDarkMode, setIsDarkMode] = useState(false)
-
-    useEffect(() => {
-        const img1 = new Image()
-        const img2 = new Image()
-        img1.src = dashboardBgDark
-        img2.src = dashboardBgLight
-    }, [])
+    const { isDarkMode } = useDarkMode()
 
     function handleLogin(password: string) {
         if (password === "") {
@@ -43,30 +37,9 @@ function ProfileSelectPage() {
 
     return (
         <div className="relative flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url(${dashboardBgDark})` }}
-            />
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ease-out"
-                style={{
-                    backgroundImage: `url(${dashboardBgLight})`,
-                    opacity: isDarkMode ? 0 : 1,
-                }}
-            />
+            <DarkModeBackground />
             <div className="relative flex flex-col items-center justify-center w-full h-full gap-8">
-                <div className="fixed top-4 right-4 flex items-center gap-2">
-                    <span className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                        {isDarkMode ? "Dark Mode" : "Light Mode"}
-                    </span>
-                    <div className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer ${isDarkMode ? "bg-slate-500/50" : "bg-cyan-950/20"}`} onClick={() => setIsDarkMode(!isDarkMode)}>
-                        <motion.div
-                            className={`w-5 h-5 rounded-full ${isDarkMode ? "bg-gray-300" : "bg-white"}`}
-                            animate={{ x: isDarkMode ? 20 : 0 }}
-                            transition={{ duration: 0.2 }}
-                        />
-                    </div>
-                </div>
+                <DarkModeToggle />
                 <AnimatePresence mode="popLayout">
                     {selectedProfile ? (
                         <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{opacity: 0, y: -20}} className="p-4 flex flex-col items-center gap-8">
