@@ -121,7 +121,7 @@ function LandingPage() {
                     <div className="flex flex-wrap gap-3 pt-2">
                         <GlassButton
                             isDarkMode={!isDarkMode}
-                            onClick={() => navigate("/login")}
+                            onClick={() => navigate("/newfamily")}
                             className="px-6 py-2.5 text-sm font-semibold"
                         >
                             Jetzt starten
@@ -231,7 +231,7 @@ function LandingPage() {
                     </p>
                     <GlassButton
                         isDarkMode={!isDarkMode}
-                        onClick={() => navigate("/login")}
+                        onClick={() => navigate("/newfamily")}
                         className="px-8 py-3 text-sm font-semibold"
                     >
                         Kostenlos starten

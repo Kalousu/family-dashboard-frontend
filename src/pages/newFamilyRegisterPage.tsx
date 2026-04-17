@@ -101,7 +101,7 @@ function NewFamilyRegisterPage() {
                 </GlassButton>
 
                 <div className="flex flex-col items-center gap-2 mt-2">
-                    <span className={`text-xs ${muted}`}>Doch lieber anmelden?</span>
+                    <span className={`text-xs ${muted}`}>Du kennst dich hier schon aus?</span>
                     <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/login")} className="px-4 py-1.5 text-sm backdrop-blur-sm">
                         Zum Login
                     </GlassButton>
