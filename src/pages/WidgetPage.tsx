@@ -16,7 +16,7 @@ function WidgetPage() {
                 <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)}/>
                 <WidgetGrid placedWidgets={placedWidgets} pendingWidget={pendingWidget} onCellClick={(col, row) => {
                     if (pendingWidget) {
-                        setPlacedWidgets([...placedWidgets, { id: Date.now().toString(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
+                        setPlacedWidgets([...placedWidgets, { id: crypto.randomUUID(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
                         setPendingWidget(null)
                     }
                 }} onRemoveWidget={(id) => setPlacedWidgets(placedWidgets.filter((w) => w.id !== id))}

@@ -4,12 +4,12 @@ import { useState } from "react"
 import GlassButton from "../../ui/GlassButton"
 import useDarkMode from "../../../hooks/useDarkMode"
 
-interface WidgetdrawerProps {
+interface WidgetDrawerProps {
     onBack: () => void
     setPendingWidget: (widget: { type: string, colSpan: number, rowSpan: number } | null) => void
 }
 
-function Widgetdrawer({ onBack, setPendingWidget }: WidgetdrawerProps) {
+function WidgetDrawer({ onBack, setPendingWidget }: WidgetDrawerProps) {
     const [selectedType, setSelectedType] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
     const widgets = Object.keys(registry)
@@ -43,4 +43,4 @@ function Widgetdrawer({ onBack, setPendingWidget }: WidgetdrawerProps) {
     )
 }
 
-export default Widgetdrawer
+export default WidgetDrawer

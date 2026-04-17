@@ -1,4 +1,4 @@
-import ToDoWidget from "../widgets/toDo/toDoWidget";
+import ToDoWidget from "../widgets/toDo/ToDoWidget";
 
 function TestPageToDo() {
 

@@ -1,7 +1,7 @@
 import WeatherWidget from "./weather/WeatherWidget";
 import CalendarWidget from "./calendar/CalendarWidget";
 import TimetableWidget from "./timetable/TimetableWidget";
-import ToDoWidget from "./toDo/toDoWidget";
+import ToDoWidget from "./toDo/ToDoWidget";
 
 interface WidgetSize {
     colSpan: number

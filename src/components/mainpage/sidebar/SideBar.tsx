@@ -1,6 +1,6 @@
 import { ChevronRight, User } from "lucide-react"
 import SideBarNav from "./SideBarNav"
-import Widgetdrawer from "./Widgetdrawer"
+import WidgetDrawer from "./WidgetDrawer"
 import GlassButton from "../../ui/GlassButton"
 import { useState } from "react"
 import useDarkMode from "../../../hooks/useDarkMode"
@@ -39,7 +39,7 @@ function SideBar({ isOpen, onClose, setPendingWidget }: SideBarProps) {
                 </div>
             ) : (
                 <div>
-                    <Widgetdrawer onBack={() => setSideBarView("nav")} setPendingWidget={setPendingWidget} />
+                    <WidgetDrawer onBack={() => setSideBarView("nav")} setPendingWidget={setPendingWidget} />
                 </div>
             )}
         </div>
