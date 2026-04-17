@@ -1,20 +1,22 @@
 import { useState } from "react"
-import { Trash2 } from "lucide-react"
+import { Trash2, Plus } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import GlassButton from "../../../ui/GlassButton"
 import { handleToggle } from "./handleToggle"
 import imageIcons from "../../../../constants/imageIcons"
 import ConfirmModal from "./ConfirmModal"
 import type { Member } from "./AdminDrawer"
 
-interface DeleteSectionProps {
+interface AddSectionProps {
     isDarkMode: boolean
     members: Member[]
     onDelete: (updatedMembers: Member[]) => void
 }
 
-function DeleteSection({ isDarkMode, members, onDelete }: DeleteSectionProps) {
+function AddSection({ isDarkMode, members, onDelete }: AddSectionProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
+    const navigate = useNavigate()
 
     function handleDelete() {
         if (memberToDelete) {
@@ -26,7 +28,7 @@ function DeleteSection({ isDarkMode, members, onDelete }: DeleteSectionProps) {
     return (
         <>
             <GlassButton isDarkMode={!isDarkMode} onClick={() => handleToggle(setIsOpen)} className="mt-1 mb-1 p-3 w-full text-left">
-                Mitglied löschen
+                Mitglieder verwalten
             </GlassButton>
 
             {isOpen && (
@@ -56,6 +58,18 @@ function DeleteSection({ isDarkMode, members, onDelete }: DeleteSectionProps) {
                                 </div>
                             )
                         })}
+
+                        <div className="flex flex-col items-center gap-1">
+                            <div
+                                className={`w-12 h-12 rounded-xl flex items-center justify-center border cursor-pointer transition-opacity hover:opacity-80 ${isDarkMode ? "bg-white/10 border-white/20" : "bg-sky-100 border-cyan-950/20"}`}
+                                onClick={() => navigate("/register")}
+                            >
+                                <Plus size={24} className={isDarkMode ? "text-white" : "text-sky-900"} />
+                            </div>
+                            <span className={`text-xs text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                                Hinzufügen
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}
@@ -73,4 +87,4 @@ function DeleteSection({ isDarkMode, members, onDelete }: DeleteSectionProps) {
     )
 }
 
-export default DeleteSection
+export default AddSection
