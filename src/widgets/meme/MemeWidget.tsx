@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { getDailyMeme } from "../../api/memeApi"
 import type { MemeResponse } from "./memeTypes"
+import { DarkModeContext } from "../../context/DarkModeContext"
 
 function MemeWidget() {
 
+    const { isDarkMode } = useContext(DarkModeContext)!
     const [meme, setMeme] = useState<MemeResponse | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -16,7 +18,7 @@ function MemeWidget() {
                 const data = await getDailyMeme()
                 setMeme(data)
             } catch (err) {
-                setError(err instanceof Error ? err.message : "Unbekannter Fehler")
+                setError(err instanceof Error ? err.message : "Failed to fetch :(")
             } finally {
                 setLoading(false)
             }
@@ -25,7 +27,12 @@ function MemeWidget() {
     }, [])
 
     return (
-        <div className="relative w-full h-full bg-zinc-900 rounded-2xl shadow-lg overflow-hidden flex flex-col">
+        <div className={`relative w-full h-full backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden flex flex-col
+            ${!isDarkMode
+                ? "bg-linear-to-b from-sky-100/10 via-blue-400/20 to-blue-300/20 border border-cyan-950/5"
+                : "bg-linear-to-b from-gray-500/50 via-gray-600/20 to-blue-400/20 border border-white/25"
+            }`}>
+            <div className={`absolute inset-x-0 top-0 h-1/13 rounded-2xl pointer-events-none ${!isDarkMode ? "bg-white/15" : "bg-white/5"}`} />
             {loading ? (
                 <div className="flex-1 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
@@ -35,7 +42,7 @@ function MemeWidget() {
                     <p className="text-white/80 text-center text-sm font-semibold">{error}</p>
                 </div>
             ) : meme && (
-                <div className="flex-1 flex items-center justify-center overflow-hidden">
+                <div className="relative flex-1 flex items-center justify-center overflow-hidden">
                     {meme.isVideo ? (
                         <video src={meme.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain"
                         />
