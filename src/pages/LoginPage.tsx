@@ -35,7 +35,6 @@ function LoginPage() {
                     navigate("/admin"); 
                     break;
                 case "FAMILY":
-                    // Save familyId in AuthContext
                     setFamilyId(response.familyId);
                     navigate("/home", { state: { profiles: response.profiles } }); 
                     break;

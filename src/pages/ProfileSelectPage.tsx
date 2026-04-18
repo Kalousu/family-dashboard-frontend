@@ -2,70 +2,115 @@ import PasswortInput from "../components/PasswordInput"
 import ProfileCard from "../components/ProfileCard"
 import GlassButton from "../components/ui/GlassButton"
 import { motion } from "framer-motion"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import AuthPageLayout from "../components/layout/AuthPageLayout"
 import useDarkMode from "../hooks/useDarkMode"
-import useUser from "../hooks/useUser"
+import useAuth from "../hooks/useAuth"
 import { fadeSlideUp } from "../constants/animations"
-
-const profiles = [
-    { id: 1, name: "Kevin", color: "blue", icon: "gamepad" },
-    { id: 2, name: "Jonas", color: "red", icon: "dog" },
-    { id: 3, name: "Daniel", color: "lightgreen", icon: "sun" },
-    { id: 4, name: "Lea", color: "pink", icon: "flower" },
-    { id: 5, name: "Katrin", color: "lightblue", icon: "cat" },
-]
-interface Profile {
-  id: number
-  name: string
-  color: string
-  icon: string
-}
+import { getUsersForFamily } from "../api/familyApi"
+import { selectUser } from "../api/authApi"
+import type { UserProfile } from "../types/authTypes"
 
 function ProfileSelectPage() {
-    const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null)
+    const [profiles, setProfiles] = useState<UserProfile[]>([])
+    const [selectedProfile, setSelectedProfile] = useState<UserProfile | null>(null)
+    const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
-    const { setCurrentUser } = useUser()
+    const { familyId, setUserId } = useAuth()
+    const navigate = useNavigate()
 
-    function handleLogin(password: string) {
-        if (password === "") {
-            setError("Bitte Passwort eingeben.")
-        } else {
-            setError(null)
-            alert(`Logging in with username: ${selectedProfile?.name} and password: ${password}`)
-            if (selectedProfile) {
-                setCurrentUser(selectedProfile)
+    useEffect(() => {
+        async function fetchProfiles() {
+            if (!familyId) {
+                navigate("/login")
+                return
+            }
+            try {
+                setLoading(true)
+                const users = await getUsersForFamily(familyId)
+                setProfiles(users)
+            } catch (err) {
+                setError("Fehler beim Laden der Profile")
+                console.error(err)
+            } finally {
+                setLoading(false)
             }
         }
+        fetchProfiles()
+    }, [familyId, navigate])
+
+    async function handleLogin(pin?: string) {
+        if (!selectedProfile) return
+        setError(null)
+        try {
+            await selectUser({ userId: selectedProfile.id, pin: pin })
+            setUserId(selectedProfile.id)
+            navigate("/dashboard")
+        } catch (err) {
+            setError("Login fehlgeschlagen")
+            console.error(err)
+        }
+    }
+
+    if (loading) {
+        return (
+            <AuthPageLayout>
+                <div className="flex items-center justify-center p-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                </div>
+            </AuthPageLayout>
+        )
     }
 
     return (
         <AuthPageLayout>
-                    {selectedProfile ? (
-                        <motion.div key="login" {...fadeSlideUp} className="p-4 flex flex-col items-center gap-8">
-                            <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Willkommen zurück, {selectedProfile.name}!</p>
-                            <ProfileCard name={selectedProfile.name} color={selectedProfile.color} icon={selectedProfile.icon} onSelect={() => setSelectedProfile(null)} isDarkMode={isDarkMode} />
-                            <PasswortInput onLogin={handleLogin} isDarkMode={isDarkMode} />
-                            <p className={`text-sm font-semibold mt-2 ${error ? "text-red-500" : "text-transparent"}`}>
-                                {error || "Platzhalter"}
-                            </p>
-                            <GlassButton isDarkMode={!isDarkMode} onClick={() => setSelectedProfile(null)} className="px-4 py-2 backdrop-blur-sm">
-                                Benutzer wechseln
-                            </GlassButton>
-                        </motion.div>
+            {selectedProfile ? (
+                <motion.div key="login" {...fadeSlideUp} className="p-4 flex flex-col items-center gap-4">
+                    <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Willkommen zurück, {selectedProfile.name}!</p>
+                    <ProfileCard 
+                        name={selectedProfile.name} 
+                        color="blue" 
+                        icon={selectedProfile.avatar} 
+                        avatarType={selectedProfile.avatarType}
+                        onSelect={() => setSelectedProfile(null)} 
+                        isDarkMode={isDarkMode} 
+                    />
+                    {selectedProfile.hasPin ? (
+                        <PasswortInput onLogin={handleLogin} isDarkMode={isDarkMode} />
                     ) : (
-                        <motion.div key="profiles" {...fadeSlideUp}>
-                            <div className="p-2 flex flex-col items-center gap-8">
-                                <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Wer bist du?</p>
-                            </div>
-                            <div className="p-8 flex flex-row items-center justify-center gap-8">
-                                {profiles.map(profile => (
-                                    <ProfileCard key={profile.id} name={profile.name} color={profile.color} icon={profile.icon} onSelect={() => setSelectedProfile(profile)} isDarkMode={isDarkMode} />
-                                ))}
-                            </div>
-                        </motion.div>
+                        <GlassButton isDarkMode={!isDarkMode} onClick={() => handleLogin()} className="px-4 py-2 backdrop-blur-sm">
+                            Anmelden
+                        </GlassButton>
                     )}
+                    <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
+                        {error || "Platzhalter"}
+                    </p>
+                    <GlassButton isDarkMode={!isDarkMode} onClick={() => setSelectedProfile(null)} className="px-4 py-2 backdrop-blur-sm">
+                        Benutzer wechseln
+                    </GlassButton>
+                </motion.div>
+            ) : (
+                <motion.div key="profiles" {...fadeSlideUp}>
+                    <div className="p-2 flex flex-col items-center gap-4">
+                        <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Wer bist du?</p>
+                    </div>
+                    <div className="p-4 flex flex-row items-center justify-center gap-4 flex-wrap">
+                        {profiles.map(profile => (
+                            <ProfileCard 
+                                key={profile.id} 
+                                name={profile.name} 
+                                color="blue" 
+                                icon={profile.avatar} 
+                                avatarType={profile.avatarType}
+                                onSelect={() => setSelectedProfile(profile)} 
+                                isDarkMode={isDarkMode} 
+                            />
+                        ))}
+                    </div>
+                </motion.div>
+            )}
         </AuthPageLayout>
     )
 }
