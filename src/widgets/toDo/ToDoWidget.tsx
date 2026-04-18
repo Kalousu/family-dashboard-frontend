@@ -2,8 +2,8 @@ import { LayoutGroup, Reorder } from "framer-motion"
 import { useToDo } from "./useToDo"
 import { ToDoItemRow, AddButton } from "./ToDoItemRow"
 
-function ToDoWidget() {
-    const { todos, setTodos, editingId, isAnyEditing, textareaRefs, addTodo, updateText, startEditing, finishEditing, deleteTodo, toggleComplete } = useToDo();
+function ToDoWidget({ widgetId = 1 }: { widgetId?: number }) {
+    const { todos, setTodos, editingId, isAnyEditing, textareaRefs, addTodo, updateText, startEditing, finishEditing, deleteTodo, toggleComplete } = useToDo(widgetId);
 
     return (
         <div
