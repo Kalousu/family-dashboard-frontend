@@ -99,7 +99,7 @@ function CalendarWidget() {
     return (
         <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/40 to-cyan-400/30">
         <div className={`
-            p-4 h-full w-full overflow-y-auto flex flex-col gap-3
+            p-4 h-full w-full overflow-y-auto [scrollbar-gutter:stable] flex flex-col gap-3
             [&::-webkit-scrollbar]:w-1.5
             [&::-webkit-scrollbar-track]:bg-transparent
             [&::-webkit-scrollbar-thumb]:rounded-full
@@ -110,7 +110,7 @@ function CalendarWidget() {
         `}>
             {/* Header */}
             <div className="flex items-center justify-between">
-                <span className="text-lg font-bold">
+                <span className="text-lg font-bold text-white">
                     {MONTH_NAMES[viewMonth]} {viewYear}
                 </span>
                 <div className="flex items-center gap-2">
@@ -133,7 +133,7 @@ function CalendarWidget() {
                 {WEEKDAYS.map(day => (
                     <div
                         key={day}
-                        className={`text-xs font-semibold py-1 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
+                        className="text-xs font-semibold py-1 text-white/70"
                     >
                         {day}
                     </div>
@@ -150,8 +150,8 @@ function CalendarWidget() {
                             className={`
                                 flex items-start justify-center pt-1 text-sm rounded-lg min-h-8
                                 ${!day.isCurrentMonth
-                                    ? isDarkMode ? "text-black/60 font-semibold" : "text-gray-300 font-semibold"
-                                    : isDarkMode ? "text-gray-200 font-semibold" : "text-gray-800 font-semibold"
+                                    ? "text-white/30 font-semibold"
+                                    : "text-white font-semibold"
                                 }
                                 ${isToday
                                     ? "bg-blue-500 text-whitefont-bold rounded-full"
