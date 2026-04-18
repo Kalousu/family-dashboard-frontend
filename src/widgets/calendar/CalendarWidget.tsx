@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Dot } from "lucide-react";
+import { ChevronLeft, ChevronRight, Dot, CirclePlus, CircleMinus, Pencil } from "lucide-react";
+import { motion } from "framer-motion";
 import GlassButton from "../../components/ui/GlassButton";
 import { DarkModeContext } from "../../context/DarkModeContext";
 
@@ -7,6 +8,29 @@ type CalendarDay = {
     date: Date;
     isCurrentMonth: boolean;
 };
+
+type CalendarEvent = {
+    id: string;
+    title: string;
+    date: Date;
+    color: string;
+    allDay: boolean;
+    startTime?: string; // "HH:MM", nur relevant wenn allDay = false
+};
+
+const today = new Date();
+const month = today.getMonth();
+
+const DUMMY_EVENTS: CalendarEvent[] = [
+    { id: "1", title: "Arzttermin", date: new Date((today.getFullYear()), month, 5), color: "#ef4444", allDay: false, startTime: "10:00" },
+    { id: "2", title: "Geburtstag Papa", date: new Date((today.getFullYear()), month, 5), color: "#f59e0b", allDay: true },
+    { id: "3", title: "Elternabend", date: new Date((today.getFullYear()), month, 12), color: "#3b82f6", allDay: false, startTime: "19:30" },
+    { id: "4", title: "Urlaub", date: new Date((today.getFullYear()), month, 20), color: "#10b981", allDay: true },
+    { id: "5", title: "Zahnarzt", date: new Date((today.getFullYear()), month, 20), color: "#ef4444", allDay: false, startTime: "14:00" },
+    { id: "6", title: "Sport", date: new Date((today.getFullYear()), month, 20), color: "#8b5cf6", allDay: false, startTime: "18:00" },
+    { id: "7", title: "Einkaufen", date: new Date((today.getFullYear()), month, 20), color: "#06b6d4", allDay: false, startTime: "11:00" },
+    { id: "8", title: "Programmieren", date: new Date(today.getFullYear(), today.getMonth(),  today.getDate()), color: "#ff5a3d", allDay: false, startTime: "11:00" },
+];
 
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -54,6 +78,7 @@ function CalendarWidget() {
     const isDarkMode = darkModeCtx?.isDarkMode ?? false;
     const [today, setToday] = useState(() => new Date());
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+    const [events, setEvents] = useState<CalendarEvent[]>(DUMMY_EVENTS);
 
     const [viewYear, setViewYear] = useState(today.getFullYear());
     const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -169,26 +194,44 @@ function CalendarWidget() {
             <div className="grid grid-cols-7 flex-1 min-h-0">
                 {days.map((day, i) => {
                     const isToday = isSameDay(day.date, today);
+                    const dayEvents = events.filter(e => isSameDay(e.date, day.date));
+                    const MAX_DOTS = 3;
+                    const visibleEvents = dayEvents.slice(0, MAX_DOTS);
+                    const overflow = dayEvents.length - MAX_DOTS;
                     return (
-                        <div
+                        <motion.div
                             key={i}
                             onClick={() => setSelectedDay(day.date)}
+                            initial="rest"
+                            whileHover="hover"
+                            whileTap="hover"
                             className={`
-                                flex items-start justify-center pt-1 text-sm rounded-lg min-h-8 cursor-pointer
-                                ${!day.isCurrentMonth
-                                    ? "text-white/30 font-semibold"
-                                    : "text-white font-semibold"
-                                }
-                                ${isToday
-                                    ? "bg-blue-500 text-white font-bold rounded-full"
-                                    : "hover:bg-white/10"
-                                }
+                                relative flex flex-col items-center pt-1 text-sm rounded-lg min-h-8 cursor-pointer
+                                ${!day.isCurrentMonth ? "text-white/30 font-semibold" : "text-white font-semibold"}
+                                ${!isToday ? "hover:bg-white/10" : ""}
                             `}
                         >
-                            <span className={isToday ? "flex items-center justify-center w-7 h-7 rounded-full bg-blue-500 text-white" : ""}>
+                            {isToday && (
+                                <motion.div
+                                    variants={{ rest: { scale: 0.93 }, hover: { scale: 1.00 } }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    className="absolute inset-0 rounded-lg bg-white/25 pointer-events-none"
+                                />
+                            )}
+                            <span className="relative">
                                 {day.date.getDate()}
                             </span>
-                        </div>
+                            {dayEvents.length > 0 && (
+                                <div className="flex items-center -mt-1">
+                                    {visibleEvents.map(e => (
+                                        <Dot key={e.id} size={12} style={{ color: e.color }} strokeWidth={6} className="-mx-1" />
+                                    ))}
+                                    {overflow > 0 && (
+                                        <span className="text-[8px] text-white/70 leading-none ml-0.5">+{overflow}</span>
+                                    )}
+                                </div>
+                            )}
+                        </motion.div>
                     );
                 })}
             </div>
