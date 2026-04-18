@@ -15,6 +15,8 @@ const MONTH_NAMES = [
     "Juli", "August", "September", "Oktober", "November", "Dezember",
 ];
 
+const DAY_NAMES = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+
 function getCalendarDays(year: number, month: number): CalendarDay[] {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -51,6 +53,7 @@ function CalendarWidget() {
     const darkModeCtx = useContext(DarkModeContext);
     const isDarkMode = darkModeCtx?.isDarkMode ?? false;
     const [today, setToday] = useState(() => new Date());
+    const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
     const [viewYear, setViewYear] = useState(today.getFullYear());
     const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -96,18 +99,43 @@ function CalendarWidget() {
 
     const isCurrentView = viewYear === today.getFullYear() && viewMonth === today.getMonth();
 
+    const scrollableClass = `
+        p-4 h-full w-full overflow-y-auto [scrollbar-gutter:stable] flex flex-col gap-3
+        [&::-webkit-scrollbar]:w-1.5
+        [&::-webkit-scrollbar-track]:bg-transparent
+        [&::-webkit-scrollbar-thumb]:rounded-full
+        ${isDarkMode
+            ? "[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb:hover]:bg-white/35 text-gray-200"
+            : "[&::-webkit-scrollbar-thumb]:bg-black/15 [&::-webkit-scrollbar-thumb:hover]:bg-black/30 text-gray-800"
+        }
+    `;
+
+    if (selectedDay) {
+        return (
+            <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/40 to-cyan-400/30">
+            <div className={scrollableClass}>
+                {/* Day detail header */}
+                <div className="flex items-center gap-2">
+                    <GlassButton isDarkMode={isDarkMode} onClick={() => setSelectedDay(null)} className="p-1 text-white">
+                        <ChevronLeft size={18} />
+                    </GlassButton>
+                    <span className="text-lg font-bold text-white">
+                        {DAY_NAMES[selectedDay.getDay()]}, {selectedDay.getDate()}. {MONTH_NAMES[selectedDay.getMonth()]} {selectedDay.getFullYear()}
+                    </span>
+                </div>
+
+                {/* Events will go here */}
+                <div className="flex-1 flex items-center justify-center">
+                    <span className="text-white/50 text-sm">Keine Events</span>
+                </div>
+            </div>
+            </div>
+        );
+    }
+
     return (
         <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/40 to-cyan-400/30">
-        <div className={`
-            p-4 h-full w-full overflow-y-auto [scrollbar-gutter:stable] flex flex-col gap-3
-            [&::-webkit-scrollbar]:w-1.5
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:rounded-full
-            ${isDarkMode
-                ? "[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb:hover]:bg-white/35 text-gray-200"
-                : "[&::-webkit-scrollbar-thumb]:bg-black/15 [&::-webkit-scrollbar-thumb:hover]:bg-black/30 text-gray-800"
-            }
-        `}>
+        <div className={scrollableClass}>
             {/* Header */}
             <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-white">
@@ -131,10 +159,7 @@ function CalendarWidget() {
             {/* Weekday headers */}
             <div className="grid grid-cols-7 text-center">
                 {WEEKDAYS.map(day => (
-                    <div
-                        key={day}
-                        className="text-xs font-semibold py-1 text-white/70"
-                    >
+                    <div key={day} className="text-xs font-semibold py-1 text-white/70">
                         {day}
                     </div>
                 ))}
@@ -147,15 +172,16 @@ function CalendarWidget() {
                     return (
                         <div
                             key={i}
+                            onClick={() => setSelectedDay(day.date)}
                             className={`
-                                flex items-start justify-center pt-1 text-sm rounded-lg min-h-8
+                                flex items-start justify-center pt-1 text-sm rounded-lg min-h-8 cursor-pointer
                                 ${!day.isCurrentMonth
                                     ? "text-white/30 font-semibold"
                                     : "text-white font-semibold"
                                 }
                                 ${isToday
-                                    ? "bg-blue-500 text-whitefont-bold rounded-full"
-                                    : "hover:bg-white/10 cursor-pointer"
+                                    ? "bg-blue-500 text-white font-bold rounded-full"
+                                    : "hover:bg-white/10"
                                 }
                             `}
                         >
