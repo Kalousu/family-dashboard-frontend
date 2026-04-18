@@ -5,7 +5,9 @@ import GlassButton from "../components/ui/GlassButton"
 import FormInput from "../components/ui/FormInput"
 import AuthPageLayout from "../components/layout/AuthPageLayout"
 import useDarkMode from "../hooks/useDarkMode"
+import useAuth from "../hooks/useAuth"
 import { fadeSlideUp } from "../constants/animations"
+import { login } from "../api/authApi"
 
 function LoginPage() {
     const [formData, setFormData] = useState({
@@ -14,14 +16,32 @@ function LoginPage() {
     })
     const [error, setError] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
+    const { setFamilyId } = useAuth()
     const navigate = useNavigate()
 
-    function handleLogin() {
+    async function handleLogin() {
         if (formData.name === "" || formData.password === "") {
             setError("Bitte alle Felder ausfüllen.")
-        } else {
-            setError(null)
-            alert(`Login mit Name: ${formData.name} und Passwort: ${formData.password}`)
+            return;
+        }
+        
+        setError(null)
+
+        try {
+            const response = await login({ name: formData.name, password: formData.password });
+
+            switch (response.role) {
+                case "SYSADMIN": 
+                    navigate("/admin"); 
+                    break;
+                case "FAMILY":
+                    // Save familyId in AuthContext
+                    setFamilyId(response.familyId);
+                    navigate("/home", { state: { profiles: response.profiles } }); 
+                    break;
+            }
+        } catch (err) {
+            setError("Name oder Passwort falsch. " + err)
         }
     }
 

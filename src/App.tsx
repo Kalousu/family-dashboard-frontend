@@ -6,26 +6,36 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import WidgetPage from './pages/WidgetPage';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { UserProvider } from './context/UserContext';
+import { AuthProvider } from './context/AuthContext';
 import UserProfileEditPage from './pages/UserProfileEditPage';
 import NewFamilyRegisterPage from './pages/newFamilyRegisterPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (
-    <UserProvider>
-    <DarkModeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/home" element={<ProfileSelectPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<WidgetPage />} />
-          <Route path="/profile/edit" element={<UserProfileEditPage />} />
-          <Route path="/newfamily" element={<NewFamilyRegisterPage />} />
-        </Routes>
-      </BrowserRouter>
-    </DarkModeProvider>
-    </UserProvider>
+    <AuthProvider>
+      <UserProvider>
+        <DarkModeProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/home" element={<ProfileSelectPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<LoginPage />} />
+
+              <Route path="/dashboard" element={
+                <ProtectedRoute allowedRoles={["USER"]}>
+                  <WidgetPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/profile/edit" element={<UserProfileEditPage />} />
+              <Route path="/newfamily" element={<NewFamilyRegisterPage />} />
+            </Routes>
+          </BrowserRouter>
+        </DarkModeProvider>
+      </UserProvider>
+    </AuthProvider>
   )
 }
 
