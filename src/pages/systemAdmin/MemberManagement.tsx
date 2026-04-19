@@ -6,6 +6,7 @@ import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmM
 import { fadeSlideUp } from "../../constants/animations"
 import imageIcons from "../../constants/imageIcons"
 import type { Family, FamilyMember, MemberRole } from "./systemAdminTypes"
+import useAdminTheme from "../../hooks/useAdminTheme"
 
 // =============================================================================
 // API-ANBINDUNG — MemberManagement
@@ -43,12 +44,7 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
     const [pendingDelete, setPendingDelete] = useState<FamilyMember | null>(null)
     const [pendingLockToggle, setPendingLockToggle] = useState<FamilyMember | null>(null)
 
-    const glassCard = isDarkMode
-        ? "bg-white/5 border-white/10"
-        : "bg-sky-100/40 border-cyan-950/20"
-
-    const textPrimary = isDarkMode ? "text-gray-200" : "text-gray-700"
-    const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-500"
+    const { glassCard, shine, textPrimary, textSecondary , inputWrapper, inputField, actionButton } = useAdminTheme(isDarkMode)
 
     function updateMembers(members: FamilyMember[]) {
         onFamilyChange({ ...family, members })
@@ -100,7 +96,7 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                     { label: "Gesperrt", value: family.members.filter((m) => m.isLocked).length },
                 ].map((stat) => (
                     <div key={stat.label} className={`relative flex-1 rounded-xl border p-3 text-center ${glassCard}`}>
-                        <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
+                        <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${shine}`} />
                         <p className={`text-2xl font-bold ${textPrimary}`}>{stat.value}</p>
                         <p className={`text-xs ${textSecondary}`}>{stat.label}</p>
                     </div>
@@ -116,7 +112,7 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                     const IconComponent = imageIcons[member.icon as keyof typeof imageIcons] ?? User
                     return (
                         <div key={member.id} className={`relative rounded-xl border px-4 py-3 flex items-center gap-3 ${glassCard} ${member.isLocked ? "opacity-60" : ""}`}>
-                            <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
+                            <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${shine}`} />
 
                             {/* Avatar */}
                             <div
@@ -134,11 +130,11 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 </div>
 
                                 {/* Role select */}
-                                <div className={`inline-flex mt-1 rounded-lg p-0.5 ${isDarkMode ? "bg-linear-to-b to-gray-700 via-gray-800/50 from-gray-700/50" : "bg-linear-to-b from-sky-200/50 via-slate-400/15 to-blue-400/30"}`}>
+                                <div className={`inline-flex mt-1 rounded-lg p-0.5 ${inputWrapper}`}>
                                     <select
                                         value={member.role}
                                         onChange={(e) => handleRoleChange(member.id, e.target.value as MemberRole)}
-                                        className={`text-xs px-2 py-1 rounded-md font-semibold focus:outline-none border ${isDarkMode ? "bg-gray-800 text-gray-200 border-white/10" : "bg-white text-gray-700 border-cyan-950/5"}`}
+                                        className={`text-xs px-2 py-1 rounded-md font-semibold focus:outline-none border ${inputField}`}
                                     >
                                         <option value="Mitglied">Mitglied</option>
                                         <option value="Familienadministrator">Familienadmin</option>
@@ -156,7 +152,7 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 <button
                                     onClick={() => setPendingLockToggle(member)}
                                     title={member.isLocked ? "Entsperren" : "Sperren"}
-                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${isDarkMode ? "border-white/10 text-gray-400 hover:text-gray-200" : "border-cyan-950/10 text-gray-500 hover:text-gray-700"}`}
+                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${actionButton}`}
                                 >
                                     {member.isLocked ? <Unlock size={14} /> : <Lock size={14} />}
                                 </button>

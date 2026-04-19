@@ -5,6 +5,7 @@ import FormInput from "../../components/ui/FormInput"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
 import type { Family, FamilyStatus } from "./systemAdminTypes"
+import useAdminTheme from "../../hooks/useAdminTheme"
 
 // =============================================================================
 // API-ANBINDUNG — FamilyOverview
@@ -40,12 +41,7 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
     const [pendingDelete, setPendingDelete] = useState<Family | null>(null)
     const [pendingStatusToggle, setPendingStatusToggle] = useState<Family | null>(null)
 
-    const glassCard = isDarkMode
-        ? "bg-white/5 border-white/10"
-        : "bg-sky-100/40 border-cyan-950/20"
-
-    const textPrimary = isDarkMode ? "text-gray-200" : "text-gray-700"
-    const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-500"
+    const { glassCard, shine, textPrimary, textSecondary, border, inputWrapper, inputField, actionButton } = useAdminTheme(isDarkMode)
 
     const filteredFamilies = families.filter((family) => {
         const matchesSearch =
@@ -90,11 +86,11 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                         className="w-full text-sm"
                     />
                 </div>
-                <div className={`rounded-xl p-0.5 ${isDarkMode ? "bg-linear-to-b to-gray-700 via-gray-800/50 from-gray-700/50" : "bg-linear-to-b from-sky-200/50 via-slate-400/15 to-blue-400/30"}`}>
+                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value as FamilyStatus | "alle")}
-                        className={`px-3 py-2 rounded-xl text-sm font-semibold focus:outline-none border ${isDarkMode ? "bg-gray-800 text-gray-200 border-white/10" : "bg-white text-gray-700 border-cyan-950/5"}`}
+                        className={`px-3 py-2 rounded-xl text-sm font-semibold focus:outline-none border ${inputField}`}
                     >
                         <option value="alle">Alle</option>
                         <option value="aktiv">Aktiv</option>
@@ -111,7 +107,7 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                     { label: "Gesperrt", value: families.filter((f) => f.status === "gesperrt").length },
                 ].map((stat) => (
                     <div key={stat.label} className={`relative flex-1 rounded-xl border p-3 text-center ${glassCard}`}>
-                        <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
+                        <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${shine}`} />
                         <p className={`text-2xl font-bold ${textPrimary}`}>{stat.value}</p>
                         <p className={`text-xs ${textSecondary}`}>{stat.label}</p>
                     </div>
@@ -154,14 +150,14 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                                 <button
                                     onClick={() => setPendingStatusToggle(family)}
                                     title={family.status === "aktiv" ? "Sperren" : "Entsperren"}
-                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${isDarkMode ? "border-white/10 text-gray-400 hover:text-gray-200" : "border-cyan-950/10 text-gray-500 hover:text-gray-700"}`}
+                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${actionButton}`}
                                 >
                                     {family.status === "aktiv" ? <Lock size={15} /> : <Unlock size={15} />}
                                 </button>
                                 <button
                                     onClick={() => onSelectFamily(family)}
                                     title="Mitglieder verwalten"
-                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${isDarkMode ? "border-white/10 text-gray-400 hover:text-gray-200" : "border-cyan-950/10 text-gray-500 hover:text-gray-700"}`}
+                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${actionButton}`}
                                 >
                                     <UserPlus size={15} />
                                 </button>
@@ -185,7 +181,7 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                                     transition={{ duration: 0.2 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className={`px-4 pb-3 pt-1 border-t flex flex-wrap gap-2 ${isDarkMode ? "border-white/10" : "border-cyan-950/10"}`}>
+                                    <div className={`px-4 pb-3 pt-1 border-t flex flex-wrap gap-2 ${border}`}>
                                         <div className={`text-xs ${textSecondary}`}>
                                             Registriert: <span className={`font-semibold ${textPrimary}`}>{family.registeredAt}</span>
                                         </div>

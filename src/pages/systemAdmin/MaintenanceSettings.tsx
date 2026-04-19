@@ -6,6 +6,7 @@ import FormInput from "../../components/ui/FormInput"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
 import type { MaintenanceSettings as MaintenanceSettingsType, FeatureFlag } from "./systemAdminTypes"
+import useAdminTheme from "../../hooks/useAdminTheme"
 
 // =============================================================================
 // API-ANBINDUNG — MaintenanceSettings
@@ -80,12 +81,7 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
     const [expandedCategory, setExpandedCategory] = useState<"widget" | "system" | null>("widget")
     const [pendingMaintenanceToggle, setPendingMaintenanceToggle] = useState(false)
 
-    const glassCard = isDarkMode
-        ? "bg-white/5 border-white/10"
-        : "bg-sky-100/40 border-cyan-950/20"
-
-    const textPrimary = isDarkMode ? "text-gray-200" : "text-gray-700"
-    const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-500"
+    const { glassCard, shine, textPrimary, textSecondary, border } = useAdminTheme(isDarkMode)
 
     function toggleFlag(flagId: string) {
         onSettingsChange({
@@ -133,7 +129,7 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
 
             {/* Maintenance mode card */}
             <div className={`relative rounded-xl border overflow-hidden ${glassCard}`}>
-                <div className={`absolute inset-x-0 top-0 h-8 pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
+                <div className={`absolute inset-x-0 top-0 h-8 pointer-events-none ${shine}`} />
 
                 <div className="flex items-center gap-4 px-4 py-4">
                     <div className="flex-1 min-w-0">
@@ -150,7 +146,7 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
                 </div>
 
                 {/* Maintenance message input */}
-                <div className={`px-4 pb-4 border-t ${isDarkMode ? "border-white/10" : "border-cyan-950/10"}`}>
+                <div className={`px-4 pb-4 border-t ${border}`}>
                     <p className={`text-xs font-semibold mt-3 mb-2 ${textSecondary}`}>Wartungsmeldung</p>
                     <FormInput
                         isDarkMode={isDarkMode}
@@ -171,7 +167,7 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
 
                 return (
                     <div key={id} className={`relative rounded-xl border overflow-hidden ${glassCard}`}>
-                        <div className={`absolute inset-x-0 top-0 h-8 pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
+                        <div className={`absolute inset-x-0 top-0 h-8 pointer-events-none ${shine}`} />
 
                         {/* Section header */}
                         <button
@@ -199,7 +195,7 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
                                     transition={{ duration: 0.2 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className={`border-t ${isDarkMode ? "border-white/10" : "border-cyan-950/10"}`}>
+                                    <div className={`border-t ${border}`}>
                                         {flags.map((flag, index) => (
                                             <div
                                                 key={flag.id}
