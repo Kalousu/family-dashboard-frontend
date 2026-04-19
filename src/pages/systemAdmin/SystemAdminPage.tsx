@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Users, Building2, UserCog, Wrench } from "lucide-react"
 import AuthPageLayout from "../../components/layout/AuthPageLayout"
 import useDarkMode from "../../hooks/useDarkMode"
+import useAdminTheme from "../../hooks/useAdminTheme"
 import { fadeSlideUp } from "../../constants/animations"
 import FamilyOverview from "./FamilyOverview"
 import MemberManagement from "./MemberManagement"
@@ -41,17 +42,11 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
 
 function SystemAdminPage() {
     const { isDarkMode } = useDarkMode()
+    const { glassCard, textPrimary, textSecondary } = useAdminTheme(isDarkMode)
     const [activeTab, setActiveTab] = useState<Tab>("familien")
     const [families, setFamilies] = useState<Family[]>(MOCK_FAMILIES)
     const [selectedFamily, setSelectedFamily] = useState<Family | null>(null)
     const [maintenanceSettings, setMaintenanceSettings] = useState<MaintenanceSettingsType>(DEFAULT_MAINTENANCE_SETTINGS)
-
-    const glassCard = isDarkMode
-        ? "bg-white/5 border-white/10"
-        : "bg-sky-100/40 border-cyan-950/20"
-
-    const textPrimary = isDarkMode ? "text-gray-200" : "text-gray-700"
-    const textSecondary = isDarkMode ? "text-gray-400" : "text-gray-500"
 
     function handleSelectFamily(family: Family) {
         setSelectedFamily(family)
@@ -94,8 +89,8 @@ function SystemAdminPage() {
                                 className={`relative flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all duration-200
                                     ${isActive
                                         ? isDarkMode
-                                            ? "bg-linear-to-b from-sky-200/30 via-slate-400/15 to-blue-400/20 text-gray-700 shadow-sm"
-                                            : "bg-linear-to-b from-gray-500/50 via-gray-600/20 to-blue-400/20 text-gray-200 shadow-sm"
+                                            ? "bg-linear-to-b from-gray-500/50 via-gray-600/20 to-blue-400/20 text-gray-200 shadow-sm"
+                                            : "bg-linear-to-b from-sky-200/30 via-slate-400/15 to-blue-400/20 text-gray-700 shadow-sm"
                                         : `${textSecondary} hover:brightness-110`
                                     }`}
                             >
