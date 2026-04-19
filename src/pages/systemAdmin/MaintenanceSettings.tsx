@@ -7,6 +7,43 @@ import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmM
 import { fadeSlideUp } from "../../constants/animations"
 import type { MaintenanceSettings as MaintenanceSettingsType, FeatureFlag } from "./systemAdminTypes"
 
+// =============================================================================
+// API-ANBINDUNG — MaintenanceSettings
+//
+// INITIALDATEN (beim Mounten in SystemAdminPage.tsx laden):
+//   GET /settings/maintenance
+//   Response: { maintenanceMode: boolean, maintenanceMessage: string, flags: FeatureFlag[] }
+//   → ersetzt useState(DEFAULT_MAINTENANCE_SETTINGS) in SystemAdminPage.tsx.
+//
+// WARTUNGSMODUS UMSCHALTEN (confirmMaintenanceToggle):
+//   PATCH /settings/maintenance
+//   Body: { maintenanceMode: true | false }
+//   → nach erfolgreichem Call den lokalen State aktualisieren.
+//   Wichtig: Das Backend muss diesen Wert auslesen und bei Login-Anfragen
+//   (POST /auth/login) mit einem 503-Status antworten, wenn maintenanceMode true ist.
+//   Zusätzlich sollte LoginPage.tsx beim Laden GET /settings/maintenance abfragen
+//   und bei maintenanceMode: true eine Wartungsseite anzeigen.
+//
+// WARTUNGSMELDUNG SPEICHERN ("Einstellungen speichern"-Button, handleMessageChange):
+//   PATCH /settings/maintenance
+//   Body: { maintenanceMessage: "..." }
+//   → gleicher Endpunkt wie Wartungsmodus, nur andere Body-Felder.
+//   Den "Einstellungen speichern"-Button mit einem onClick-Handler versehen,
+//   der diesen Call auslöst.
+//
+// EINZELNEN FEATURE-FLAG UMSCHALTEN (toggleFlag):
+//   PATCH /settings/feature-flags/:flagId
+//   Body: { enabled: true | false }
+//   → nach erfolgreichem Call den lokalen flags-State aktualisieren.
+//   Alternativ: alle Flags auf einmal speichern (siehe unten).
+//
+// ALLE FLAGS AUF EINMAL SPEICHERN ("Einstellungen speichern"-Button):
+//   PUT /settings/feature-flags
+//   Body: { flags: FeatureFlag[] }
+//   → sendet den gesamten flags-Array. Einfacher als einzelne PATCH-Calls,
+//   wenn kein Live-Saving gewünscht ist.
+// =============================================================================
+
 interface MaintenanceSettingsProps {
     isDarkMode: boolean
     settings: MaintenanceSettingsType

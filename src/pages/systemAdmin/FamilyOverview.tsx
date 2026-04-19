@@ -1,11 +1,30 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown, ChevronUp, Lock, Unlock, Trash2, UserPlus } from "lucide-react"
-import GlassButton from "../../components/ui/GlassButton"
 import FormInput from "../../components/ui/FormInput"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
 import type { Family, FamilyStatus } from "./systemAdminTypes"
+
+// =============================================================================
+// API-ANBINDUNG — FamilyOverview
+//
+// INITIALDATEN (beim Mounten der Komponente laden):
+//   GET /families
+//   Response: Family[]
+//   → ersetzt den families-State, der aktuell als Prop mit MOCK_FAMILIES befüllt wird.
+//   In SystemAdminPage.tsx: useEffect(() => { api.get('/families').then(...) }, [])
+//
+// FAMILIE SPERREN / ENTSPERREN (confirmToggleStatus):
+//   PATCH /families/:id/status
+//   Body: { status: "aktiv" | "gesperrt" }
+//   → nach erfolgreichem Call den lokalen State aktualisieren (oder neu laden).
+//
+// FAMILIE LÖSCHEN (confirmDelete):
+//   DELETE /families/:id
+//   → nach erfolgreichem Call die Familie aus dem lokalen State entfernen.
+//
+// =============================================================================
 
 interface FamilyOverviewProps {
     isDarkMode: boolean
@@ -180,14 +199,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                         </AnimatePresence>
                     </div>
                 ))}
-            </div>
-
-            {/* Neue Familie anlegen */}
-            <div className="flex justify-end">
-                <GlassButton isDarkMode={!isDarkMode} className="px-4 py-2 text-sm flex items-center gap-2">
-                    <UserPlus size={15} />
-                    Neue Familie anlegen
-                </GlassButton>
             </div>
 
             {/* Modals */}

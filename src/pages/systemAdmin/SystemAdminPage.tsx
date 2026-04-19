@@ -11,6 +11,25 @@ import MaintenanceSettings from "./MaintenanceSettings"
 import { MOCK_FAMILIES, DEFAULT_MAINTENANCE_SETTINGS } from "./systemAdminTypes"
 import type { Family, MaintenanceSettings as MaintenanceSettingsType } from "./systemAdminTypes"
 
+// =============================================================================
+// API-ANBINDUNG — SystemAdminPage
+//
+// Dieser Bereich ist der Einstiegspunkt der Admin-App.
+// Hier müssen zwei Dinge ergänzt werden:
+//
+// 1. ROUTE-GUARD: Vor dem Rendern der Seite prüfen, ob der eingeloggte User
+//    die Rolle "Systemadministrator" hat. Falls nicht → Redirect zu /login.
+//    Empfohlene Umsetzung: eine ProtectedRoute-Komponente in App.tsx, die
+//    den Token aus localStorage liest und die Rolle prüft.
+//    Beispiel: GET /auth/me  → { id, name, role }
+//
+// 2. INITIALDATEN LADEN: Die Mock-Konstanten MOCK_FAMILIES und
+//    DEFAULT_MAINTENANCE_SETTINGS müssen durch echte API-Calls ersetzt werden.
+//    Beide Calls können parallel beim ersten Laden ausgeführt werden:
+//    GET /families               → ersetzt useState(MOCK_FAMILIES)
+//    GET /settings/maintenance   → ersetzt useState(DEFAULT_MAINTENANCE_SETTINGS)
+// =============================================================================
+
 type Tab = "familien" | "mitglieder" | "benutzer" | "wartung"
 
 const TABS: { id: Tab; label: string; icon: typeof Users }[] = [

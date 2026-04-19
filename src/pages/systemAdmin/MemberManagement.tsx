@@ -7,6 +7,31 @@ import { fadeSlideUp } from "../../constants/animations"
 import imageIcons from "../../constants/imageIcons"
 import type { Family, FamilyMember, MemberRole } from "./systemAdminTypes"
 
+// =============================================================================
+// API-ANBINDUNG — MemberManagement
+//
+// INITIALDATEN (beim Mounten oder wenn sich family.id ändert):
+//   GET /families/:id/members
+//   Response: FamilyMember[]
+//   → aktuell werden die Members direkt aus dem family-Prop gelesen (kein eigener
+//     Fetch nötig, solange GET /families bereits alle Members mitliefert).
+//     Falls das Backend Members separat lädt: useEffect auf family.id.
+//
+// ROLLE ÄNDERN (handleRoleChange — beim Ändern des Dropdowns):
+//   PATCH /members/:id/role
+//   Body: { role: "Mitglied" | "Familienadministrator" }
+//   → nach erfolgreichem Call onFamilyChange mit aktualisiertem Member aufrufen.
+//
+// MITGLIED SPERREN / ENTSPERREN (confirmLockToggle):
+//   PATCH /members/:id/status
+//   Body: { isLocked: true | false }
+//   → nach erfolgreichem Call onFamilyChange mit aktualisiertem Member aufrufen.
+//
+// MITGLIED ENTFERNEN (confirmDelete):
+//   DELETE /members/:id
+//   → nach erfolgreichem Call onFamilyChange ohne das gelöschte Member aufrufen.
+// =============================================================================
+
 interface MemberManagementProps {
     isDarkMode: boolean
     family: Family

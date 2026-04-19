@@ -47,6 +47,8 @@ export const DEFAULT_MAINTENANCE_SETTINGS: MaintenanceSettings = {
     ],
 }
 
+//Mock-Daten, mit API ersetzen
+
 export const MOCK_FAMILIES: Family[] = [
     {
         id: 1,

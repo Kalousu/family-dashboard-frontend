@@ -6,6 +6,34 @@ import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmM
 import { fadeSlideUp } from "../../constants/animations"
 import type { Family, FamilyMember, MemberRole } from "./systemAdminTypes"
 
+// =============================================================================
+// API-ANBINDUNG — UserManagement
+//
+// INITIALDATEN (beim Mounten laden):
+//   GET /users
+//   Response: Array von { id, name, icon, color, role, isLocked, familyId, familyName }
+//   → aktuell werden alle User aus dem families-Prop per flatMap abgeleitet.
+//     Sobald das Backend einen eigenen /users-Endpunkt liefert, kann dieser
+//     State unabhängig vom families-State befüllt werden.
+//
+// BENUTZER SPERREN / ENTSPERREN (confirmLockToggle):
+//   PATCH /users/:id/status
+//   Body: { isLocked: true | false }
+//   → nach erfolgreichem Call den lokalen State aktualisieren.
+//
+// BENUTZER LÖSCHEN (confirmDelete):
+//   DELETE /users/:id
+//   → nach erfolgreichem Call den User aus dem lokalen State entfernen.
+//     Achtung: auch den families-State in SystemAdminPage.tsx aktualisieren,
+//     damit MemberManagement konsistent bleibt (onFamiliesChange aufrufen).
+//
+// PASSWORT-RESET AUSLÖSEN (confirmReset):
+//   POST /users/:id/password-reset
+//   Body: {} (leer — das Backend verschickt die E-Mail selbst)
+//   → aktuell nur alert(). Den alert() durch den API-Call ersetzen.
+//     Erfolgsmeldung danach als Toast/Hinweis im UI anzeigen.
+// =============================================================================
+
 interface SystemUser extends FamilyMember {
     familyId: number
     familyName: string
