@@ -1,11 +1,14 @@
 import { createContext, useState } from "react"
 import type { ReactNode } from "react"
+import type { UserProfile } from "../types/authTypes"
 
 interface AuthContextType {
     familyId: number | null
     setFamilyId: (id: number | null) => void
     userId: number | null
     setUserId: (id: number | null) => void
+    currentUser: UserProfile | null
+    setCurrentUser: (user: UserProfile | null) => void
     isAuthenticated: boolean
     logout: () => void
 }
@@ -27,6 +30,13 @@ function AuthProvider({ children }: { children: ReactNode }) {
         }
     )
 
+    const [currentUser, setCurrentUserState] = useState<UserProfile | null>(
+        () => {
+            const stored = localStorage.getItem("currentUser")
+            return stored ? JSON.parse(stored) : null
+        }
+    )
+
     function setFamilyId(id: number | null) {
         setFamilyIdState(id)
         if (id !== null) {
@@ -45,11 +55,22 @@ function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
+    function setCurrentUser(user: UserProfile | null) {
+        setCurrentUserState(user)
+        if (user !== null) {
+            localStorage.setItem("currentUser", JSON.stringify(user))
+        } else {
+            localStorage.removeItem("currentUser")
+        }
+    }
+
     function logout() {
         setFamilyIdState(null)
         setUserIdState(null)
+        setCurrentUserState(null)
         localStorage.removeItem("familyId")
         localStorage.removeItem("userId")
+        localStorage.removeItem("currentUser")
     }
 
     const isAuthenticated = familyId !== null && userId !== null
@@ -60,6 +81,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
             setFamilyId, 
             userId, 
             setUserId,
+            currentUser,
+            setCurrentUser,
             isAuthenticated,
             logout
         }}>

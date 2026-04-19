@@ -4,7 +4,9 @@ import WidgetDrawer from "./WidgetDrawer"
 import AdminDrawer from "./AdminDrawer/AdminDrawer"
 import GlassButton from "../../ui/GlassButton"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import useDarkMode from "../../../hooks/useDarkMode"
+import useAuth from "../../../hooks/useAuth"
 
 interface SideBarProps {
     isOpen: boolean
@@ -16,6 +18,13 @@ interface SideBarProps {
 function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarProps) {
     const [sideBarView, setSideBarView] = useState<"nav" | "widgets" | "admin">("nav")
     const { isDarkMode } = useDarkMode()
+    const { currentUser, logout } = useAuth()
+    const navigate = useNavigate()
+
+    function handleLogout() {
+        logout()
+        navigate("/login")
+    }
 
     return(
         <div className={`fixed z-20 right-0 top-0 h-full w-70 rounded-l-2xl p-4 transition-all duration-300 flex flex-col justify-between backdrop-blur-md ${isOpen ? "translate-x-0" : "translate-x-full"} ${isDarkMode ? "bg-linear-to-b from-gray-950/90 via-gray-900/85 to-slate-900/80 border-2 border-white/5" : "bg-linear-to-b to-sky-100 from-blue-200 border-2 border-gray-400/20"}`}>
@@ -27,14 +36,24 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarPr
                             {/*profile card wurde für design copy pasted, vllt bessere lösung später?*/}
                             <div className={`relative rounded-2xl p-2 bg-linear-to-b transition-all hover:scale-103 hover:brightness-105 ${isDarkMode ? "from-gray-500/50 via-gray-600/20 to-blue-400/20 border-2 border-white/10" : "from-sky-200/30 via-slate-400/15 to-blue-400/20 border-2 border-cyan-950/5"}`}>
                                 <div className={`absolute rounded-2xl inset-x-0 top-0 h-1/2 pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
-                                <User className="w-24 h-24 p-2 rounded-xl border bg-blue-500 border-white/30" size={48} />
+                                {currentUser && currentUser.avatarType === "URL" ? (
+                                    <img src={currentUser.avatar} alt={currentUser.name} className="w-24 h-24 p-1 rounded-xl border border-white/30 object-cover" />
+                                ) : currentUser && currentUser.avatarType === "ICON" ? (
+                                    <svg className="w-24 h-24 p-1 rounded-xl border border-white/30">
+                                        <use href={currentUser.avatar} />
+                                    </svg>
+                                ) : (
+                                    <User className="w-24 h-24 p-1 rounded-xl border border-white/30" size={48} />
+                                )}
                             </div>
-                            <p className={`m-2 text-center text-lg font-bold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>Willkommen zurück, User!</p>
+                            <p className={`m-2 text-center text-lg font-bold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                Willkommen zurück, {currentUser?.name || "User"}!
+                            </p>
                         </div>
                         <SideBarNav onWidgetsClick={() => setSideBarView("widgets")} onAdminClick={() => setSideBarView("admin")}/>
                     </div>
                     <div className="flex flex-col items-center mt-auto">
-                        <GlassButton isDarkMode={!isDarkMode} className="self-center mb-4 p-3 w-30">
+                        <GlassButton isDarkMode={!isDarkMode} onClick={handleLogout} className="self-center mb-4 p-3 w-30">
                             Abmelden
                         </GlassButton>
                     </div>

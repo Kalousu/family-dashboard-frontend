@@ -18,7 +18,7 @@ function ProfileSelectPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
-    const { familyId, setUserId } = useAuth()
+    const { familyId, setUserId, setCurrentUser } = useAuth()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -47,6 +47,7 @@ function ProfileSelectPage() {
         try {
             await selectUser({ userId: selectedProfile.id, pin: pin })
             setUserId(selectedProfile.id)
+            setCurrentUser(selectedProfile)  // Save user in context
             navigate("/dashboard")
         } catch (err) {
             setError("Login fehlgeschlagen")
