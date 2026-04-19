@@ -92,7 +92,7 @@ export function ToDoItemRow({ todo, isEditing, isAnyEditing, textareaRefs, onUpd
                     }
                 }}
                 rows={1}
-                className={`w-full pl-1 pr-4 bg-transparent border-0 rounded-sm focus:outline-none ${isEditing ? "" : "cursor-default"} ${todo.completed ? "line-through text-amber-900/40" : "text-white"}`}
+                className={`w-full pl-1 pr-4 bg-transparent border-0 rounded-sm focus:outline-none ${isEditing ? "" : "cursor-default"} ${todo.completed ? "line-through text-white/50" : "text-white"}`}
                 style={{ resize: "none", overflow: "hidden" }}
                 autoFocus={isEditing}
             />

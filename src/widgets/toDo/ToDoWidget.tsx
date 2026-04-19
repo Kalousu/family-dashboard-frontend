@@ -6,10 +6,11 @@ function ToDoWidget() {
     const { todos, setTodos, editingId, isAnyEditing, textareaRefs, addTodo, updateText, startEditing, finishEditing, deleteTodo, toggleComplete } = useToDo();
 
     return (
-        <div
-            className="w-full h-full max-h-full overflow-y-scroll overflow-x-hidden bg-linear-to-b from-orange-400/30 to-yellow-200/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4"
-            style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(180,130,50,0.4) rgba(180,130,50,0.1)" }}
-        >
+        <div className="w-full h-full bg-linear-to-b from-orange-400/30 to-yellow-200/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg overflow-hidden">
+            <div
+                className="w-full h-full overflow-y-auto overflow-x-hidden p-4"
+                style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(180,130,50,0.4) rgba(180,130,50,0.1)" }}
+            >
             <h1 className="text-3xl text-center font-bold text-white mb-2">To-Do Liste</h1>
             <LayoutGroup>
                 <Reorder.Group axis="y" values={todos} onReorder={setTodos} className="p-0 m-0">
@@ -30,6 +31,7 @@ function ToDoWidget() {
                 </Reorder.Group>
                 <AddButton onClick={addTodo} />
             </LayoutGroup>
+            </div>
         </div>
     );
 }
