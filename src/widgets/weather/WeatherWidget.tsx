@@ -71,7 +71,7 @@ function WeatherWidget() {
     const isNight = new Date().getHours() >= 20 || new Date().getHours() < 6
 
     return (
-        <div ref={ref} className={`relative w-full h-full bg-linear-to-b ${getWeatherGradient(weatherData.weatherCode, isNight)} backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4`}>
+        <div ref={ref} className={`relative w-full h-full flex flex-col overflow-hidden bg-linear-to-b ${getWeatherGradient(weatherData.weatherCode, isNight)} backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4`}>
             {isCompact ? (
                 <div className="h-full flex flex-col justify-between">
                     <div className="relative w-full">
@@ -113,8 +113,8 @@ function WeatherWidget() {
                     )}
                 </div>
             ) : (
-                <div>
-                    <div className="flex flex-row items-center gap-2 mb-4">
+                <div className="flex flex-col h-full min-h-0 flex-1">
+                    <div className="flex flex-row items-center gap-2 mb-4 shrink-0">
                         <MapPin color="white" size={32} />
                         <div className="border-4 border-white/20 focus:outline-none focus:border-white/60 rounded-xl flex flex-row items-center gap-2 transition-all">
                             <input
@@ -144,8 +144,9 @@ function WeatherWidget() {
                             )}
                         </div>
                     )}
+                    
                     <motion.div
-                        className="flex flex-col items-center justify-center m-6"
+                        className="flex flex-col flex-1 w-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-2"
                         animate={{
                             opacity: showDropdown && searchResults.length > 0 ? 0 : 1,
                             y: showDropdown && searchResults.length > 0 ? 10 : 0,
@@ -153,34 +154,34 @@ function WeatherWidget() {
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
                         {isLoading ? (
-                            <div className="flex items-center justify-center m-8 mb-12">
+                            <div className="flex items-center justify-center my-8">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
                             </div>
                         ) : error ? (
-                            <div className="flex items-center justify-center m-8 mb-12">
+                            <div className="flex items-center justify-center my-8">
                                 <p className="text-white/80 text-center text-xl font-semibold">{error}</p>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center gap-2">
-                                <div className="flex flex-row items-center justify-center gap-2 m-6">
-                                    <p className="text-white text-center text-7xl font-semibold mr-4 leading-none transition-transform">{weatherData.temperature}°C</p>
-                                    <div className="mt-2">
-                                        {getWeatherIcon(weatherData.weatherCode, 80, isNight)}
+                            <div className="flex flex-col flex-1 gap-4 w-full">
+                                <div className="flex flex-row items-center justify-center gap-2 shrink-0">
+                                    <p className="text-white text-center text-6xl font-semibold leading-none">{weatherData.temperature}°C</p>
+                                    <div className="shrink-0">
+                                        {getWeatherIcon(weatherData.weatherCode, 70, isNight)}
                                     </div>
                                 </div>
-                                <div className="flex flex-row items-center gap-2 mb-4">
-                                    <Wind color="white" size={32} />
-                                    <p className="text-white text-center text-xl font-bold">Wind: {weatherData.windSpeed} km/h</p>
+                                <div className="flex flex-row items-center justify-center gap-2 shrink-0">
+                                    <Wind color="white" size={24} />
+                                    <p className="text-white text-center text-lg font-bold">Wind: {weatherData.windSpeed} km/h</p>
                                 </div>
                                 {daily && (
-                                    <div className="flex flex-col gap-2 w-full mt-2">
+                                    <div className="flex flex-col gap-2 w-full flex-grow">
                                         {daily.time.slice(0, 5).map((time, i) => {
                                             const date = new Date(time + "T12:00:00")
                                             const dayLabel = i === 0
                                                 ? "Heute"
                                                 : date.toLocaleDateString("de-DE", { weekday: "short" })
                                             return (
-                                                <div key={time} className="flex flex-row items-center bg-white/10 rounded-xl px-4 py-2">
+                                                <div key={time} className="flex flex-row items-center bg-white/10 rounded-xl px-4 py-2 flex-1 min-h-[40px]">
                                                     <p className="text-white/80 text-sm font-semibold w-12">{dayLabel}</p>
                                                     {getWeatherIcon(daily.weathercode[i], 24, isNight)}
                                                     <p className="text-white text-sm font-bold ml-auto">{daily.temperature_2m_max[i]}°C</p>

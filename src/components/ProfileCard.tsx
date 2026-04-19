@@ -6,9 +6,10 @@ interface ProfileCardProps {
   icon: string
   onSelect: () => void
   isDarkMode?: boolean
+  showName?: boolean
 }
 
-function ProfileCard({ name, color, icon, onSelect, isDarkMode = false }: ProfileCardProps) {
+function ProfileCard({ name, color, icon, onSelect, isDarkMode = false, showName = true }: ProfileCardProps) {
     const Icon = imageIcons[icon as keyof typeof imageIcons]
 
     return (
@@ -17,7 +18,7 @@ function ProfileCard({ name, color, icon, onSelect, isDarkMode = false }: Profil
                 <div className={`absolute rounded-2xl inset-x-0 top-0 h-1/2 pointer-events-none ${isDarkMode ? "bg-white/20" : "bg-white/30"}`} />
                 <Icon className="w-24 h-24 p-2 rounded-xl border border-white/30" style={{ backgroundColor: color }} size={48} />
             </div>
-            <p className={`mt-2 text-lg font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{name}</p>
+            {showName && <p className={`mt-2 text-lg font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{name}</p>}
         </div>
     )
 }
