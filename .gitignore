@@ -25,3 +25,6 @@ dist-ssr
 *.sw?
 package-lock*
 package-lock.json
+
+# Bruno API client
+opencollection.yml

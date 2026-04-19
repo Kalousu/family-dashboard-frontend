@@ -2,8 +2,8 @@ import { LayoutGroup, Reorder } from "framer-motion"
 import { useToDo } from "./useToDo"
 import { ToDoItemRow, AddButton } from "./ToDoItemRow"
 
-function ToDoWidget() {
-    const { todos, setTodos, editingId, isAnyEditing, textareaRefs, addTodo, updateText, startEditing, finishEditing, deleteTodo, toggleComplete } = useToDo();
+function ToDoWidget({ widgetId = 1 }: { widgetId?: number }) {
+    const { todos, setTodos, editingId, isAnyEditing, textareaRefs, addTodo, updateText, startEditing, finishEditing, deleteTodo, toggleComplete } = useToDo(widgetId);
 
     return (
         <div className="w-full h-full bg-linear-to-b from-orange-400/30 to-yellow-200/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg overflow-hidden">
