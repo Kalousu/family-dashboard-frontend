@@ -1,15 +1,10 @@
 import { Coffee, TvMinimalPlay, Sprout, SportShoe, CalendarFold } from "lucide-react";
-import type { CalendarUser } from "./calendarTypes";
 
 export type CalendarDay = {
     date: Date;
     isCurrentMonth: boolean;
 };
 
-export const DUMMY_USERS: CalendarUser[] = [
-    { id: "11111111-1111-1111-1111-111111111111", username: "Kevin" },
-    { id: "22222222-2222-2222-2222-222222222222", username: "Daniel" },
-];
 
 export const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -67,4 +62,17 @@ export function isSameDay(a: Date, b: Date): boolean {
     return a.getFullYear() === b.getFullYear()
         && a.getMonth() === b.getMonth()
         && a.getDate() === b.getDate();
+}
+
+export function getScrollableClass(isDarkMode: boolean): string {
+    return `
+        p-4 h-full w-full overflow-y-auto [scrollbar-gutter:stable] flex flex-col gap-3
+        [&::-webkit-scrollbar]:w-1.5
+        [&::-webkit-scrollbar-track]:bg-transparent
+        [&::-webkit-scrollbar-thumb]:rounded-full
+        ${isDarkMode
+            ? "[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb:hover]:bg-white/35 text-gray-200"
+            : "[&::-webkit-scrollbar-thumb]:bg-black/15 [&::-webkit-scrollbar-thumb:hover]:bg-black/30 text-gray-800"
+        }
+    `;
 }
