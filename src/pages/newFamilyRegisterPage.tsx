@@ -6,6 +6,7 @@ import FormInput from "../components/ui/FormInput"
 import AuthPageLayout from "../components/layout/AuthPageLayout"
 import useDarkMode from "../hooks/useDarkMode"
 import { fadeSlideUp } from "../constants/animations"
+import { createFamily } from "../api/familyApi"
 
 function NewFamilyRegisterPage() {
     const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ function NewFamilyRegisterPage() {
         passwortWiederholen: "",
     })
     const [error, setError] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
     const { isDarkMode } = useDarkMode()
     const navigate = useNavigate()
 
@@ -40,10 +42,30 @@ function NewFamilyRegisterPage() {
         }
     }
 
-    function handleRegister() {
+    async function handleRegister() {
         const err = validate()
-        if (err) { setError(err); return }
-        navigate("/register")
+        if (err) { 
+            setError(err)
+            return 
+        }
+        
+        setLoading(true)
+        setError(null)
+        
+        try {
+            await createFamily({
+                familyName: formData.familienname,
+                password: formData.passwort,
+                email: formData.email
+            })
+            // Nach erfolgreicher Registrierung zum Login navigieren
+            navigate("/login")
+        } catch (error) {
+            console.error("Fehler bei der Registrierung:", error)
+            setError("Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.")
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -106,8 +128,12 @@ function NewFamilyRegisterPage() {
                     {error || "Platzhalter"}
                 </p>
 
-                <GlassButton isDarkMode={!isDarkMode} onClick={handleRegister} className="px-4 py-2 backdrop-blur-sm">
-                    Registrieren
+                <GlassButton 
+                    isDarkMode={!isDarkMode} 
+                    onClick={loading ? undefined : handleRegister} 
+                    className={`px-4 py-2 backdrop-blur-sm ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    {loading ? "Wird erstellt..." : "Registrieren"}
                 </GlassButton>
 
                 <div className="flex flex-col items-center gap-2 mt-2">

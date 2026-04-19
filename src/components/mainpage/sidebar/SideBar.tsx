@@ -37,13 +37,13 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarPr
                             <div className={`relative rounded-2xl p-2 bg-linear-to-b transition-all hover:scale-103 hover:brightness-105 ${isDarkMode ? "from-gray-500/50 via-gray-600/20 to-blue-400/20 border-2 border-white/10" : "from-sky-200/30 via-slate-400/15 to-blue-400/20 border-2 border-cyan-950/5"}`}>
                                 <div className={`absolute rounded-2xl inset-x-0 top-0 h-1/2 pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
                                 {currentUser && currentUser.avatarType === "URL" ? (
-                                    <img src={currentUser.avatar} alt={currentUser.name} className="w-24 h-24 p-1 rounded-xl border border-white/30 object-cover" />
+                                    <img src={currentUser.avatar} alt={currentUser.name} className="w-24 h-24 p-1 rounded-xl border-2 object-cover" style={{ borderColor: currentUser.color || '#ffffff50' }} />
                                 ) : currentUser && currentUser.avatarType === "ICON" ? (
-                                    <svg className="w-24 h-24 p-1 rounded-xl border border-white/30">
+                                    <svg className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: currentUser.color || '#ffffff50' }}>
                                         <use href={currentUser.avatar} />
                                     </svg>
                                 ) : (
-                                    <User className="w-24 h-24 p-1 rounded-xl border border-white/30" size={48} />
+                                    <User className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: currentUser?.color || '#ffffff50' }} size={48} />
                                 )}
                             </div>
                             <p className={`m-2 text-center text-lg font-bold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>

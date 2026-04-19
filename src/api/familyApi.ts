@@ -50,3 +50,13 @@ export const getDashboardByFamilyId = async (familyId: number): Promise<Dashboar
     const response = await axiosInstance.get<DashboardResponse>(`/api/family/${familyId}/dashboard`)
     return response.data
 }
+
+export interface CreateFamilyRequest {
+    familyName: string
+    password: string
+    email: string
+}
+
+export const createFamily = async (data: CreateFamilyRequest): Promise<void> => {
+    await axiosInstance.post('/api/family', data)
+}

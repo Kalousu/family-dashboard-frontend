@@ -26,7 +26,8 @@ export interface UserProfile {
     avatar: string,
     avatarType: UserAvatarType,
     role: UserRole,
-    hasPin: boolean
+    hasPin: boolean,
+    color: string
 }
 
 export type UserAvatarType =
