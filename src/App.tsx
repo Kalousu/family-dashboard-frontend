@@ -8,6 +8,7 @@ import { DarkModeProvider } from './context/DarkModeContext';
 import { UserProvider } from './context/UserContext';
 import UserProfileEditPage from './pages/UserProfileEditPage';
 import NewFamilyRegisterPage from './pages/newFamilyRegisterPage';
+import SystemAdminPage from './pages/systemAdmin/SystemAdminPage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/dashboard" element={<WidgetPage />} />
           <Route path="/profile/edit" element={<UserProfileEditPage />} />
           <Route path="/newfamily" element={<NewFamilyRegisterPage />} />
+          <Route path="/admin" element={<SystemAdminPage />} />
         </Routes>
       </BrowserRouter>
     </DarkModeProvider>
