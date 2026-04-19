@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useContext, useEffect, useMemo, useRef } from "react";
 import { ChevronLeft, ChevronRight, Dot, CirclePlus, CircleMinus, Pencil, Coffee, TvMinimalPlay, Sprout, SportShoe, CalendarFold } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HslStringColorPicker } from "react-colorful";
@@ -10,36 +10,47 @@ type CalendarDay = {
     isCurrentMonth: boolean;
 };
 
+type CalendarUser = {
+    id: string;
+    username: string;
+};
+
 type CalendarEvent = {
     id: string;
     title: string;
     date: Date;
     color: string;
     allDay: boolean;
-    startTime?: string; // "HH:MM", nur relevant wenn allDay = false
+    startTime?: string;
+    userId: string;
 };
 
 const today = new Date();
 const month = today.getMonth();
 
+const DUMMY_USERS: CalendarUser[] = [
+    { id: "11111111-1111-1111-1111-111111111111", username: "Kevin" },
+    { id: "22222222-2222-2222-2222-222222222222", username: "Daniel" },
+];
+
 const DUMMY_EVENTS: CalendarEvent[] = [
-    { id: "1", title: "Arzttermin", date: new Date((today.getFullYear()), month, 5), color: "hsl(0, 84%, 60%)", allDay: false, startTime: "10:00" },
-    { id: "2", title: "Geburtstag Papa", date: new Date((today.getFullYear()), month, 5), color: "hsl(38, 92%, 50%)", allDay: true },
-    { id: "3", title: "Elternabend", date: new Date((today.getFullYear()), month, 12), color: "hsl(217, 91%, 60%)", allDay: false, startTime: "19:30" },
-    { id: "4", title: "Urlaub", date: new Date((today.getFullYear()), month, 20), color: "hsl(160, 84%, 39%)", allDay: true },
-    { id: "5", title: "Zahnarzt", date: new Date((today.getFullYear()), month, 20), color: "hsl(0, 84%, 60%)", allDay: false, startTime: "14:00" },
-    { id: "6", title: "Sport", date: new Date((today.getFullYear()), month, 20), color: "hsl(258, 90%, 66%)", allDay: false, startTime: "18:00" },
-    { id: "7", title: "Einkaufen", date: new Date((today.getFullYear()), month, 20), color: "hsl(192, 94%, 43%)", allDay: false, startTime: "11:00" },
-    { id: "8", title: "Programmieren", date: new Date(today.getFullYear(), today.getMonth(),  today.getDate()), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00" },
-    { id: "9", title: "Tanken", date: new Date((today.getFullYear()), month, 20), color: "hsl(192, 94%, 43%)", allDay: false, startTime: "11:00" },
-    { id: "10", title: "Joggen", date: new Date((today.getFullYear()), month, 21), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00" },
-    { id: "11", title: "Tanken", date: new Date((today.getFullYear()), month, 21), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00" },
-    { id: "12", title: "Tanken", date: new Date((today.getFullYear()), month, 21), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00" },
-    { id: "13", title: "Tanken", date: new Date((today.getFullYear()), month, 21), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00" },
-    { id: "14", title: "Tanken", date: new Date((today.getFullYear()), month, 23), color: "hsl(289, 84%, 43%)", allDay: true},
-    { id: "15", title: "Tanken", date: new Date((today.getFullYear()), month, 23), color: "hsl(159, 100%, 53%)", allDay: false, startTime: "15:00" },
-    { id: "16", title: "Tanken", date: new Date((today.getFullYear()), month, 23), color: "hsl(105, 45%, 35%)", allDay: false, startTime: "13:00" },
-    { id: "17", title: "Joggen", date: new Date((today.getFullYear()), month, 23), color: "hsl(10, 100%, 62%)", allDay: true},
+    { id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", title: "Arzttermin", date: new Date((today.getFullYear()), month, 5), color: "hsl(0, 84%, 60%)", allDay: false, startTime: "10:00", userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "b2c3d4e5-f6a7-8901-bcde-f12345678901", title: "Geburtstag Papa", date: new Date((today.getFullYear()), month, 5), color: "hsl(38, 92%, 50%)", allDay: true, userId: "22222222-2222-2222-2222-222222222222" },
+    { id: "c3d4e5f6-a7b8-9012-cdef-123456789012", title: "Elternabend", date: new Date((today.getFullYear()), month, 12), color: "hsl(217, 91%, 60%)", allDay: false, startTime: "19:30", userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "d4e5f6a7-b8c9-0123-defa-234567890123", title: "Urlaub", date: new Date((today.getFullYear()), month, 20), color: "hsl(160, 84%, 39%)", allDay: true, userId: "22222222-2222-2222-2222-222222222222" },
+    { id: "e5f6a7b8-c9d0-1234-efab-345678901234", title: "Zahnarzt", date: new Date((today.getFullYear()), month, 20), color: "hsl(0, 84%, 60%)", allDay: false, startTime: "14:00", userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "f6a7b8c9-d0e1-2345-fabc-456789012345", title: "Sport", date: new Date((today.getFullYear()), month, 20), color: "hsl(258, 90%, 66%)", allDay: false, startTime: "18:00", userId: "22222222-2222-2222-2222-222222222222" },
+    { id: "a7b8c9d0-e1f2-3456-abcd-567890123456", title: "Einkaufen", date: new Date((today.getFullYear()), month, 20), color: "hsl(192, 94%, 43%)", allDay: false, startTime: "11:00", userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "b8c9d0e1-f2a3-4567-bcde-678901234567", title: "Programmieren", date: new Date(today.getFullYear(), today.getMonth(),  today.getDate()), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00", userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "c9d0e1f2-a3b4-5678-cdef-789012345678", title: "Tanken", date: new Date((today.getFullYear()), month, 20), color: "hsl(192, 94%, 43%)", allDay: false, startTime: "11:00", userId: "22222222-2222-2222-2222-222222222222" },
+    { id: "d0e1f2a3-b4c5-6789-defa-890123456789", title: "Joggen", date: new Date((today.getFullYear()), month, 21), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00", userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "e1f2a3b4-c5d6-7890-efab-901234567890", title: "Tanken", date: new Date((today.getFullYear()), month, 21), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00", userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "f2a3b4c5-d6e7-8901-fabc-012345678901", title: "Tanken", date: new Date((today.getFullYear()), month, 21), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00", userId: "22222222-2222-2222-2222-222222222222" },
+    { id: "a3b4c5d6-e7f8-9012-abcd-123456789012", title: "Tanken", date: new Date((today.getFullYear()), month, 21), color: "hsl(10, 100%, 62%)", allDay: false, startTime: "11:00", userId: "22222222-2222-2222-2222-222222222222" },
+    { id: "b4c5d6e7-f8a9-0123-bcde-234567890123", title: "Tanken", date: new Date((today.getFullYear()), month, 23), color: "hsl(289, 84%, 43%)", allDay: true, userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "c5d6e7f8-a9b0-1234-cdef-345678901234", title: "Tanken", date: new Date((today.getFullYear()), month, 23), color: "hsl(159, 100%, 53%)", allDay: false, startTime: "15:00", userId: "22222222-2222-2222-2222-222222222222" },
+    { id: "d6e7f8a9-b0c1-2345-defa-456789012345", title: "Tanken", date: new Date((today.getFullYear()), month, 23), color: "hsl(105, 45%, 35%)", allDay: false, startTime: "13:00", userId: "11111111-1111-1111-1111-111111111111" },
+    { id: "e7f8a9b0-c1d2-3456-efab-567890123456", title: "Joggen", date: new Date((today.getFullYear()), month, 23), color: "hsl(10, 100%, 62%)", allDay: true, userId: "22222222-2222-2222-2222-222222222222" },
 
     ...Array.from({ length: 10 }, (_, i) => ({
         id: `gen-${i}`,
@@ -48,6 +59,7 @@ const DUMMY_EVENTS: CalendarEvent[] = [
         color: "hsl(192, 94%, 43%)",
         allDay: false,
         startTime: "10:00",
+        userId: "11111111-1111-1111-1111-111111111111",
     })),
     ...Array.from({ length: 1000 }, (_, i) => ({
         id: `gen22-${i}`,
@@ -56,6 +68,7 @@ const DUMMY_EVENTS: CalendarEvent[] = [
         color: "hsl(258, 90%, 66%)",
         allDay: false,
         startTime: "10:00",
+        userId: "22222222-2222-2222-2222-222222222222",
     })),
 ];
 
@@ -156,6 +169,8 @@ function CalendarWidget() {
     const [formColor, setFormColor] = useState(COLOR_OPTIONS[0]);
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [localPickerColor, setLocalPickerColor] = useState("hsl(252, 91%, 55%)");
+    const [editingEventId, setEditingEventId] = useState<string | null>(null);
+    const savedAddForm = useRef({ title: "", allDay: false, time: "12:00", color: COLOR_OPTIONS[0] });
 
     useEffect(() => {
         if (!showColorPicker) return;
@@ -177,8 +192,54 @@ function CalendarWidget() {
         setEvents(prev => [...prev, event]);
     }
 
+    function updateEvent(updated: CalendarEvent) {
+        setEvents(prev => prev.map(e => e.id === updated.id ? updated : e));
+    }
+
     function removeEvent(id: string) {
         setEvents(prev => prev.filter(e => e.id !== id));
+    }
+
+    function openEditForm(event: CalendarEvent) {
+        savedAddForm.current = { title: formTitle, allDay: formAllDay, time: formTime, color: formColor };
+        setFormTitle(event.title);
+        setFormAllDay(event.allDay);
+        setFormTime(event.startTime ?? "12:00");
+        setFormColor(event.color);
+        setEditingEventId(event.id);
+        setShowAddForm(true);
+    }
+
+    function submitForm() {
+        if (!formTitle.trim()) return;
+        if (editingEventId) {
+            const existing = events.find(e => e.id === editingEventId);
+            updateEvent({
+                id: editingEventId,
+                title: formTitle.trim(),
+                date: selectedDay!,
+                color: formColor,
+                allDay: formAllDay,
+                startTime: formAllDay ? undefined : formTime,
+                userId: existing?.userId ?? "",
+            });
+        } else {
+            addEvent({
+                id: crypto.randomUUID(),
+                title: formTitle.trim(),
+                date: selectedDay!,
+                color: formColor,
+                allDay: formAllDay,
+                startTime: formAllDay ? undefined : formTime,
+                userId: "",
+            });
+        }
+        setFormTitle("");
+        setFormAllDay(false);
+        setFormTime("12:00");
+        setFormColor(COLOR_OPTIONS[0]);
+        setEditingEventId(null);
+        setShowAddForm(false);
     }
 
     const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -293,7 +354,11 @@ function CalendarWidget() {
                                             <div className="w-1 self-stretch shrink-0" style={{ backgroundColor: event.color }} />
                                             <div className="px-3 py-2 flex-1">
                                                 <span className="text-white text-sm font-semibold">{event.title}</span>
+                                                <p className="text-white/40 text-[10px]">Angelegt von: {DUMMY_USERS.find(u => u.id === event.userId)?.username ?? "Unbekannt"}</p>
                                             </div>
+                                            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => openEditForm(event)} className="pr-1 text-white/40 hover:text-white/80 transition-colors">
+                                                <Pencil size={14} />
+                                            </motion.button>
                                             <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => removeEvent(event.id)} className="pr-3 text-white/40 hover:text-white/80 transition-colors">
                                                 <CircleMinus size={16} />
                                             </motion.button>
@@ -321,11 +386,17 @@ function CalendarWidget() {
                                         >
                                             <div className="w-1 self-stretch shrink-0" style={{ backgroundColor: event.color }} />
                                             <div className="px-3 py-2 flex-1">
-                                                <span className="text-white text-sm font-semibold">{event.title}</span>
-                                                {event.startTime && (
-                                                    <span className="text-white/50 text-xs ml-2">{event.startTime}</span>
-                                                )}
+                                                <div className="flex items-baseline gap-2">
+                                                    <span className="text-white text-sm font-semibold">{event.title}</span>
+                                                    {event.startTime && (
+                                                        <span className="text-white/50 text-xs">{event.startTime}</span>
+                                                    )}
+                                                </div>
+                                                <p className="text-white/40 text-[10px]">Angelegt von: {DUMMY_USERS.find(u => u.id === event.userId)?.username ?? "Unbekannt"}</p>
                                             </div>
+                                            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => openEditForm(event)} className="pr-1 text-white/40 hover:text-white/80 transition-colors">
+                                                <Pencil size={14} />
+                                            </motion.button>
                                             <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => removeEvent(event.id)} className="pr-3 text-white/40 hover:text-white/80 transition-colors">
                                                 <CircleMinus size={16} />
                                             </motion.button>
@@ -349,31 +420,19 @@ function CalendarWidget() {
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
                         className="absolute inset-3 rounded-xl backdrop-blur-md bg-linear-to-b from-teal-700/90 to-cyan-700/80 border border-white/20 flex flex-col p-4 gap-4"
+                        onKeyDown={e => { if (e.key === "Enter") submitForm(); }}
                     >
                         <div className="flex items-center gap-2">
-                            <GlassButton isDarkMode={isDarkMode} onClick={() => setShowAddForm(false)} className="p-1 text-white">
+                            <GlassButton isDarkMode={isDarkMode} onClick={() => { setShowAddForm(false); if (editingEventId) { setEditingEventId(null); setFormTitle(savedAddForm.current.title); setFormAllDay(savedAddForm.current.allDay); setFormTime(savedAddForm.current.time); setFormColor(savedAddForm.current.color); } }} className="p-1 text-white">
                                 <ChevronLeft size={18} />
                             </GlassButton>
-                            <span className="text-white font-bold text-base flex-1">Neuer Termin</span>
+                            <span className="text-white font-bold text-base flex-1">
+                                {editingEventId ? "Termin bearbeiten" : "Neuer Termin"}
+                            </span>
                             <motion.button
                                 whileHover={{ scale: 1.15 }}
                                 whileTap={{ scale: 0.9 }}
-                                onClick={() => {
-                                    if (!formTitle.trim()) return;
-                                    addEvent({
-                                        id: crypto.randomUUID(),
-                                        title: formTitle.trim(),
-                                        date: selectedDay!,
-                                        color: formColor,
-                                        allDay: formAllDay,
-                                        startTime: formAllDay ? undefined : formTime,
-                                    });
-                                    setFormTitle("");
-                                    setFormAllDay(false);
-                                    setFormTime("12:00");
-                                    setFormColor(COLOR_OPTIONS[0]);
-                                    setShowAddForm(false);
-                                }}
+                                onClick={submitForm}
                                 className="text-white/40 hover:text-white/80 transition-colors"
                             >
                                 <CirclePlus size={18} />
@@ -385,23 +444,6 @@ function CalendarWidget() {
                             type="text"
                             value={formTitle}
                             onChange={e => setFormTitle(e.target.value)}
-                            onKeyDown={e => {
-                                if (e.key === "Enter" && formTitle.trim()) {
-                                    addEvent({
-                                        id: crypto.randomUUID(),
-                                        title: formTitle.trim(),
-                                        date: selectedDay!,
-                                        color: formColor,
-                                        allDay: formAllDay,
-                                        startTime: formAllDay ? undefined : formTime,
-                                    });
-                                    setFormTitle("");
-                                    setFormAllDay(false);
-                                    setFormTime("12:00");
-                                    setFormColor(COLOR_OPTIONS[0]);
-                                    setShowAddForm(false);
-                                }
-                            }}
                             placeholder="Titel hinzufügen"
                             className="w-full bg-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder:text-white/40 outline-none focus:ring-1 focus:ring-white/30"
                         />
