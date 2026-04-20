@@ -150,14 +150,14 @@ function CalendarWidget() {
                     </span>
                     <div className="flex items-center gap-2">
                         {!isCurrentView && (
-                            <GlassButton isDarkMode={isDarkMode} onClick={goToToday} className="px-3 py-1 text-sm text-white">
+                            <GlassButton isDarkMode={!isDarkMode} onClick={goToToday} className="px-3 py-1 text-sm text-white">
                                 Heute
                             </GlassButton>
                         )}
-                        <GlassButton isDarkMode={isDarkMode} onClick={prevMonth} className="p-1 text-white">
+                        <GlassButton isDarkMode={!isDarkMode} onClick={prevMonth} className="p-1 text-white">
                             <ChevronLeft size={18} />
                         </GlassButton>
-                        <GlassButton isDarkMode={isDarkMode} onClick={nextMonth} className="p-1 text-white">
+                        <GlassButton isDarkMode={!isDarkMode} onClick={nextMonth} className="p-1 text-white">
                             <ChevronRight size={18} />
                         </GlassButton>
                     </div>

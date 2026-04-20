@@ -30,7 +30,7 @@ function DayHeader({ isDarkMode, selectedDay, onBack, onOpenAddForm }: {
     return (
         <>
             <div className="flex items-center gap-2">
-                <GlassButton isDarkMode={isDarkMode} onClick={onBack} className="p-1 text-white">
+                <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-1 text-white">
                     <ChevronLeft size={18} />
                 </GlassButton>
                 <span className="text-lg font-bold text-white flex-1">
