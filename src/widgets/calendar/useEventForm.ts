@@ -1,17 +1,15 @@
-import { useState, useEffect, useRef } from "react";
-import type { RefObject } from "react";
-import type { CalendarEvent } from "../calendarTypes";
-import { COLOR_OPTIONS } from "../calendarUtils";
+import { useState } from "react";
+import type { CalendarEvent } from "./calendarTypes";
+import { COLOR_OPTIONS } from "./calendarUtils";
 
 interface UseEventFormOptions {
     events: CalendarEvent[];
     addEvent: (event: CalendarEvent) => void;
     updateEvent: (event: CalendarEvent) => void;
     selectedDay: Date | null;
-    containerRef: RefObject<HTMLDivElement | null>;
 }
 
-export function useEventForm({ events, addEvent, updateEvent, selectedDay, containerRef }: UseEventFormOptions) {
+export function useEventForm({ events, addEvent, updateEvent, selectedDay }: UseEventFormOptions) {
     const [showAddForm, setShowAddForm] = useState(false);
     const [formTitle, setFormTitle] = useState("");
     const [formAllDay, setFormAllDay] = useState(false);
@@ -20,31 +18,16 @@ export function useEventForm({ events, addEvent, updateEvent, selectedDay, conta
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [localPickerColor, setLocalPickerColor] = useState("hsl(252, 91%, 55%)");
     const [editingEventId, setEditingEventId] = useState<string | null>(null);
-    const [widgetRect, setWidgetRect] = useState<DOMRect | null>(null);
-
-    const savedAddForm = useRef({ title: "", allDay: false, time: "12:00", color: COLOR_OPTIONS[0] });
-    const savedEditForms = useRef<Map<string, { title: string; allDay: boolean; time: string; color: string }>>(new Map());
-
-    useEffect(() => {
-        if (!showColorPicker) return;
-        function handleClose() { setShowColorPicker(false); }
-        document.addEventListener("mousedown", handleClose);
-        return () => document.removeEventListener("mousedown", handleClose);
-    }, [showColorPicker]);
 
     function openAddForm() {
-        setWidgetRect(containerRef.current?.getBoundingClientRect() ?? null);
         setShowAddForm(true);
     }
 
     function openEditForm(event: CalendarEvent) {
-        setWidgetRect(containerRef.current?.getBoundingClientRect() ?? null);
-        savedAddForm.current = { title: formTitle, allDay: formAllDay, time: formTime, color: formColor };
-        const saved = savedEditForms.current.get(event.id);
-        setFormTitle(saved?.title ?? event.title);
-        setFormAllDay(saved?.allDay ?? event.allDay);
-        setFormTime(saved?.time ?? event.startTime ?? "12:00");
-        setFormColor(saved?.color ?? event.color);
+        setFormTitle(event.title);
+        setFormAllDay(event.allDay);
+        setFormTime(event.startTime ?? "12:00");
+        setFormColor(event.color);
         setEditingEventId(event.id);
         setShowAddForm(true);
     }
@@ -73,7 +56,6 @@ export function useEventForm({ events, addEvent, updateEvent, selectedDay, conta
                 userId: "",
             });
         }
-        if (editingEventId) savedEditForms.current.delete(editingEventId);
         setFormTitle("");
         setFormAllDay(false);
         setFormTime("12:00");
@@ -84,14 +66,11 @@ export function useEventForm({ events, addEvent, updateEvent, selectedDay, conta
 
     function cancelForm() {
         setShowAddForm(false);
-        if (editingEventId) {
-            savedEditForms.current.set(editingEventId, { title: formTitle, allDay: formAllDay, time: formTime, color: formColor });
-            setEditingEventId(null);
-            setFormTitle(savedAddForm.current.title);
-            setFormAllDay(savedAddForm.current.allDay);
-            setFormTime(savedAddForm.current.time);
-            setFormColor(savedAddForm.current.color);
-        }
+        setEditingEventId(null);
+        setFormTitle("");
+        setFormAllDay(false);
+        setFormTime("12:00");
+        setFormColor(COLOR_OPTIONS[0]);
     }
 
     function toggleAllDay() { setFormAllDay(v => !v); }
@@ -108,7 +87,6 @@ export function useEventForm({ events, addEvent, updateEvent, selectedDay, conta
         showColorPicker,
         localPickerColor,
         editingEventId,
-        widgetRect,
         openAddForm,
         openEditForm,
         submitForm,

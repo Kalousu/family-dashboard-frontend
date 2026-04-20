@@ -1,17 +1,13 @@
-import { useState, useContext, useMemo } from "react";
+import { useState, useEffect, useContext } from "react";
 import { ChevronLeft, ChevronRight, Dot } from "lucide-react";
 import { motion } from "framer-motion";
 import GlassButton from "../../components/ui/GlassButton";
 import { DarkModeContext } from "../../context/DarkModeContext";
-import { CalendarContext } from "../../context/CalendarContext";
-import { WEEKDAYS, MONTH_NAMES, EMPTY_DAY_MESSAGES, getCalendarDays, isSameDay, getScrollableClass } from "./calendarUtils";
+import { WEEKDAYS, MONTH_NAMES, getCalendarDays, isSameDay, getScrollableClass } from "./calendarUtils";
 import type { CalendarDay } from "./calendarUtils";
 import type { CalendarEvent } from "./calendarTypes";
+import { DUMMY_EVENTS } from "./calendarMocks";
 import DayDetailView from "./DayDetailView";
-import { useAutoUpdatedToday } from "../../hooks/useAutoUpdatedToday";
-import { useCalendarNavigation } from "./hooks/useCalendarNavigation";
-import { useEventForm } from "./hooks/useEventForm";
-import { useContainerSize } from "../../hooks/useContainerSize";
 
 function CalendarDayCell({ day, today, events, onSelect }: {
     day: CalendarDay;
@@ -67,117 +63,109 @@ function CalendarDayCell({ day, today, events, onSelect }: {
 function CalendarWidget() {
     const darkModeCtx = useContext(DarkModeContext);
     const isDarkMode = darkModeCtx?.isDarkMode ?? false;
-    const calendarCtx = useContext(CalendarContext)!;
-    const { events, addEvent, updateEvent, removeEvent } = calendarCtx;
 
-    const today = useAutoUpdatedToday();
-    const { viewYear, viewMonth, prevMonth, nextMonth, goToToday } = useCalendarNavigation(today);
+    const [today, setToday] = useState(() => new Date());
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+    const [events, setEvents] = useState<CalendarEvent[]>(DUMMY_EVENTS);
+    const [viewYear, setViewYear] = useState(today.getFullYear());
+    const [viewMonth, setViewMonth] = useState(today.getMonth());
 
-    // TODO: width/height werden später genutzt um die Kalenderansicht abhängig von der Widget-Größe zu rendern
-    const { ref: containerRef, width, height } = useContainerSize();
-    void width; void height;
+    useEffect(() => {
+        function scheduleNextUpdate() {
+            const now = new Date();
+            const msUntilMidnight =
+                new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+            return setTimeout(() => {
+                setToday(new Date());
+                scheduleNextUpdate();
+            }, msUntilMidnight);
+        }
+        const timer = scheduleNextUpdate();
+        return () => clearTimeout(timer);
+    }, []);
 
-    const {
-        showAddForm,
-        formTitle, setFormTitle,
-        formAllDay,
-        formTime, setFormTime,
-        formColor, setFormColor,
-        showColorPicker,
-        localPickerColor,
-        editingEventId,
-        widgetRect,
-        openAddForm,
-        openEditForm,
-        submitForm,
-        cancelForm,
-        toggleAllDay,
-        toggleColorPicker,
-        closeColorPicker,
-        changePickerColor,
-    } = useEventForm({ events, addEvent, updateEvent, selectedDay, containerRef });
+    function addEvent(event: CalendarEvent) {
+        const eventsOnDay = events.filter(e => isSameDay(e.date, event.date));
+        if (eventsOnDay.length >= 100) return;
+        setEvents(prev => [...prev, event]);
+    }
 
-    const emptyDayMessage = useMemo(
-        () => EMPTY_DAY_MESSAGES[Math.floor(Math.random() * EMPTY_DAY_MESSAGES.length)],
-        [selectedDay]
-    );
+    function updateEvent(updated: CalendarEvent) {
+        setEvents(prev => prev.map(e => e.id === updated.id ? updated : e));
+    }
+
+    function removeEvent(id: string) {
+        setEvents(prev => prev.filter(e => e.id !== id));
+    }
+
+    function prevMonth() {
+        if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+        else setViewMonth(m => m - 1);
+    }
+
+    function nextMonth() {
+        if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+        else setViewMonth(m => m + 1);
+    }
+
+    function goToToday() {
+        setViewYear(today.getFullYear());
+        setViewMonth(today.getMonth());
+    }
 
     const days = getCalendarDays(viewYear, viewMonth);
     const isCurrentView = viewYear === today.getFullYear() && viewMonth === today.getMonth();
     const scrollableClass = getScrollableClass(isDarkMode);
 
     return (
-    <div ref={containerRef} className="h-full w-full">
-        {selectedDay ? (
-            <DayDetailView
-                isDarkMode={isDarkMode}
-                selectedDay={selectedDay}
-                onBack={() => setSelectedDay(null)}
-                events={events}
-                emptyDayMessage={emptyDayMessage}
-                onRemoveEvent={removeEvent}
-                showAddForm={showAddForm}
-                onOpenAddForm={openAddForm}
-                onEditEvent={openEditForm}
-                scrollableClass={scrollableClass}
-                formProps={{
-                    editingEventId,
-                    formTitle,
-                    onTitleChange: setFormTitle,
-                    formAllDay,
-                    onAllDayToggle: toggleAllDay,
-                    formTime,
-                    onTimeChange: setFormTime,
-                    formColor,
-                    onColorChange: setFormColor,
-                    showColorPicker,
-                    onPickerButtonClick: toggleColorPicker,
-                    onColorPickerClose: closeColorPicker,
-                    localPickerColor,
-                    onPickerColorChange: changePickerColor,
-                    onSubmit: submitForm,
-                    onCancel: cancelForm,
-                    anchorRect: widgetRect,
-                }}
-            />
-        ) : (
-        <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/40 to-cyan-400/30">
-            <div className={scrollableClass}>
-                <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-white">
-                        {MONTH_NAMES[viewMonth]} {viewYear}
-                    </span>
-                    <div className="flex items-center gap-2">
-                        {!isCurrentView && (
-                            <GlassButton isDarkMode={!isDarkMode} onClick={goToToday} className="px-3 py-1 text-sm text-white">
-                                Heute
-                            </GlassButton>
-                        )}
-                        <GlassButton isDarkMode={!isDarkMode} onClick={prevMonth} className="p-1 text-white">
-                            <ChevronLeft size={18} />
-                        </GlassButton>
-                        <GlassButton isDarkMode={!isDarkMode} onClick={nextMonth} className="p-1 text-white">
-                            <ChevronRight size={18} />
-                        </GlassButton>
+        <div className="h-full w-full">
+            {selectedDay ? (
+                <DayDetailView
+                    isDarkMode={isDarkMode}
+                    selectedDay={selectedDay}
+                    onBack={() => setSelectedDay(null)}
+                    events={events}
+                    addEvent={addEvent}
+                    updateEvent={updateEvent}
+                    removeEvent={removeEvent}
+                />
+            ) : (
+                <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/40 to-cyan-400/30">
+                    <div className={scrollableClass}>
+                        <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-white">
+                                {MONTH_NAMES[viewMonth]} {viewYear}
+                            </span>
+                            <div className="flex items-center gap-2">
+                                {!isCurrentView && (
+                                    <GlassButton isDarkMode={!isDarkMode} onClick={goToToday} className="px-3 py-1 text-sm text-white">
+                                        Heute
+                                    </GlassButton>
+                                )}
+                                <GlassButton isDarkMode={!isDarkMode} onClick={prevMonth} className="p-1 text-white">
+                                    <ChevronLeft size={18} />
+                                </GlassButton>
+                                <GlassButton isDarkMode={!isDarkMode} onClick={nextMonth} className="p-1 text-white">
+                                    <ChevronRight size={18} />
+                                </GlassButton>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-7 text-center">
+                            {WEEKDAYS.map(day => (
+                                <div key={day} className="text-xs font-semibold py-1 text-white/70">{day}</div>
+                            ))}
+                        </div>
+
+                        <div className="grid grid-cols-7 flex-1 min-h-0">
+                            {days.map((day, i) => (
+                                <CalendarDayCell key={i} day={day} today={today} events={events} onSelect={setSelectedDay} />
+                            ))}
+                        </div>
                     </div>
                 </div>
-
-                <div className="grid grid-cols-7 text-center">
-                    {WEEKDAYS.map(day => (
-                        <div key={day} className="text-xs font-semibold py-1 text-white/70">{day}</div>
-                    ))}
-                </div>
-
-                <div className="grid grid-cols-7 flex-1 min-h-0">
-                    {days.map((day, i) => (
-                        <CalendarDayCell key={i} day={day} today={today} events={events} onSelect={setSelectedDay} />
-                    ))}
-                </div>
-            </div>
+            )}
         </div>
-        )}
-    </div>
     );
 }
 

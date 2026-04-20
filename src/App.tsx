@@ -6,14 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import WidgetPage from './pages/WidgetPage';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { UserProvider } from './context/UserContext';
-import { CalendarProvider } from './context/CalendarContext';
 import UserProfileEditPage from './pages/UserProfileEditPage';
 import NewFamilyRegisterPage from './pages/newFamilyRegisterPage';
 
 function App() {
   return (
     <UserProvider>
-    <CalendarProvider>
     <DarkModeProvider>
       <BrowserRouter>
         <Routes>
@@ -27,7 +25,6 @@ function App() {
         </Routes>
       </BrowserRouter>
     </DarkModeProvider>
-    </CalendarProvider>
     </UserProvider>
   )
 }
