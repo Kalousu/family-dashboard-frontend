@@ -4,25 +4,40 @@ import { MapPin, Wind, Search } from "lucide-react"
 import { useContainerSize } from "../../hooks/useContainerSize"
 import { getWeatherGradient, getWeatherIcon } from "./WeatherMappings"
 import { getWeather, searchCities } from "../../api/weatherApi"
+import { updateWidgetConfig } from "../../api/widgetApi"
 import type { GeoLocation, Daily } from "./weatherTypes"
 import type { ChangeEvent } from "react"
+import type { WidgetConfig } from "../../api/familyApi"
 
-function WeatherWidget() {
+interface WeatherWidgetProps {
+    widgetId: string
+    config?: WidgetConfig
+}
+
+function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
 
     const { ref, height } = useContainerSize()
     const isCompact = height < 220
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [inputCity, setInputCity] = useState("Mannheim")
+    
+    // Initialize from config if available
+    const settings = config?.settings as Record<string, any> | undefined
+    const initialCity = settings?.city as string || "Mannheim"
+    const initialLat = settings?.latitude as number || 49.4891
+    const initialLon = settings?.longitude as number || 8.46694
+    const initialTimezone = settings?.timezone as string || "Europe/Berlin"
+    
+    const [inputCity, setInputCity] = useState(initialCity)
     const [searchResults, setSearchResults] = useState<GeoLocation[]>([])
     const [showDropdown, setShowDropdown] = useState(false)
 
     const [geoLocation, setGeoLocation] = useState<GeoLocation>({
-        name: "Mannheim",
-        latitude: 49.4891,
-        longitude: 8.46694,
+        name: initialCity,
+        latitude: initialLat,
+        longitude: initialLon,
         country: "Deutschland",
-        timezone: "Europe/Berlin",
+        timezone: initialTimezone,
         admin1: "Baden-Württemberg"
     })
 
@@ -62,10 +77,29 @@ function WeatherWidget() {
         setShowDropdown(true)
     }
 
-    const handleLocationSelect = (geo: GeoLocation) => {
+    const handleLocationSelect = async (geo: GeoLocation) => {
         setGeoLocation(geo)
         setInputCity(geo.name)
         setShowDropdown(false)
+        
+        // Save config to backend
+        try {
+            const numericId = Number(widgetId)
+            if (!isNaN(numericId)) {
+                await updateWidgetConfig(numericId, {
+                    title: config?.title || "Wetter App",
+                    color: config?.color || "blue",
+                    settings: {
+                        city: geo.name,
+                        latitude: geo.latitude,
+                        longitude: geo.longitude,
+                        timezone: geo.timezone
+                    }
+                })
+            }
+        } catch (error) {
+            console.error("Failed to save widget config:", error)
+        }
     }
 
     const isNight = new Date().getHours() >= 20 || new Date().getHours() < 6
