@@ -15,3 +15,7 @@ export const selectUser = async (data: UserSelectRequest) => {
     const response = await axiosInstance.post("/api/auth/user/login", data)
     return response.data;
 }
+
+export const logout = async (): Promise<void> => {
+    await axiosInstance.post("/api/auth/logout")
+}

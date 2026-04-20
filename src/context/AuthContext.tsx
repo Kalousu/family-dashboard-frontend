@@ -11,6 +11,7 @@ interface AuthContextType {
     setCurrentUser: (user: UserProfile | null) => void
     isAuthenticated: boolean
     logout: () => void
+    logoutUser: () => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -73,6 +74,13 @@ function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("currentUser")
     }
 
+    function logoutUser() {
+        setUserIdState(null)
+        setCurrentUserState(null)
+        localStorage.removeItem("userId")
+        localStorage.removeItem("currentUser")
+    }
+
     const isAuthenticated = familyId !== null && userId !== null
 
     return (
@@ -84,7 +92,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
             currentUser,
             setCurrentUser,
             isAuthenticated,
-            logout
+            logout,
+            logoutUser
         }}>
             {children}
         </AuthContext.Provider>

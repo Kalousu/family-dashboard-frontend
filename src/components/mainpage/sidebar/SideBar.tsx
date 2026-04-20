@@ -7,6 +7,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import useDarkMode from "../../../hooks/useDarkMode"
 import useAuth from "../../../hooks/useAuth"
+import { logout as logoutApi } from "../../../api/authApi"
 
 interface SideBarProps {
     isOpen: boolean
@@ -18,12 +19,19 @@ interface SideBarProps {
 function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarProps) {
     const [sideBarView, setSideBarView] = useState<"nav" | "widgets" | "admin">("nav")
     const { isDarkMode } = useDarkMode()
-    const { currentUser, logout } = useAuth()
+    const { currentUser, logoutUser } = useAuth()
     const navigate = useNavigate()
 
-    function handleLogout() {
-        logout()
-        navigate("/login")
+    async function handleLogout() {
+        try {
+            // First navigate away from the page
+            navigate("/home", { replace: true })
+            // Then call logout API and clear state
+            await logoutApi()
+            logoutUser()
+        } catch (error) {
+            console.error("Logout failed:", error)
+        }
     }
 
     return(
