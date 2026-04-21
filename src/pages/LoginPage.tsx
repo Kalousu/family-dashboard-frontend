@@ -1,11 +1,13 @@
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import GlassButton from "../components/ui/GlassButton"
 import FormInput from "../components/ui/FormInput"
 import AuthPageLayout from "../components/layout/AuthPageLayout"
 import useDarkMode from "../hooks/useDarkMode"
+import useAuth from "../hooks/useAuth"
 import { fadeSlideUp } from "../constants/animations"
+import { login } from "../api/authApi"
 
 function LoginPage() {
     const [formData, setFormData] = useState({
@@ -14,16 +16,41 @@ function LoginPage() {
     })
     const [error, setError] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
+    const { setFamilyId } = useAuth()
     const navigate = useNavigate()
 
-    function handleLogin() {
+    const handleLogin = useCallback(async () => {
         if (formData.name === "" || formData.password === "") {
             setError("Bitte alle Felder ausfüllen.")
-        } else {
-            setError(null)
-            alert(`Login mit Name: ${formData.name} und Passwort: ${formData.password}`)
+            return;
         }
-    }
+        
+        setError(null)
+
+        try {
+            const response = await login({ name: formData.name, password: formData.password });
+
+            switch (response.role) {
+                case "SYSADMIN": 
+                    navigate("/admin"); 
+                    break;
+                case "FAMILY":
+                    setFamilyId(response.familyId);
+                    navigate("/home", { state: { profiles: response.profiles } }); 
+                    break;
+            }
+        } catch (err) {
+            setError("Name oder Passwort falsch. " + err)
+        }
+    }, [formData, navigate, setFamilyId])
+
+    useEffect(() => {
+            const handler = (e: KeyboardEvent) => {
+                if (e.key === "Enter") handleLogin()
+            }
+            window.addEventListener("keydown", handler)
+            return () => window.removeEventListener("keydown", handler)
+        }, [handleLogin])
 
     return (
         <AuthPageLayout>

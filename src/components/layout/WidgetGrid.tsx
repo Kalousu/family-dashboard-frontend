@@ -3,16 +3,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X } from "lucide-react"
 import { getWidget } from "../../widgets/WidgetRegistry"
 import useDarkMode from "../../hooks/useDarkMode"
+import type { PlacedWidget } from "../../pages/WidgetPage"
 
-interface PlacedWidget {
-    id: string
-    type: string
-    col: number
-    row: number
-    colSpan: number
-    rowSpan: number
-    widgetId?: number
-}
 interface WidgetGridProps {
     placedWidgets: PlacedWidget[]
     pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
@@ -56,7 +48,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget 
                         <div key={widget.id} className="relative bg-gray-700/40 rounded-2xl border border-white/10" style={{ gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(widget.colSpan * DOTS_PER_SLOT) - 1}`, gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(widget.rowSpan * DOTS_PER_SLOT) - 1}` }} onMouseEnter={() => setHoveredWidget(widget.id)} onMouseLeave={() => setHoveredWidget(null)}>
                             {(() => {
                                 const WidgetComponent = getWidget(widget.type)
-                                return WidgetComponent ? <WidgetComponent widgetId={widget.widgetId} /> : <p className="text-white p-2">{widget.type}</p>
+                                return WidgetComponent ? <WidgetComponent widgetId={widget.id} config={widget.config} /> : <p className="text-white p-2">{widget.type}</p>
                             })()}
                             <AnimatePresence>
                                 {hoveredWidget === widget.id && (
