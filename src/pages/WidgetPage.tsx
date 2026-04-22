@@ -1,7 +1,7 @@
 import AppHeader from "../components/mainpage/AppHeader"
 import SideBar from "../components/mainpage/sidebar/SideBar"
 import WidgetGrid from "../components/layout/WidgetGrid"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import DarkModeBackground from "../components/ui/DarkModeBackground"
 import useAuth from "../hooks/useAuth"
 import { getDashboardByFamilyId, type WidgetConfig, type Permissions } from "../api/familyApi"
@@ -32,6 +32,8 @@ function WidgetPage() {
     const [placedWidgets, setPlacedWidgets] = useState<PlacedWidget[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
+    const [saveError, setSaveError] = useState<string | null>(null)
+    const isSavingRef = useRef(false)
     const [savedLayout, setSavedLayout] = useState("")
     const [dashboardId, setDashboardId] = useState<number | null>(null)
     const [permissions, setPermissions] = useState<Permissions>({
@@ -44,12 +46,13 @@ function WidgetPage() {
     const { currentUser, familyId, setCurrentUser, setUserId } = useAuth()
     const { isDarkMode } = useDarkMode()
 
-    const hasChanges = placedWidgets.length > 0 && JSON.stringify(placedWidgets) !== savedLayout
+    const hasChanges = JSON.stringify(placedWidgets) !== savedLayout
 
     const handleSaveLayout = async () => {
-        if (!dashboardId || isSaving) return
-        
+        if (!dashboardId || isSavingRef.current) return
+        isSavingRef.current = true
         setIsSaving(true)
+        setSaveError(null)
         try {
             // Get the original widgets from backend to compare
             const dashboardData = await getDashboardByFamilyId(familyId!)
@@ -117,7 +120,9 @@ function WidgetPage() {
             setSavedLayout(updatedJson)
         } catch (error) {
             console.error("Failed to save layout:", error)
+            setSaveError("Layout konnte nicht gespeichert werden. Bitte versuche es erneut.")
         } finally {
+            isSavingRef.current = false
             setIsSaving(false)
         }
     }
@@ -196,8 +201,19 @@ function WidgetPage() {
             <DarkModeBackground />
             <div className="relative flex flex-col w-full h-full">
                 <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)} user={currentUser}/>
-                <div className="absolute bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
+                <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-2 z-50 pointer-events-none">
                     <AnimatePresence>
+                        {saveError && (
+                            <motion.div
+                                key="save-error"
+                                initial={{ y: 80, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: 80, opacity: 0 }}
+                                className="pointer-events-auto px-4 py-2 bg-red-500/40 backdrop-blur-sm rounded-xl text-white text-sm text-center"
+                            >
+                                {saveError}
+                            </motion.div>
+                        )}
                         {hasChanges && permissions?.canEditLayout && (
                             <motion.div
                                 key="save-button"

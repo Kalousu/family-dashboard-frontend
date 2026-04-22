@@ -40,7 +40,7 @@ function RegisterPage() {
     
     // Redirect if no family data is available
     if (!state?.familyId) {
-        navigate("/register-family")
+        navigate("/newfamily")
         return null
     }
 

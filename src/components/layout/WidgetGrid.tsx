@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
+import { X, Lock } from "lucide-react"
 import { getWidget } from "../../widgets/WidgetRegistry"
 import useDarkMode from "../../hooks/useDarkMode"
 import type { PlacedWidget } from "../../pages/WidgetPage"
@@ -50,6 +50,12 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget 
                                 const WidgetComponent = getWidget(widget.type)
                                 return WidgetComponent ? <WidgetComponent widgetId={widget.id} config={widget.config} /> : <p className="text-white p-2">{widget.type}</p>
                             })()}
+                            {Number(widget.id) < 0 && (
+                                <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10" style={{ pointerEvents: "all" }}>
+                                    <Lock size={20} className="text-white/80" />
+                                    <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
+                                </div>
+                            )}
                             <AnimatePresence>
                                 {hoveredWidget === widget.id && (
                                     <motion.button
