@@ -57,6 +57,12 @@ export interface CreateFamilyRequest {
     email: string
 }
 
-export const createFamily = async (data: CreateFamilyRequest): Promise<void> => {
-    await axiosInstance.post('/api/family', data)
+export interface CreateFamilyResponse {
+    familyId: number
+    familyName: string
+}
+
+export const createFamily = async (data: CreateFamilyRequest): Promise<CreateFamilyResponse> => {
+    const response = await axiosInstance.post<CreateFamilyResponse>('/api/family', data)
+    return response.data
 }

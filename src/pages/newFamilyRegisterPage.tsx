@@ -53,13 +53,18 @@ function NewFamilyRegisterPage() {
         setError(null)
         
         try {
-            await createFamily({
+            const response = await createFamily({
                 familyName: formData.familienname,
                 password: formData.passwort,
                 email: formData.email
             })
-            // Nach erfolgreicher Registrierung zum Login navigieren
-            navigate("/login")
+            // Nach erfolgreicher Familienregistrierung zur Benutzererstellung navigieren
+            navigate("/register", { 
+                state: { 
+                    familyId: response.familyId,
+                    familyName: response.familyName 
+                }
+            })
         } catch (error) {
             console.error("Fehler bei der Registrierung:", error)
             setError("Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.")

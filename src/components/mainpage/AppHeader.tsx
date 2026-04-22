@@ -1,5 +1,6 @@
 import { User } from "lucide-react"
 import useDarkMode from "../../hooks/useDarkMode"
+import imageIcons from "../../constants/imageIcons"
 import type { UserProfile } from "../../types/authTypes"
 
 interface AppHeaderProps {
@@ -18,9 +19,14 @@ function AppHeader({ onUserClick, user }: AppHeaderProps) {
                 {user && user.avatarType === "URL" ? (
                     <img src={user.avatar} alt={user.name} className="w-24 h-24 p-1 rounded-xl border-2 object-cover" style={{ borderColor: user.color || '#ffffff50' }} />
                 ) : user && user.avatarType === "ICON" ? (
-                    <svg className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: user.color || '#ffffff50' }}>
-                        <use href={user.avatar} />
-                    </svg>
+                    (() => {
+                        const Icon = imageIcons[user.avatar as keyof typeof imageIcons]
+                        return Icon ? (
+                            <Icon className="w-24 h-24 p-1 rounded-xl border-2" style={{ backgroundColor: user.color, borderColor: user.color || '#ffffff50' }} size={48} />
+                        ) : (
+                            <User className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: user.color || '#ffffff50' }} size={10} />
+                        )
+                    })()
                 ) : (
                     <User className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: user?.color || '#ffffff50' }} size={10} />
                 )}

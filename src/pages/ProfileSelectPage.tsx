@@ -85,7 +85,7 @@ function ProfileSelectPage() {
                     <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Willkommen zurück, {selectedProfile.name}!</p>
                     <ProfileCard 
                         name={selectedProfile.name} 
-                        color="blue" 
+                        color={selectedProfile.color} 
                         icon={selectedProfile.avatar} 
                         avatarType={selectedProfile.avatarType}
                         onSelect={() => setSelectedProfile(null)} 
@@ -116,7 +116,7 @@ function ProfileSelectPage() {
                                 <ProfileCard
                                     key={profile.id}
                                     name={profile.name}
-                                    color="blue"
+                                    color={profile.color}
                                     icon={profile.avatar}
                                     avatarType={profile.avatarType}
                                     onSelect={() => setSelectedProfile(profile)}

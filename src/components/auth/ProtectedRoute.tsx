@@ -10,7 +10,12 @@ function ProtectedRoute({ allowedRoles, children }: { allowedRoles: StatusRespon
 
     useEffect(() => {
         getStatus().then(status => {
+            console.log('ProtectedRoute: Status received:', status);
+            console.log('ProtectedRoute: Allowed roles:', allowedRoles);
+            console.log('ProtectedRoute: Role included?', allowedRoles.includes(status.role));
+            
             if (!allowedRoles.includes(status.role)){
+                console.log('ProtectedRoute: Access denied, redirecting to login');
                 switch (status.role) {
                     case "NONE": 
                         navigate("/login"); 
@@ -26,10 +31,14 @@ function ProtectedRoute({ allowedRoles, children }: { allowedRoles: StatusRespon
                         break;
                 }
             } else {
+                console.log('ProtectedRoute: Access granted');
                 setReady(true);
             }
         })
-        .catch(err => console.error(err))
+        .catch(err => {
+            console.error('ProtectedRoute: Error getting status:', err);
+            navigate("/login");
+        })
     }, [])
 
 

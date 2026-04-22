@@ -22,10 +22,11 @@ function ProfileCard({ name, color, icon, avatarType = "ICON", onSelect, isDarkM
                     <img 
                         src={icon} 
                         alt={name}
-                        className="w-24 h-24 rounded-xl border border-white/30 object-cover"
+                        className="w-24 h-24 rounded-xl border-2 object-cover"
+                        style={{ borderColor: color || '#ffffff50' }}
                     />
                 ) : (
-                    Icon && <Icon className="w-24 h-24 p-2 rounded-xl border border-white/30" style={{ backgroundColor: color }} size={48} />
+                    Icon && <Icon className="w-24 h-24 p-2 rounded-xl border-2" style={{ backgroundColor: color, borderColor: color || '#ffffff50' }} size={48} />
                 )}
             </div>
             {showName && <p className={`mt-2 text-lg font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{name}</p>}
