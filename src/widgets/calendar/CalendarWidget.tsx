@@ -6,7 +6,7 @@ import { DarkModeContext } from "../../context/DarkModeContext";
 import { WEEKDAYS, MONTH_NAMES, getCalendarDays, isSameDay, getScrollableClass } from "./calendarUtils";
 import type { CalendarDay } from "./calendarUtils";
 import type { CalendarEvent } from "./calendarTypes";
-import { DUMMY_EVENTS } from "./calendarMocks";
+import { getCalendarEvents, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "../../api/calendarApi";
 import DayDetailView from "./DayDetailView";
 
 function CalendarDayCell({ day, today, events, onSelect }: {
@@ -33,16 +33,16 @@ function CalendarDayCell({ day, today, events, onSelect }: {
             whileHover="hover"
             whileTap="hover"
             className={`
-                relative flex flex-col items-center pt-1 text-sm rounded-lg min-h-8 cursor-pointer
+                relative flex flex-col items-center pt-1 text-sm rounded-lg min-h-8 cursor-pointer transition-all scale-93
                 ${!day.isCurrentMonth ? "text-white/30 font-semibold" : "text-white font-semibold"}
                 ${!isToday ? "hover:bg-white/10" : ""}
             `}
         >
             {isToday && (
                 <motion.div
-                    variants={{ rest: { scale: 0.93 }, hover: { scale: 1.00 } }}
+                    //variants={{ rest: { scale: 0.93 }, hover: { scale: 1.00 } }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="absolute inset-0 rounded-lg bg-white/25 pointer-events-none"
+                    className="absolute inset-0 rounded-lg bg-white/25 pointer-events-none hover:scale-100"
                 />
             )}
             <span className="relative">{day.date.getDate()}</span>
@@ -60,15 +60,21 @@ function CalendarDayCell({ day, today, events, onSelect }: {
     );
 }
 
-function CalendarWidget() {
+function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
+    const numericWidgetId = widgetId !== undefined ? Number(widgetId) : undefined;
     const darkModeCtx = useContext(DarkModeContext);
     const isDarkMode = darkModeCtx?.isDarkMode ?? false;
 
     const [today, setToday] = useState(() => new Date());
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-    const [events, setEvents] = useState<CalendarEvent[]>(DUMMY_EVENTS);
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [viewYear, setViewYear] = useState(today.getFullYear());
     const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+    useEffect(() => {
+        if (numericWidgetId === undefined) return;
+        getCalendarEvents(numericWidgetId).then(setEvents).catch(console.error);
+    }, [numericWidgetId]);
 
     useEffect(() => {
         function scheduleNextUpdate() {
@@ -84,18 +90,33 @@ function CalendarWidget() {
         return () => clearTimeout(timer);
     }, []);
 
-    function addEvent(event: CalendarEvent) {
-        const eventsOnDay = events.filter(e => isSameDay(e.date, event.date));
-        if (eventsOnDay.length >= 100) return;
-        setEvents(prev => [...prev, event]);
+    async function addEvent(event: Omit<CalendarEvent, "id">) {
+        if (numericWidgetId === undefined) return;
+        try {
+            const created = await createCalendarEvent(numericWidgetId, event);
+            setEvents(prev => [...prev, created]);
+        } catch (e) {
+            console.error(e);
+        }
     }
 
-    function updateEvent(updated: CalendarEvent) {
-        setEvents(prev => prev.map(e => e.id === updated.id ? updated : e));
+    async function updateEvent(updated: CalendarEvent) {
+        try {
+            const { id, ...rest } = updated;
+            const saved = await updateCalendarEvent(id, rest);
+            setEvents(prev => prev.map(e => e.id === saved.id ? saved : e));
+        } catch (e) {
+            console.error(e);
+        }
     }
 
-    function removeEvent(id: string) {
-        setEvents(prev => prev.filter(e => e.id !== id));
+    async function removeEvent(id: number) {
+        try {
+            await deleteCalendarEvent(id);
+            setEvents(prev => prev.filter(e => e.id !== id));
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     function prevMonth() {
@@ -151,13 +172,13 @@ function CalendarWidget() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-7 text-center">
+                        <div className="grid grid-cols-7 text-center transition-all">
                             {WEEKDAYS.map(day => (
                                 <div key={day} className="text-xs font-semibold py-1 text-white/70">{day}</div>
                             ))}
                         </div>
 
-                        <div className="grid grid-cols-7 flex-1 min-h-0">
+                        <div className="grid grid-cols-7 flex-1 min-h-0 transition-all">
                             {days.map((day, i) => (
                                 <CalendarDayCell key={i} day={day} today={today} events={events} onSelect={setSelectedDay} />
                             ))}

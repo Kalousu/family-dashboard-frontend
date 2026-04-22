@@ -4,14 +4,13 @@ import { HslStringColorPicker } from "react-colorful";
 import GlassButton from "../../components/ui/GlassButton";
 import { DAY_NAMES, MONTH_NAMES, EMPTY_DAY_MESSAGES, isSameDay, getScrollableClass, COLOR_OPTIONS } from "./calendarUtils";
 import type { CalendarEvent } from "./calendarTypes";
-import { DUMMY_USERS } from "./calendarMocks";
 import { useEventForm } from "./useEventForm";
 
 function EventItem({ event, showTime, onEdit, onRemove }: {
     event: CalendarEvent;
     showTime?: boolean;
     onEdit: (event: CalendarEvent) => void;
-    onRemove: (id: string) => void;
+    onRemove: (id: number) => void;
 }) {
     return (
         <motion.div
@@ -30,9 +29,6 @@ function EventItem({ event, showTime, onEdit, onRemove }: {
                         <span className="text-white/50 text-xs">{event.startTime}</span>
                     )}
                 </div>
-                <p className="text-white/40 text-[10px]">
-                    Angelegt von: {DUMMY_USERS.find(u => u.id === event.userId)?.username ?? "Unbekannt"}
-                </p>
             </div>
             <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => onEdit(event)} className="pr-1 text-white/40 hover:text-white/80 transition-colors">
                 <Pencil size={14} />
@@ -49,9 +45,9 @@ type Props = {
     selectedDay: Date;
     onBack: () => void;
     events: CalendarEvent[];
-    addEvent: (event: CalendarEvent) => void;
+    addEvent: (event: Omit<CalendarEvent, "id">) => void;
     updateEvent: (event: CalendarEvent) => void;
-    removeEvent: (id: string) => void;
+    removeEvent: (id: number) => void;
 };
 
 function DayDetailView({ isDarkMode, selectedDay, onBack, events, addEvent, updateEvent, removeEvent }: Props) {
@@ -88,7 +84,7 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, events, addEvent, upda
         <div className="relative rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/40 to-cyan-400/30">
             <div className={scrollableClass}>
                 <div className="flex items-center gap-2">
-                    <GlassButton isDarkMode={isDarkMode} onClick={onBack} className="p-1 text-white">
+                    <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-1 text-white">
                         <ChevronLeft size={18} />
                     </GlassButton>
                     <span className="text-lg font-bold text-white flex-1">

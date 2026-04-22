@@ -4,7 +4,7 @@ import { COLOR_OPTIONS } from "./calendarUtils";
 
 interface UseEventFormOptions {
     events: CalendarEvent[];
-    addEvent: (event: CalendarEvent) => void;
+    addEvent: (event: Omit<CalendarEvent, "id">) => void;
     updateEvent: (event: CalendarEvent) => void;
     selectedDay: Date | null;
 }
@@ -17,7 +17,7 @@ export function useEventForm({ events, addEvent, updateEvent, selectedDay }: Use
     const [formColor, setFormColor] = useState(COLOR_OPTIONS[0]);
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [localPickerColor, setLocalPickerColor] = useState("hsl(252, 91%, 55%)");
-    const [editingEventId, setEditingEventId] = useState<string | null>(null);
+    const [editingEventId, setEditingEventId] = useState<number | null>(null);
 
     function openAddForm() {
         setShowAddForm(true);
@@ -34,8 +34,9 @@ export function useEventForm({ events, addEvent, updateEvent, selectedDay }: Use
 
     function submitForm() {
         if (!formTitle.trim()) return;
-        if (editingEventId) {
+        if (editingEventId !== null) {
             const existing = events.find(e => e.id === editingEventId);
+            if (!existing) return;
             updateEvent({
                 id: editingEventId,
                 title: formTitle.trim(),
@@ -43,17 +44,14 @@ export function useEventForm({ events, addEvent, updateEvent, selectedDay }: Use
                 color: formColor,
                 allDay: formAllDay,
                 startTime: formAllDay ? undefined : formTime,
-                userId: existing?.userId ?? "",
             });
         } else {
             addEvent({
-                id: crypto.randomUUID(),
                 title: formTitle.trim(),
                 date: selectedDay!,
                 color: formColor,
                 allDay: formAllDay,
                 startTime: formAllDay ? undefined : formTime,
-                userId: "",
             });
         }
         setFormTitle("");
