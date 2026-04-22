@@ -74,11 +74,11 @@ function WidgetPage() {
                 
                 if (originalWidget) {
                     // Update position if changed
-                    const posChanged = 
-                        originalWidget.position.col !== widget.col ||
-                        originalWidget.position.row !== widget.row ||
-                        originalWidget.position.colSpan !== widget.colSpan ||
-                        originalWidget.position.rowSpan !== widget.rowSpan
+                    const posChanged =
+                        Number(originalWidget.position.col) !== widget.col ||
+                        Number(originalWidget.position.row) !== widget.row ||
+                        Number(originalWidget.position.colSpan) !== widget.colSpan ||
+                        Number(originalWidget.position.rowSpan) !== widget.rowSpan
                     
                     if (posChanged) {
                         await updateWidgetPosition(originalWidget.id, {
