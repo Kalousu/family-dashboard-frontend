@@ -10,6 +10,7 @@ import { AuthProvider } from './context/AuthContext';
 import UserProfileEditPage from './pages/UserProfileEditPage';
 import NewFamilyRegisterPage from './pages/newFamilyRegisterPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import SystemAdminPage from './pages/systemAdmin/SystemAdminPage';
 
 function App() {
   return (
@@ -31,7 +32,12 @@ function App() {
 
               <Route path="/profile/edit" element={<UserProfileEditPage />} />
               <Route path="/newfamily" element={<NewFamilyRegisterPage />} />
-              <Route path="/admin" element={<SystemAdminPage />} />
+              
+              <Route path="/admin" element={
+                <ProtectedRoute allowedRoles={["SYSADMIN"]}>
+                  <SystemAdminPage />
+                </ProtectedRoute>
+              } />
             </Routes>
           </BrowserRouter>
         </DarkModeProvider>

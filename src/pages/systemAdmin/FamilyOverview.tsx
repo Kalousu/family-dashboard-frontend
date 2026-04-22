@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronDown, ChevronUp, Lock, Unlock, Trash2, UserPlus } from "lucide-react"
+import { ChevronDown, ChevronUp, Trash2, UserPlus } from "lucide-react"
 import FormInput from "../../components/ui/FormInput"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
-import type { Family, FamilyStatus } from "./systemAdminTypes"
+import type { Family } from "./systemAdminTypes"
 import useAdminTheme from "../../hooks/useAdminTheme"
+import { deleteFamily } from "../../api/familyApi"
 
 // =============================================================================
 // API-ANBINDUNG — FamilyOverview
@@ -36,40 +37,35 @@ interface FamilyOverviewProps {
 
 function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily }: FamilyOverviewProps) {
     const [searchTerm, setSearchTerm] = useState("")
-    const [statusFilter, setStatusFilter] = useState<FamilyStatus | "alle">("alle")
     const [expandedFamilyId, setExpandedFamilyId] = useState<number | null>(null)
     const [pendingDelete, setPendingDelete] = useState<Family | null>(null)
-    const [pendingStatusToggle, setPendingStatusToggle] = useState<Family | null>(null)
 
-    const { glassCard, shine, textPrimary, textSecondary, border, inputWrapper, inputField, actionButton } = useAdminTheme(isDarkMode)
+    const { glassCard, textPrimary, textSecondary, border } = useAdminTheme(isDarkMode)
 
     const filteredFamilies = families.filter((family) => {
         const matchesSearch =
             family.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             family.email.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesStatus = statusFilter === "alle" || family.status === statusFilter
-        return matchesSearch && matchesStatus
+        return matchesSearch
     })
 
     function toggleExpand(id: number) {
         setExpandedFamilyId((prev) => (prev === id ? null : id))
     }
 
-    function confirmToggleStatus() {
-        if (!pendingStatusToggle) return
-        const updated = families.map((f) =>
-            f.id === pendingStatusToggle.id
-                ? { ...f, status: f.status === "aktiv" ? "gesperrt" : "aktiv" as FamilyStatus }
-                : f
-        )
-        onFamiliesChange(updated)
-        setPendingStatusToggle(null)
-    }
-
-    function confirmDelete() {
+    async function confirmDelete() {
         if (!pendingDelete) return
-        onFamiliesChange(families.filter((f) => f.id !== pendingDelete.id))
-        setPendingDelete(null)
+        
+        try {
+            await deleteFamily(pendingDelete.id)
+            // Only update UI if API call was successful
+            onFamiliesChange(families.filter((f) => f.id !== pendingDelete.id))
+            setPendingDelete(null)
+        } catch (error) {
+            console.error('Failed to delete family:', error)
+            // TODO: Show error message to user
+            setPendingDelete(null)
+        }
     }
 
     return (
@@ -86,32 +82,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                         className="w-full text-sm"
                     />
                 </div>
-                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as FamilyStatus | "alle")}
-                        className={`px-3 py-2 rounded-xl text-sm font-semibold focus:outline-none border ${inputField}`}
-                    >
-                        <option value="alle">Alle</option>
-                        <option value="aktiv">Aktiv</option>
-                        <option value="gesperrt">Gesperrt</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Stats row */}
-            <div className="flex gap-3">
-                {[
-                    { label: "Gesamt", value: families.length },
-                    { label: "Aktiv", value: families.filter((f) => f.status === "aktiv").length },
-                    { label: "Gesperrt", value: families.filter((f) => f.status === "gesperrt").length },
-                ].map((stat) => (
-                    <div key={stat.label} className={`relative flex-1 rounded-xl border p-3 text-center ${glassCard}`}>
-                        <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${shine}`} />
-                        <p className={`text-2xl font-bold ${textPrimary}`}>{stat.value}</p>
-                        <p className={`text-xs ${textSecondary}`}>{stat.label}</p>
-                    </div>
-                ))}
             </div>
 
             {/* Family list */}
@@ -134,9 +104,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                                     <p className={`text-xs truncate ${textSecondary}`}>{family.email}</p>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
-                                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${family.status === "aktiv" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                                        {family.status}
-                                    </span>
                                     <span className={`text-xs ${textSecondary}`}>{family.members.length} Mitglieder</span>
                                     {expandedFamilyId === family.id
                                         ? <ChevronUp size={16} className={textSecondary} />
@@ -148,16 +115,9 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                             {/* Actions */}
                             <div className="flex gap-2 shrink-0">
                                 <button
-                                    onClick={() => setPendingStatusToggle(family)}
-                                    title={family.status === "aktiv" ? "Sperren" : "Entsperren"}
-                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${actionButton}`}
-                                >
-                                    {family.status === "aktiv" ? <Lock size={15} /> : <Unlock size={15} />}
-                                </button>
-                                <button
                                     onClick={() => onSelectFamily(family)}
                                     title="Mitglieder verwalten"
-                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${actionButton}`}
+                                    className="p-1.5 rounded-lg border transition-all hover:brightness-110 border-blue-500/30 text-blue-400 hover:text-blue-300"
                                 >
                                     <UserPlus size={15} />
                                 </button>
@@ -198,15 +158,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
             </div>
 
             {/* Modals */}
-            {pendingStatusToggle && (
-                <ConfirmModal
-                    isDarkMode={isDarkMode}
-                    message={<>Familie <strong>{pendingStatusToggle.name}</strong> {pendingStatusToggle.status === "aktiv" ? "sperren" : "entsperren"}?</>}
-                    subMessage={pendingStatusToggle.status === "aktiv" ? "Die Familie kann sich nicht mehr einloggen." : "Der Zugang wird wiederhergestellt."}
-                    onConfirm={confirmToggleStatus}
-                    onCancel={() => setPendingStatusToggle(null)}
-                />
-            )}
             {pendingDelete && (
                 <ConfirmModal
                     isDarkMode={isDarkMode}

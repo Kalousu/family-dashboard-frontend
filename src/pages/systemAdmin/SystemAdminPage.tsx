@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Users, Building2, UserCog, Wrench } from "lucide-react"
+import { Users, Building2, UserCog, Wrench, LogOut } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import AuthPageLayout from "../../components/layout/AuthPageLayout"
 import useDarkMode from "../../hooks/useDarkMode"
 import useAdminTheme from "../../hooks/useAdminTheme"
@@ -9,8 +10,11 @@ import FamilyOverview from "./FamilyOverview"
 import MemberManagement from "./MemberManagement"
 import UserManagement from "./UserManagement"
 import MaintenanceSettings from "./MaintenanceSettings"
-import { MOCK_FAMILIES, DEFAULT_MAINTENANCE_SETTINGS } from "./systemAdminTypes"
+import { DEFAULT_MAINTENANCE_SETTINGS } from "./systemAdminTypes"
 import type { Family, MaintenanceSettings as MaintenanceSettingsType } from "./systemAdminTypes"
+import { getFamilies, getUsersForFamily } from "../../api/familyApi"
+import { logout } from "../../api/authApi"
+import GlassButton from "../../components/ui/GlassButton"
 
 // =============================================================================
 // API-ANBINDUNG — SystemAdminPage
@@ -43,10 +47,79 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
 function SystemAdminPage() {
     const { isDarkMode } = useDarkMode()
     const { glassCard, textPrimary, textSecondary } = useAdminTheme(isDarkMode)
+    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState<Tab>("familien")
-    const [families, setFamilies] = useState<Family[]>(MOCK_FAMILIES)
+    const [families, setFamilies] = useState<Family[]>([])
     const [selectedFamily, setSelectedFamily] = useState<Family | null>(null)
     const [maintenanceSettings, setMaintenanceSettings] = useState<MaintenanceSettingsType>(DEFAULT_MAINTENANCE_SETTINGS)
+    const [isLoading, setIsLoading] = useState(true)
+
+    const handleLogout = async () => {
+        try {
+            await logout()
+            navigate("/login")
+        } catch (error) {
+            console.error('Logout failed:', error)
+            // Even if logout fails, redirect to login
+            navigate("/login")
+        }
+    }
+
+    // Load families from API
+    useEffect(() => {
+        const loadFamilies = async () => {
+            try {
+                setIsLoading(true)
+                const familyResponses = await getFamilies()
+                
+                // Convert FamilyResponse to Family format with empty members for now
+                const familiesWithMembers: Family[] = await Promise.all(
+                    familyResponses.map(async (familyResponse) => {
+                        try {
+                            // Try to get users for this family
+                            const users = await getUsersForFamily(familyResponse.id)
+                            const members = users.map(user => ({
+                                id: user.id,
+                                name: user.name,
+                                role: user.role === 'FAMILY_ADMIN' ? 'Familienadministrator' as const : 'Mitglied' as const,
+                                icon: user.avatar || 'user', // Can be URL or icon name
+                                color: user.color || '#3b82f6',
+                                isLocked: false
+                            }))
+                            
+                            return {
+                                id: familyResponse.id,
+                                name: familyResponse.familyName,
+                                email: familyResponse.email,
+                                registeredAt: new Date().toISOString().split('T')[0], // Placeholder
+                                status: 'aktiv' as const,
+                                members
+                            }
+                        } catch (error) {
+                            // If getUsersForFamily fails, create family with empty members
+                            console.warn(`Failed to load users for family ${familyResponse.id}:`, error)
+                            return {
+                                id: familyResponse.id,
+                                name: familyResponse.familyName,
+                                email: familyResponse.email,
+                                registeredAt: new Date().toISOString().split('T')[0],
+                                status: 'aktiv' as const,
+                                members: []
+                            }
+                        }
+                    })
+                )
+                
+                setFamilies(familiesWithMembers)
+            } catch (error) {
+                console.error('Failed to load families:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        loadFamilies()
+    }, [])
 
     function handleSelectFamily(family: Family) {
         setSelectedFamily(family)
@@ -70,10 +143,22 @@ function SystemAdminPage() {
                 {...fadeSlideUp}
                 className="flex flex-col items-center w-full max-w-2xl px-4 gap-6"
             >
-                {/* Page title */}
-                <div className="text-center">
+                {/* Page title with logout button */}
+                <div className="relative text-center w-full">
                     <h1 className={`text-2xl font-bold ${textPrimary}`}>System Administration</h1>
                     <p className={`text-sm mt-1 ${textSecondary}`}>Verwaltung aller Familien und Benutzer</p>
+                    
+                    {/* Logout button in top right */}
+                    <div className="absolute top-0 right-0">
+                        <GlassButton 
+                            isDarkMode={!isDarkMode} 
+                            onClick={handleLogout}
+                            className="p-2 flex items-center gap-2"
+                        >
+                            <LogOut size={16} />
+                            <span className="text-sm">Logout</span>
+                        </GlassButton>
+                    </div>
                 </div>
 
                 {/* Tab bar */}
@@ -95,7 +180,7 @@ function SystemAdminPage() {
                                     }`}
                             >
                                 {isActive && (
-                                    <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-lg pointer-events-none ${isDarkMode ? "bg-white/30" : "bg-white/5"}`} />
+                                    <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-lg pointer-events-none ${!isDarkMode ? "bg-white/30" : "bg-white/5"}`} />
                                 )}
                                 <Icon size={15} />
                                 <span>{tab.label}</span>
@@ -106,8 +191,13 @@ function SystemAdminPage() {
 
                 {/* Tab content */}
                 <div className="w-full">
-                    <AnimatePresence mode="wait">
-                        {activeTab === "familien" && (
+                    {isLoading ? (
+                        <motion.div key="loading" {...fadeSlideUp} className={`rounded-xl border p-8 text-center ${glassCard}`}>
+                            <p className={`text-sm ${textSecondary}`}>Lade Familiendaten...</p>
+                        </motion.div>
+                    ) : (
+                        <AnimatePresence mode="wait">
+                            {activeTab === "familien" && (
                             <FamilyOverview
                                 key="familien"
                                 isDarkMode={isDarkMode}
@@ -146,7 +236,8 @@ function SystemAdminPage() {
                                 onSettingsChange={setMaintenanceSettings}
                             />
                         )}
-                    </AnimatePresence>
+                        </AnimatePresence>
+                    )}
                 </div>
             </motion.div>
         </AuthPageLayout>

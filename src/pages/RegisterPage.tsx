@@ -15,6 +15,7 @@ import useAuth from "../hooks/useAuth"
 interface LocationState {
     familyId: number
     familyName: string
+    isAddingMember?: boolean
 }
 
 function RegisterPage() {
@@ -45,12 +46,18 @@ function RegisterPage() {
 
     const text = isDarkMode ? "text-white" : "text-gray-900"
     const muted = isDarkMode ? "text-gray-400" : "text-gray-500"
+    const isAddingMember = state.isAddingMember || false
 
     function validate(): string | null {
         if (!formData.name) return "Bitte einen Namen eingeben."
-        if (!formData.pin) return "PIN ist erforderlich für Familienadministratoren."
-        if (formData.pin.length < 3) return "PIN muss mindestens 3 Zeichen lang sein."
-        if (formData.pin !== formData.pinWiederholen) return "PINs stimmen nicht überein."
+        
+        // Only require PIN for admin registration (not when adding regular members)
+        if (!isAddingMember) {
+            if (!formData.pin) return "PIN ist erforderlich für Familienadministratoren."
+            if (formData.pin.length < 3) return "PIN muss mindestens 3 Zeichen lang sein."
+            if (formData.pin !== formData.pinWiederholen) return "PINs stimmen nicht überein."
+        }
+        
         return null
     }
 
@@ -128,12 +135,14 @@ function RegisterPage() {
                 onKeyDown={(e) => e.key === "Enter" && handleCreateUser()}
             >
                 <h1 className={`text-2xl font-bold tracking-tight ${text}`}>
-                    Familienadministrator erstellen
+                    {isAddingMember ? "Neues Familienmitglied hinzufügen" : "Familienadministrator erstellen"}
                 </h1>
                 
                 <p className={`text-center ${muted} mb-4`}>
-                    Familie "{state.familyName}" wurde erfolgreich erstellt!<br/>
-                    Erstelle jetzt den ersten Benutzer als Familienadministrator.
+                    {isAddingMember 
+                        ? `Neues Mitglied zur Familie "${state.familyName}" hinzufügen.`
+                        : `Familie "${state.familyName}" wurde erfolgreich erstellt!\nErstelle jetzt den ersten Benutzer als Familienadministrator.`
+                    }
                 </p>
 
                 <div className="flex flex-row gap-8 h-96">
@@ -141,26 +150,30 @@ function RegisterPage() {
                         <FormInput
                             isDarkMode={isDarkMode}
                             type="text"
-                            placeholder="Dein Name"
+                            placeholder={isAddingMember ? "Name des neuen Mitglieds" : "Dein Name"}
                             value={formData.name}
                             onChange={handleChange("name")}
                         />
                         
-                        <FormInput
-                            isDarkMode={isDarkMode}
-                            type="password"
-                            placeholder="PIN (erforderlich für Admin)"
-                            value={formData.pin}
-                            onChange={handleChange("pin")}
-                        />
-                        
-                        <FormInput
-                            isDarkMode={isDarkMode}
-                            type="password"
-                            placeholder="PIN wiederholen"
-                            value={formData.pinWiederholen}
-                            onChange={handleChange("pinWiederholen")}
-                        />
+                        {!isAddingMember && (
+                            <>
+                                <FormInput
+                                    isDarkMode={isDarkMode}
+                                    type="password"
+                                    placeholder="PIN (erforderlich für Admin)"
+                                    value={formData.pin}
+                                    onChange={handleChange("pin")}
+                                />
+                                
+                                <FormInput
+                                    isDarkMode={isDarkMode}
+                                    type="password"
+                                    placeholder="PIN wiederholen"
+                                    value={formData.pinWiederholen}
+                                    onChange={handleChange("pinWiederholen")}
+                                />
+                            </>
+                        )}
                         
                         <div className="flex flex-row items-center gap-2">
                             <ColorPickerButton
@@ -248,10 +261,12 @@ function RegisterPage() {
                     </div>
                 </div>
 
-                <div className={`text-xs ${muted} text-center max-w-md`}>
-                    <p>Als Familienadministrator benötigst du eine PIN für den sicheren Zugang.</p>
-                    <p>Andere Familienmitglieder mit Benutzerrolle benötigen keine PIN.</p>
-                </div>
+                {!isAddingMember && (
+                    <div className={`text-xs ${muted} text-center max-w-md`}>
+                        <p>Als Familienadministrator benötigst du eine PIN für den sicheren Zugang.</p>
+                        <p>Andere Familienmitglieder mit Benutzerrolle benötigen keine PIN.</p>
+                    </div>
+                )}
 
                 <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
                     {error || "Platzhalter"}
@@ -262,14 +277,21 @@ function RegisterPage() {
                     onClick={loading ? undefined : handleCreateUser} 
                     className={`px-4 py-2 backdrop-blur-sm ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    {loading ? "Wird erstellt..." : "Administrator erstellen"}
+                    {loading 
+                        ? "Wird erstellt..." 
+                        : isAddingMember 
+                            ? "Mitglied hinzufügen" 
+                            : "Administrator erstellen"
+                    }
                 </GlassButton>
 
                 <div className="flex flex-col items-center gap-2 mt-2">
-                    <span className={`text-xs ${muted}`}>Zurück zur Familienregistrierung?</span>
+                    <span className={`text-xs ${muted}`}>
+                        {isAddingMember ? "Zurück zur Familie verwalten?" : "Zurück zur Familienregistrierung?"}
+                    </span>
                     <GlassButton 
                         isDarkMode={!isDarkMode} 
-                        onClick={() => navigate("/register-family")} 
+                        onClick={() => isAddingMember ? navigate("/dashboard") : navigate("/register-family")} 
                         className="px-4 py-1.5 text-sm backdrop-blur-sm"
                     >
                         Zurück

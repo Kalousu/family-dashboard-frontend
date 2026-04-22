@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Trash2, Plus } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import GlassButton from "../../../ui/GlassButton"
 import { handleToggle } from "./handleToggle"
 import imageIcons from "../../../../constants/imageIcons"
 import ConfirmModal from "./ConfirmModal"
+import useAuth from "../../../../hooks/useAuth"
 import type { Member } from "./AdminDrawer"
 
 interface AddSectionProps {
@@ -17,13 +18,28 @@ function AddSection({ isDarkMode, members, onDelete }: AddSectionProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
     const navigate = useNavigate()
+    const { familyId } = useAuth()
 
-    function handleDelete() {
+    const handleDelete = useCallback(() => {
         if (memberToDelete) {
             onDelete(members.filter(m => m.id !== memberToDelete.id))
             setMemberToDelete(null)
         }
-    }
+    }, [memberToDelete, members, onDelete])
+
+    const handleAddMember = useCallback(() => {
+        if (familyId) {
+            // Use a placeholder family name or fetch it if needed
+            const familyName = "Familie" // Placeholder - could be improved by fetching actual family name
+            navigate("/register", { 
+                state: { 
+                    familyId: familyId, 
+                    familyName: familyName,
+                    isAddingMember: true // Flag to indicate this is adding a regular member, not admin
+                } 
+            })
+        }
+    }, [navigate, familyId])
 
     return (
         <>
@@ -62,7 +78,7 @@ function AddSection({ isDarkMode, members, onDelete }: AddSectionProps) {
                         <div className="flex flex-col items-center gap-1">
                             <div
                                 className={`w-12 h-12 rounded-xl flex items-center justify-center border cursor-pointer transition-opacity hover:opacity-80 ${isDarkMode ? "bg-white/10 border-white/20" : "bg-sky-100 border-cyan-950/20"}`}
-                                onClick={() => navigate("/register")}
+                                onClick={handleAddMember}
                             >
                                 <Plus size={24} className={isDarkMode ? "text-white" : "text-sky-900"} />
                             </div>

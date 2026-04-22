@@ -3,19 +3,37 @@ import { ChevronDown } from "lucide-react"
 import GlassButton from "../../../ui/GlassButton"
 import { handleToggle } from "./handleToggle"
 import imageIcons from "../../../../constants/imageIcons"
+import { changeUserRole, type ChangeUserRoleRequest } from "../../../../api/userApi"
 import type { Member } from "./AdminDrawer"
 
 interface RoleSectionProps {
     isDarkMode: boolean
     members: Member[]
+    onMembersUpdate?: () => void
 }
 
-function RoleSection({ isDarkMode, members }: RoleSectionProps) {
+function RoleSection({ isDarkMode, members, onMembersUpdate }: RoleSectionProps) {
     const [isOpen, setIsOpen] = useState(false)
-    const [memberRoles, setMemberRoles] = useState<Record<number, string>>(
-        () => Object.fromEntries(members.map(m => [m.id, "Admin"]))
-    )
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null)
+
+    // Calculate roles directly from members data
+    const memberRoles = Object.fromEntries(
+        members.map(m => [m.id, m.role === 'FAMILY_ADMIN' ? 'Admin' : 'Mitglied'])
+    )
+
+    const handleRoleChange = async (userId: number, newRole: string) => {
+        try {
+            const backendRole: ChangeUserRoleRequest['userRole'] = newRole === 'Admin' ? 'FAMILY_ADMIN' : 'USER'
+            await changeUserRole(userId, { userRole: backendRole })
+            setOpenDropdownId(null)
+            // Trigger refresh of members list
+            if (onMembersUpdate) {
+                onMembersUpdate()
+            }
+        } catch (error) {
+            console.error('Failed to change user role:', error)
+        }
+    }
 
     useEffect(() => {
         if (openDropdownId === null) return
@@ -62,7 +80,7 @@ function RoleSection({ isDarkMode, members }: RoleSectionProps) {
                                                 {["Admin", "Mitglied"].map(role => (
                                                     <button
                                                         key={role}
-                                                        onClick={() => { setMemberRoles(prev => ({ ...prev, [member.id]: role })); setOpenDropdownId(null) }}
+                                                        onClick={() => handleRoleChange(member.id, role)}
                                                         className={`block w-full text-left px-3 py-1.5 text-sm ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-600 hover:bg-gray-100"}`}
                                                     >
                                                         {role}

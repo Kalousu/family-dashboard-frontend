@@ -38,7 +38,8 @@ function WidgetPage() {
         canEditLayout: false,
         canAddWidgets: false,
         canDeleteWidgets: false,
-        canEditWidgetData: false
+        canEditWidgetData: false,
+        canManageFamily: false
     })
     const { currentUser, familyId, setCurrentUser, setUserId } = useAuth()
     const { isDarkMode } = useDarkMode()

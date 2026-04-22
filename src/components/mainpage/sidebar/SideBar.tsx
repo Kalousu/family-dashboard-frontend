@@ -15,7 +15,7 @@ interface SideBarProps {
     onClose: () => void
     pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
     setPendingWidget: (widget: { type: string, colSpan: number, rowSpan: number } | null) => void
-    permissions?: { canAddWidgets?: boolean }
+    permissions?: { canAddWidgets?: boolean; canManageFamily?: boolean }
 }
 
 function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget, permissions }: SideBarProps) {

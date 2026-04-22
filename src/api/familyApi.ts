@@ -32,6 +32,7 @@ export interface Permissions {
     canAddWidgets: boolean
     canDeleteWidgets: boolean
     canEditWidgetData: boolean
+    canManageFamily: boolean
 }
 
 export interface DashboardResponse {
@@ -66,4 +67,19 @@ export interface CreateFamilyResponse {
 export const createFamily = async (data: CreateFamilyRequest): Promise<CreateFamilyResponse> => {
     const response = await axiosInstance.post<CreateFamilyResponse>('/api/family', data)
     return response.data
+}
+
+export interface FamilyResponse {
+    id: number
+    familyName: string
+    email: string
+}
+
+export const getFamilies = async (): Promise<FamilyResponse[]> => {
+    const response = await axiosInstance.get<FamilyResponse[]>('/api/family')
+    return response.data
+}
+
+export const deleteFamily = async (familyId: number): Promise<void> => {
+    await axiosInstance.delete(`/api/family/${familyId}`)
 }
