@@ -32,7 +32,7 @@ function RegisterPage() {
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const { isDarkMode } = useDarkMode()
-    const { setFamilyId } = useAuth()
+    const { setFamilyId, setUserId, setCurrentUser } = useAuth()
     const navigate = useNavigate()
     const location = useLocation()
     
@@ -88,8 +88,9 @@ function RegisterPage() {
                 color: formData.color
             }, avatarFile || undefined)
             
-            // After successful registration, the auth_token cookie is set by the backend
-            // Set familyId so the dashboard can load the correct family data
+            // Clear stale user data so the dashboard loads the new user from the backend
+            setUserId(null)
+            setCurrentUser(null)
             setFamilyId(state.familyId)
             
             // Navigate to dashboard - the AuthContext will be loaded from the cookie
