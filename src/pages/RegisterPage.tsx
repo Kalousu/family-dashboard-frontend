@@ -124,7 +124,7 @@ function RegisterPage() {
             <motion.div 
                 key="user-creation" 
                 {...fadeSlideUp} 
-                className="flex flex-col items-center gap-4 justify-center"
+                className="flex flex-col items-center gap-4"
                 onKeyDown={(e) => e.key === "Enter" && handleCreateUser()}
             >
                 <h1 className={`text-2xl font-bold tracking-tight ${text}`}>
@@ -136,8 +136,8 @@ function RegisterPage() {
                     Erstelle jetzt den ersten Benutzer als Familienadministrator.
                 </p>
 
-                <div className="flex flex-row items-center gap-8">
-                    <div className="px-8 flex flex-col gap-4 items-center">
+                <div className="flex flex-row gap-8 h-96">
+                    <div className="px-8 flex flex-col gap-4 items-center justify-center">
                         <FormInput
                             isDarkMode={isDarkMode}
                             type="text"
@@ -198,50 +198,52 @@ function RegisterPage() {
                             </button>
                         </div>
 
-                        {!useCustomAvatar ? (
-                            <IconSelect
-                                selectedIcon={formData.pfpIcon}
-                                isDarkMode={isDarkMode}
-                                onSelect={(iconCode) => setFormData({...formData, pfpIcon: iconCode})}
-                            />
-                        ) : (
-                            <div className="flex flex-col items-center gap-2">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                    id="avatar-upload"
+                        <div className="flex flex-row items-center gap-6">
+                            {!useCustomAvatar ? (
+                                <IconSelect
+                                    selectedIcon={formData.pfpIcon}
+                                    isDarkMode={isDarkMode}
+                                    onSelect={(iconCode) => setFormData({...formData, pfpIcon: iconCode})}
                                 />
-                                <label
-                                    htmlFor="avatar-upload"
-                                    className={`cursor-pointer px-4 py-2 rounded-lg border-2 border-dashed transition-colors ${
-                                        isDarkMode 
-                                            ? "border-gray-600 hover:border-gray-500 text-gray-300" 
-                                            : "border-gray-300 hover:border-gray-400 text-gray-600"
-                                    }`}
-                                >
-                                    {avatarFile ? "Bild ändern" : "Bild hochladen"}
-                                </label>
-                                {avatarFile && (
-                                    <span className={`text-xs ${muted}`}>
-                                        {avatarFile.name}
-                                    </span>
-                                )}
+                            ) : (
+                                <div className="flex flex-col items-center gap-2">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        id="avatar-upload"
+                                    />
+                                    <label
+                                        htmlFor="avatar-upload"
+                                        className={`cursor-pointer px-4 py-2 rounded-lg border-2 border-dashed transition-colors ${
+                                            isDarkMode
+                                                ? "border-gray-600 hover:border-gray-500 text-gray-300"
+                                                : "border-gray-300 hover:border-gray-400 text-gray-600"
+                                        }`}
+                                    >
+                                        {avatarFile ? "Bild ändern" : "Bild hochladen"}
+                                    </label>
+                                    {avatarFile && (
+                                        <span className={`text-xs ${muted}`}>
+                                            {avatarFile.name}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Profile Preview */}
+                            <div className="flex flex-col items-center gap-2">
+                                <span className={`text-xs ${muted}`}>Vorschau:</span>
+                                <ProfileCard
+                                    name={formData.name || "Dein Name"}
+                                    color={formData.color}
+                                    icon={useCustomAvatar && avatarPreview ? avatarPreview : formData.pfpIcon}
+                                    avatarType={useCustomAvatar ? "URL" : "ICON"}
+                                    onSelect={() => {}}
+                                    isDarkMode={isDarkMode}
+                                />
                             </div>
-                        )}
-                        
-                        {/* Profile Preview */}
-                        <div className="flex flex-col items-center gap-2">
-                            <span className={`text-xs ${muted}`}>Vorschau:</span>
-                            <ProfileCard
-                                name={formData.name || "Dein Name"}
-                                color={formData.color}
-                                icon={useCustomAvatar && avatarPreview ? avatarPreview : formData.pfpIcon}
-                                avatarType={useCustomAvatar ? "URL" : "ICON"}
-                                onSelect={() => {}} // No action needed for preview
-                                isDarkMode={isDarkMode}
-                            />
                         </div>
                     </div>
                 </div>
