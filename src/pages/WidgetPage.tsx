@@ -40,7 +40,7 @@ function WidgetPage() {
         canDeleteWidgets: false,
         canEditWidgetData: false
     })
-    const { currentUser, familyId } = useAuth()
+    const { currentUser, familyId, setCurrentUser, setUserId } = useAuth()
     const { isDarkMode } = useDarkMode()
 
     const hasChanges = placedWidgets.length > 0 && JSON.stringify(placedWidgets) !== savedLayout
@@ -146,6 +146,15 @@ function WidgetPage() {
                 setDashboardId(dashboardData.id)
                 console.log('Dashboard permissions for user:', currentUser?.name, dashboardData.permissions)
                 setPermissions(dashboardData.permissions)
+                
+                // Load current user data if not already loaded
+                console.log('Dashboard currentUser from backend:', dashboardData.currentUser)
+                console.log('Frontend currentUser before:', currentUser)
+                if (!currentUser && dashboardData.currentUser) {
+                    console.log('Setting currentUser:', dashboardData.currentUser)
+                    setCurrentUser(dashboardData.currentUser)
+                    setUserId(dashboardData.currentUser.id)
+                }
                 
                 // Load widgets from backend
                 const widgets = dashboardData.widgets.map(widget => ({

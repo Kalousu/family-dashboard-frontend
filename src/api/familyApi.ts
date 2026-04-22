@@ -39,6 +39,7 @@ export interface DashboardResponse {
     familyId: number
     widgets: WidgetResponse[]
     permissions: Permissions
+    currentUser: UserProfile | null
 }
 
 export const getUsersForFamily = async (familyId: number): Promise<UserProfile[]> => {
