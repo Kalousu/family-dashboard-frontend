@@ -31,6 +31,7 @@ function App() {
 
               <Route path="/profile/edit" element={<UserProfileEditPage />} />
               <Route path="/newfamily" element={<NewFamilyRegisterPage />} />
+              <Route path="/admin" element={<SystemAdminPage />} />
             </Routes>
           </BrowserRouter>
         </DarkModeProvider>
