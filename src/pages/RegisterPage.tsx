@@ -81,7 +81,7 @@ function RegisterPage() {
         try {
             await register({
                 name: formData.name,
-                pin: formData.pin,
+                pin: isAddingMember ? undefined : formData.pin,
                 email: "", // Not needed for user creation
                 familyId: state.familyId,
                 pfpIcon: formData.pfpIcon,
