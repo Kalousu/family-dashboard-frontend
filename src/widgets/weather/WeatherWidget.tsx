@@ -240,6 +240,15 @@ function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
                     </motion.div>
                 </div>
             )}
+            <a
+                href="https://open-meteo.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-1 right-2 text-white/30 hover:text-white/60 transition-colors"
+                style={{ fontSize: "9px", lineHeight: 1 }}
+            >
+                open-meteo.com
+            </a>
         </div>
     )
 }
