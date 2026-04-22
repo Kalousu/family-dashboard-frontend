@@ -1,28 +1,44 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { MapPin, Wind, Search } from "lucide-react"
 import { useContainerSize } from "../../hooks/useContainerSize"
 import { getWeatherGradient, getWeatherIcon } from "./WeatherMappings"
 import { getWeather, searchCities } from "../../api/weatherApi"
+import { updateWidgetConfig } from "../../api/widgetApi"
 import type { GeoLocation, Daily } from "./weatherTypes"
 import type { ChangeEvent } from "react"
+import type { WidgetConfig } from "../../api/familyApi"
 
-function WeatherWidget() {
+interface WeatherWidgetProps {
+    widgetId: string
+    config?: WidgetConfig
+}
+
+function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
 
     const { ref, height } = useContainerSize()
     const isCompact = height < 220
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [inputCity, setInputCity] = useState("Mannheim")
+    
+    // Initialize from config if available
+    const settings = config?.settings as Record<string, any> | undefined
+    const initialCity = settings?.city as string || "Mannheim"
+    const initialLat = settings?.latitude as number || 49.4891
+    const initialLon = settings?.longitude as number || 8.46694
+    const initialTimezone = settings?.timezone as string || "Europe/Berlin"
+    
+    const [inputCity, setInputCity] = useState(initialCity)
     const [searchResults, setSearchResults] = useState<GeoLocation[]>([])
     const [showDropdown, setShowDropdown] = useState(false)
+    const dropdownRef = useRef<HTMLDivElement>(null)
 
     const [geoLocation, setGeoLocation] = useState<GeoLocation>({
-        name: "Mannheim",
-        latitude: 49.4891,
-        longitude: 8.46694,
+        name: initialCity,
+        latitude: initialLat,
+        longitude: initialLon,
         country: "Deutschland",
-        timezone: "Europe/Berlin",
+        timezone: initialTimezone,
         admin1: "Baden-Württemberg"
     })
 
@@ -55,6 +71,16 @@ function WeatherWidget() {
         fetchWeatherData()
     }, [geoLocation])
 
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setShowDropdown(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
+
     const handleInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
         setInputCity(e.target.value)
         const results = await searchCities(e.target.value)
@@ -62,10 +88,29 @@ function WeatherWidget() {
         setShowDropdown(true)
     }
 
-    const handleLocationSelect = (geo: GeoLocation) => {
+    const handleLocationSelect = async (geo: GeoLocation) => {
         setGeoLocation(geo)
         setInputCity(geo.name)
         setShowDropdown(false)
+        
+        // Save config to backend
+        try {
+            const numericId = Number(widgetId)
+            if (!isNaN(numericId)) {
+                await updateWidgetConfig(numericId, {
+                    title: config?.title || "Wetter App",
+                    color: config?.color || "blue",
+                    settings: {
+                        city: geo.name,
+                        latitude: geo.latitude,
+                        longitude: geo.longitude,
+                        timezone: geo.timezone
+                    }
+                })
+            }
+        } catch (error) {
+            console.error("Failed to save widget config:", error)
+        }
     }
 
     const isNight = new Date().getHours() >= 20 || new Date().getHours() < 6
@@ -114,9 +159,9 @@ function WeatherWidget() {
                 </div>
             ) : (
                 <div className="flex flex-col h-full min-h-0 flex-1">
-                    <div className="flex flex-row items-center gap-2 mb-4 shrink-0">
+                    <div className="relative flex flex-row items-center gap-2 mb-4 shrink-0">
                         <MapPin color="white" size={32} />
-                        <div className="border-4 border-white/20 focus:outline-none focus:border-white/60 rounded-xl flex flex-row items-center gap-2 transition-all">
+                        <div className="justify-between border-4 border-white/20 focus:outline-none focus:border-white/60 rounded-xl flex flex-row items-center gap-2 transition-all flex-1">
                             <input
                                 value={inputCity}
                                 onChange={handleInputChange}
@@ -130,20 +175,20 @@ function WeatherWidget() {
                                 <Search color="white" size={32} />
                             </button>
                         </div>
+                        {showDropdown && searchResults.length > 0 && (
+                            <div ref={dropdownRef} className="absolute left-10 right-0 top-full mt-1 bg-white/20 backdrop-blur-md rounded-xl overflow-hidden z-50">
+                                {searchResults.map((geo) =>
+                                    <div
+                                        key={geo.latitude + "-" + geo.longitude}
+                                        onClick={() => handleLocationSelect(geo)}
+                                        className="px-4 py-2 text-white cursor-pointer hover:bg-white/30"
+                                    >
+                                        {geo.name}, {geo.admin1}, {geo.country}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
-                    {showDropdown && searchResults.length > 0 && (
-                        <div className="absolute left-4 right-4 bg-white/20 backdrop-blur-md rounded-xl overflow-hidden z-50">
-                            {searchResults.map((geo) =>
-                                <div
-                                    key={geo.latitude + "-" + geo.longitude}
-                                    onClick={() => handleLocationSelect(geo)}
-                                    className="px-4 py-2 text-white cursor-pointer hover:bg-white/30"
-                                >
-                                    {geo.name}, {geo.admin1}, {geo.country}
-                                </div>
-                            )}
-                        </div>
-                    )}
                     
                     <motion.div
                         className="flex flex-col flex-1 w-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-2"

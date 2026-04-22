@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Check, Plus } from "lucide-react"
+import { X } from "lucide-react"
 import imageIcons from "../../constants/imageIcons"
 import type { Profile, Reminder } from "./timetableTypes"
 
@@ -72,23 +72,17 @@ export function EventCard({ title, profiles, merged, editMode, onRemove }: {
     )
 }
 
-export function DayHeader({ day, reminder, editMode, isEditing, reminderText, onReminderTextChange, onSave, onCancelEdit, onStartEdit, onRemove }: {
+export function DayHeader({ day, reminder, editMode, onRemove }: {
     day: string
     reminder?: Reminder
     editMode: boolean
-    isEditing: boolean
-    reminderText: string
-    onReminderTextChange: (text: string) => void
-    onSave: () => void
-    onCancelEdit: () => void
-    onStartEdit: () => void
     onRemove: () => void
 }) {
     return (
         <div className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 border-b border-white/15 border-r border-white/10 last:border-r-0">
             <span className="text-white/70 text-xs font-bold tracking-wide text-center">{day}</span>
 
-            {reminder ? (
+            {reminder && (
                 <div className="flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md px-1.5 py-0.5 w-full">
                     <span className="text-white text-[10px] font-semibold break-words min-w-0">! {reminder.text}</span>
                     {editMode && (
@@ -97,25 +91,6 @@ export function DayHeader({ day, reminder, editMode, isEditing, reminderText, on
                         </button>
                     )}
                 </div>
-            ) : editMode && (
-                isEditing ? (
-                    <div className="flex items-center gap-0.5 w-full px-1">
-                        <input
-                            value={reminderText}
-                            onChange={(e) => onReminderTextChange(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && onSave()}
-                            placeholder="Erinnerung…"
-                            autoFocus
-                            className="bg-white/10 text-white placeholder:text-white/30 text-[10px] rounded px-1 py-0.5 border border-white/20 focus:outline-none w-full"
-                        />
-                        <button onClick={onSave} className="text-green-400 hover:text-green-300 shrink-0"><Check size={10} /></button>
-                        <button onClick={onCancelEdit} className="text-white/50 hover:text-white shrink-0"><X size={10} /></button>
-                    </div>
-                ) : (
-                    <button onClick={onStartEdit} className="text-white/25 hover:text-red-400">
-                        <Plus size={11} />
-                    </button>
-                )
             )}
         </div>
     )
