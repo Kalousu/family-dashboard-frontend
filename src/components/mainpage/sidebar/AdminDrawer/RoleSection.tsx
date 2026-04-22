@@ -3,9 +3,10 @@ import { ChevronDown } from "lucide-react"
 import GlassButton from "../../../ui/GlassButton"
 import { handleToggle } from "./handleToggle"
 import imageIcons from "../../../../constants/imageIcons"
-import { changeUserRole, type ChangeUserRoleRequest } from "../../../../api/userApi"
+import { changeUserRole, setUserPin, type ChangeUserRoleRequest } from "../../../../api/userApi"
 import useAuth from "../../../../hooks/useAuth"
 import type { Member } from "./AdminDrawer"
+import SetPinModal from "./SetPinModal"
 
 interface RoleSectionProps {
     isDarkMode: boolean
@@ -16,6 +17,7 @@ interface RoleSectionProps {
 function RoleSection({ isDarkMode, members, onMembersUpdate }: RoleSectionProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null)
+    const [pinModalFor, setPinModalFor] = useState<Member | null>(null)
     const { currentUser } = useAuth()
 
     // Calculate roles directly from members data
@@ -24,16 +26,32 @@ function RoleSection({ isDarkMode, members, onMembersUpdate }: RoleSectionProps)
     )
 
     const handleRoleChange = async (userId: number, newRole: string) => {
-        try {
-            const backendRole: ChangeUserRoleRequest['userRole'] = newRole === 'Admin' ? 'FAMILY_ADMIN' : 'USER'
-            await changeUserRole(userId, { userRole: backendRole })
-            setOpenDropdownId(null)
-            // Trigger refresh of members list
-            if (onMembersUpdate) {
-                onMembersUpdate()
+        if (newRole === 'Admin') {
+            const member = members.find(m => m.id === userId)
+            if (member) {
+                setOpenDropdownId(null)
+                setPinModalFor(member)
             }
+            return
+        }
+        try {
+            await changeUserRole(userId, { userRole: 'USER' })
+            setOpenDropdownId(null)
+            if (onMembersUpdate) onMembersUpdate()
         } catch (error) {
             console.error('Failed to change user role:', error)
+        }
+    }
+
+    const handlePinConfirm = async (pin: string) => {
+        if (!pinModalFor) return
+        try {
+            await changeUserRole(pinModalFor.id, { userRole: 'FAMILY_ADMIN' })
+            await setUserPin(pinModalFor.id, pin)
+            setPinModalFor(null)
+            if (onMembersUpdate) onMembersUpdate()
+        } catch (error) {
+            console.error('Failed to promote user to admin:', error)
         }
     }
 
@@ -46,6 +64,14 @@ function RoleSection({ isDarkMode, members, onMembersUpdate }: RoleSectionProps)
 
     return (
         <>
+            {pinModalFor && (
+                <SetPinModal
+                    userName={pinModalFor.name}
+                    isDarkMode={isDarkMode}
+                    onConfirm={handlePinConfirm}
+                    onCancel={() => setPinModalFor(null)}
+                />
+            )}
             <GlassButton isDarkMode={!isDarkMode} onClick={() => handleToggle(setIsOpen)} className="mt-1 mb-1 p-3 w-full text-left">
                 Rollen verwalten
             </GlassButton>

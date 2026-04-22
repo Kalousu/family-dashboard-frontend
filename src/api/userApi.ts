@@ -11,3 +11,7 @@ export const changeUserRole = async (userId: number, request: ChangeUserRoleRequ
 export const deleteUser = async (userId: number): Promise<void> => {
     await axiosInstance.delete(`/api/users/${userId}`)
 }
+
+export const setUserPin = async (userId: number, pin: string): Promise<void> => {
+    await axiosInstance.patch(`/api/users/${userId}/pin`, { pin })
+}

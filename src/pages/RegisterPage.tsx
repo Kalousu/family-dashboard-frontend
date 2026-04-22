@@ -87,15 +87,17 @@ function RegisterPage() {
                 pfpIcon: formData.pfpIcon,
                 color: formData.color
             }, avatarFile || undefined)
-            
-            // Clear stale user data so the dashboard loads the new user from the backend
+
+            // The register endpoint switches the backend session to the new user.
+            // Clear stale user state and go to profile select so the correct user
+            // can re-establish their session (admin re-selects themselves with PIN,
+            // or new member logs in for the first time).
+            if (!isAddingMember) {
+                setFamilyId(state.familyId)
+            }
             setUserId(null)
             setCurrentUser(null)
-            setFamilyId(state.familyId)
-            
-            // Navigate to dashboard - the AuthContext will be loaded from the cookie
-            // The WidgetPage will load the user data via the dashboard API
-            navigate("/dashboard")
+            navigate("/home")
         } catch (error) {
             console.error("Fehler bei der Benutzererstellung:", error)
             setError("Benutzererstellung fehlgeschlagen. Bitte versuchen Sie es erneut.")

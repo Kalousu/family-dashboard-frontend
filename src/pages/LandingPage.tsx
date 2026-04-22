@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import GlassButton from "../components/ui/GlassButton"
 import DarkModeToggle from "../components/ui/DarkModeToggle"
-import useDarkMode from "../hooks/useDarkMode"
+import { DarkModeContext } from "../context/DarkModeContext"
 import logo from "../assets/logo.png"
 import imageIcons from "../constants/imageIcons"
 import { LayoutGrid, SquareDashedMousePointer, Baby, MonitorSmartphone, Heart } from "lucide-react"
@@ -76,8 +76,17 @@ function FloatingIconTile({ iconKey, color, initialX, initialY, duration, delay 
 }
 
 function LandingPage() {
-    const { isDarkMode } = useDarkMode()
+    const [isDarkMode, setIsDarkMode] = useState(
+        () => localStorage.getItem("landingIsDarkMode") !== "false"
+    )
     const navigate = useNavigate()
+
+    function toggleDarkMode() {
+        setIsDarkMode(prev => {
+            localStorage.setItem("landingIsDarkMode", String(!prev))
+            return !prev
+        })
+    }
 
     const bg = isDarkMode ? "bg-[#111316]" : "bg-[#f5f3ee]"
     const text = isDarkMode ? "text-white" : "text-gray-900"
@@ -86,6 +95,7 @@ function LandingPage() {
     const cardBg = isDarkMode ? "bg-[#1a1d21]" : "bg-[#1a1d21]"
 
     return (
+        <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
         <div className={`min-h-screen ${bg} transition-colors duration-500`}>
 
             {/* ── NAVBAR ── */}
@@ -248,6 +258,7 @@ function LandingPage() {
                 <span>© 2025</span>
             </footer>
         </div>
+        </DarkModeContext.Provider>
     )
 }
 
