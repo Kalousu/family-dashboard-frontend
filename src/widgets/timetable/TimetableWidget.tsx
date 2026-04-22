@@ -99,12 +99,16 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
 
     async function saveReminder(day: number) {
         if (!reminderText.trim() || numId === undefined) return
-        const existing = reminders.find((r) => r.day === day)
-        if (existing) await deleteTimetableReminder(numId, existing.id).catch(console.error)
-        const created = await createTimetableReminder(numId, { day, text: reminderText.trim() })
-        setReminders((prev) => [...prev.filter((r) => r.day !== day), created])
-        setEditingDay(null)
-        setReminderText("")
+        try {
+            const existing = reminders.find((r) => r.day === day)
+            if (existing) await deleteTimetableReminder(numId, existing.id)
+            const created = await createTimetableReminder(numId, { day, text: reminderText.trim() })
+            setReminders((prev) => [...prev.filter((r) => r.day !== day), created])
+            setEditingDay(null)
+            setReminderText("")
+        } catch (err) {
+            console.error("Reminder save error:", err)
+        }
     }
 
     async function handleAddEvent(body: { title: string; slot: number; day: number; userId: number }) {
@@ -206,7 +210,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                                 const allViewCount = getEventsForCell(events, slot, dayIndex, "all", watchedIds, allProfiles).length
                                 const minHeight = `${Math.max(1, allViewCount) * 3}rem`
                                 return (
-                                    <div key={dayIndex} className="px-1 py-1 flex flex-col gap-0.5 border-b border-white/10 border-r border-white/10 last:border-r-0" style={{ minHeight }}>
+                                    <div key={dayIndex} className="px-1 py-1 flex flex-col gap-0.5 border-b border-r border-white/10 last:border-r-0" style={{ minHeight }}>
                                         {cellEvents.length === 0 ? (
                                             <div className="flex-1 rounded-lg border border-dashed border-white/10" />
                                         ) : cellEvents.map((ev) => (
