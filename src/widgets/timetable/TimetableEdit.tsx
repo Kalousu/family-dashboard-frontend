@@ -1,13 +1,13 @@
 import { useState } from "react"
 import { Plus, X, Check } from "lucide-react"
-import type { Profile, TimetableEvent } from "./timetableTypes"
+import type { Profile } from "./timetableTypes"
 import { DAYS, SLOTS } from "./timetableTypes"
 import { UserIcon } from "./TimetableComponents"
 
 interface TimetableEditProps {
     profiles: Profile[]
     watchedIds: number[]
-    onAddEvent: (event: TimetableEvent) => void
+    onAddEvent: (body: { title: string; slot: number; day: number; userId: number }) => Promise<void>
     onAddUser: (userId: number) => void
     onRemoveUser: (userId: number) => void
 }
@@ -20,22 +20,24 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
     const [newTitle,  setNewTitle]  = useState("")
     const [newSlot,   setNewSlot]   = useState(1)
     const [newDay,    setNewDay]    = useState(0)
-    const [newUserId, setNewUserId] = useState(watchedIds[0])
+    const [newUserId, setNewUserId] = useState<number | undefined>(watchedProfiles[0]?.id)
     const [addUserId, setAddUserId] = useState(
-        availableUsers[0]?.id ?? profiles[0].id
+        availableUsers[0]?.id ?? profiles[0]?.id
     )
 
-    function handleAddEvent() {
-        if (!newTitle.trim()) return
-        onAddEvent({
-            id: Date.now().toString(),
-            title: newTitle.trim(),
-            slot: newSlot,
-            day: newDay,
-            userId: newUserId,
-        })
-        setNewTitle("")
-        setShowForm(false)
+    const effectiveUserId = (newUserId !== undefined && watchedIds.includes(newUserId))
+        ? newUserId
+        : watchedProfiles[0]?.id
+
+    async function handleAddEvent() {
+        if (!newTitle.trim() || effectiveUserId === undefined) return
+        try {
+            await onAddEvent({ title: newTitle.trim(), slot: newSlot, day: newDay, userId: effectiveUserId })
+            setNewTitle("")
+            setShowForm(false)
+        } catch (err) {
+            console.error("Save error:", err)
+        }
     }
 
     function handleAddUser() {
@@ -94,7 +96,7 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
                     <select value={newSlot} onChange={(e) => setNewSlot(Number(e.target.value))} className="bg-white/10 text-white text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none">
                         {SLOTS.map((s) => <option key={s} value={s} className="text-black">{s}. Stunde</option>)}
                     </select>
-                    <select value={newUserId} onChange={(e) => setNewUserId(Number(e.target.value))} className="bg-white/10 text-white text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none">
+                    <select value={effectiveUserId ?? ""} onChange={(e) => setNewUserId(Number(e.target.value))} className="bg-white/10 text-white text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none">
                         {watchedProfiles.map((p) => <option key={p.id} value={p.id} className="text-black">{p.name}</option>)}
                     </select>
                     <button onClick={handleAddEvent} className="p-1 rounded-lg bg-green-500/60 hover:bg-green-500/80 text-white">

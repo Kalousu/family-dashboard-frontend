@@ -1,41 +1,19 @@
-import { useState, Fragment, useRef } from "react"
+import { useState, Fragment, useRef, useEffect, useContext } from "react"
 import { Pencil } from "lucide-react"
 import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
 import { DAYS, SLOTS } from "./timetableTypes"
 import TimetableEdit from "./TimetableEdit"
 import { TabButton, EventCard, DayHeader } from "./TimetableComponents"
-
-// Mock-Daten
-
-const ALL_PROFILES: Profile[] = [
-    { id: 1, name: "Kevin",  color: "blue",       icon: "gamepad" }, //Kind
-    { id: 2, name: "Jonas",  color: "red",         icon: "dog"     }, //Kind2
-    { id: 3, name: "Daniel", color: "lightgreen",  icon: "sun"     },
-    { id: 4, name: "Lea",    color: "pink",        icon: "flower"  }, //AuPair
-    { id: 5, name: "Katrin", color: "lightblue",   icon: "cat"     },
-]
-
-const INITIAL_EVENTS: TimetableEvent[] = [
-    { id: "1", title: "Mathe",    slot: 1, day: 0, userId: 1 },
-    { id: "2", title: "Mathe",    slot: 2, day: 0, userId: 1 },
-    { id: "3", title: "Kunst",    slot: 3, day: 0, userId: 1 },
-    { id: "4", title: "ESL @Sprachschule",    slot: 3, day: 0, userId: 4 },
-    { id: "5", title: "Deutsch",    slot: 4, day: 0, userId: 1 },
-    { id: "6", title: "Sport", slot: 5, day: 0, userId: 1 },
-    { id: "7", title: "MITTAGSPAUSE", slot: 6, day: 0, userId: 1 },
-    { id: "8", title: "MITTAGSPAUSE", slot: 6, day: 1, userId: 1 },
-    { id: "9", title: "MITTAGSPAUSE", slot: 6, day: 2, userId: 1 },
-    { id: "10", title: "MITTAGSPAUSE", slot: 6, day:3, userId: 1 },
-    { id: "11", title: "MITTAGSPAUSE", slot: 6, day: 4, userId: 1 },
-    { id: "12", title: "Chemie",    slot: 7, day: 0, userId: 1 },
-    { id: "13", title: "Klavier @Musikschule",    slot: 7, day: 0, userId: 2 },
-]
-
-const INITIAL_REMINDERS: Reminder[] = [
-    { id: "r1", day: 0, text: "Sportsachen" },
-]
-
-// ────────────────────────────────────────────────────────────────
+import { AuthContext } from "../../context/AuthContext"
+import { getUsersForFamily } from "../../api/familyApi"
+import {
+    getTimetable,
+    createTimetableEvent,
+    deleteTimetableEvent,
+    createTimetableReminder,
+    deleteTimetableReminder,
+    updateWatchedUsers,
+} from "../../api/timetableApi"
 
 function getEventsForCell(
     events: TimetableEvent[],
@@ -58,8 +36,7 @@ function getEventsForCell(
         }))
     }
 
-    // gleichnamige Events zusammenführen
-    const eventGroups: Record<string, { ids: string[]; profiles: Profile[] }> = {}
+    const eventGroups: Record<string, { ids: number[]; profiles: Profile[] }> = {}
     for (const e of filtered) {
         const profile = profiles.find((p) => p.id === e.userId)
         if (!profile) continue
@@ -71,48 +48,82 @@ function getEventsForCell(
     return Object.entries(eventGroups).map(([title, { ids, profiles }]) => ({ title, ids, profiles }))
 }
 
-function TimetableWidget() {
-    const [events, setEvents]         = useState<TimetableEvent[]>(INITIAL_EVENTS)
-    const [reminders, setReminders]   = useState<Reminder[]>(INITIAL_REMINDERS)
-    // Später: nur die IDs der Kinder & AuPair, nicht der Eltern
-    const [watchedIds, setWatchedIds] = useState<number[]>(
-        ALL_PROFILES
-            .filter((p) => INITIAL_EVENTS.some((e) => e.userId === p.id))
-            .map((p) => p.id)
-    )
-    const [activeTab, setActiveTab]   = useState<"all" | number>("all")
-    const [editMode, setEditMode]     = useState(false)
+function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
+    const auth = useContext(AuthContext)
+    const familyId = auth?.familyId ?? null
+    const numId = widgetId !== undefined ? Number(widgetId) : undefined
+
+    const [allProfiles, setAllProfiles] = useState<Profile[]>([])
+    const [events, setEvents]           = useState<TimetableEvent[]>([])
+    const [reminders, setReminders]     = useState<Reminder[]>([])
+    const [watchedIds, setWatchedIds]   = useState<number[]>([])
+    const [loading, setLoading]         = useState(true)
+
+    const [activeTab, setActiveTab]     = useState<"all" | number>("all")
+    const [editMode, setEditMode]       = useState(false)
+    const [editingDay, setEditingDay]   = useState<number | null>(null)
+    const [reminderText, setReminderText] = useState("")
 
     const scrollRef = useRef<HTMLDivElement>(null)
 
-    const [editingDay, setEditingDay]     = useState<number | null>(null)
-    const [reminderText, setReminderText] = useState("")
+    useEffect(() => {
+        if (numId === undefined || !familyId) return
+        Promise.all([
+            getUsersForFamily(familyId),
+            getTimetable(numId),
+        ]).then(([users, data]) => {
+            setAllProfiles(users.map((u) => ({ id: u.id, name: u.name, color: u.color, icon: u.avatar })))
+            setEvents(data.events)
+            setReminders(data.reminders)
+            setWatchedIds(data.watchedUserIds)
+        }).catch(console.error)
+          .finally(() => setLoading(false))
+    }, [numId, familyId])
 
-    const watchedProfiles = ALL_PROFILES.filter((p) => watchedIds.includes(p.id))
+    const watchedProfiles = allProfiles.filter((p) => watchedIds.includes(p.id))
 
-    function addUser(userId: number) {
-        if (watchedIds.includes(userId)) return
-        setWatchedIds((prev) => [...prev, userId])
+    async function addUser(userId: number) {
+        if (watchedIds.includes(userId) || numId === undefined) return
+        const newIds = [...watchedIds, userId]
+        setWatchedIds(newIds)
+        await updateWatchedUsers(numId, newIds).catch(console.error)
     }
 
-    function removeUser(userId: number) {
-        setWatchedIds((prev) => prev.filter((id) => id !== userId))
+    async function removeUser(userId: number) {
+        if (numId === undefined) return
+        const newIds = watchedIds.filter((id) => id !== userId)
+        setWatchedIds(newIds)
         if (activeTab === userId) setActiveTab("all")
+        await updateWatchedUsers(numId, newIds).catch(console.error)
     }
 
-    function saveReminder(day: number) {
-        if (!reminderText.trim()) return
-        setReminders((prev) => [
-            ...prev.filter((r) => r.day !== day),
-            { id: Date.now().toString(), day, text: reminderText.trim() },
-        ])
+    async function saveReminder(day: number) {
+        if (!reminderText.trim() || numId === undefined) return
+        const existing = reminders.find((r) => r.day === day)
+        if (existing) await deleteTimetableReminder(numId, existing.id).catch(console.error)
+        const created = await createTimetableReminder(numId, { day, text: reminderText.trim() })
+        setReminders((prev) => [...prev.filter((r) => r.day !== day), created])
         setEditingDay(null)
         setReminderText("")
+    }
+
+    async function handleAddEvent(body: { title: string; slot: number; day: number; userId: number }) {
+        if (numId === undefined) return
+        const created = await createTimetableEvent(numId, body)
+        setEvents((prev) => [...prev, created])
     }
 
     function toggleEdit() {
         setEditMode((v) => !v)
         setEditingDay(null)
+    }
+
+    if (loading) {
+        return (
+            <div className="w-full h-full bg-linear-to-b from-purple-900/50 to-indigo-400/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg flex items-center justify-center">
+                <span className="text-white/50 text-sm">Lädt…</span>
+            </div>
+        )
     }
 
     return (
@@ -145,16 +156,17 @@ function TimetableWidget() {
             {/* Edit-Panel */}
             {editMode && (
                 <TimetableEdit
-                    profiles={ALL_PROFILES}
+                    profiles={allProfiles}
                     watchedIds={watchedIds}
-                    onAddEvent={(e) => setEvents((prev) => [...prev, e])}
+                    onAddEvent={handleAddEvent}
                     onAddUser={addUser}
                     onRemoveUser={removeUser}
                 />
             )}
 
             {/* Grid */}
-            <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{ overflowAnchor: "none" }}>                <div
+            <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{ overflowAnchor: "none" }}>
+                <div
                     className="grid"
                     style={{ gridTemplateColumns: "1.5rem 1px repeat(5, minmax(0, 1fr))" }}
                 >
@@ -172,7 +184,14 @@ function TimetableWidget() {
                             onSave={() => saveReminder(dayIndex)}
                             onCancelEdit={() => setEditingDay(null)}
                             onStartEdit={() => { setEditingDay(dayIndex); setReminderText("") }}
-                            onRemove={() => setReminders((prev) => prev.filter((r) => r.day !== dayIndex))}
+                            onRemove={() => {
+                                const r = reminders.find((r) => r.day === dayIndex)
+                                if (r && numId !== undefined) {
+                                    deleteTimetableReminder(numId, r.id)
+                                        .then(() => setReminders((prev) => prev.filter((rem) => rem.day !== dayIndex)))
+                                        .catch(console.error)
+                                }
+                            }}
                         />
                     ))}
 
@@ -183,8 +202,8 @@ function TimetableWidget() {
                             </div>
                             <div className="bg-white/15 border-b border-white/10" />
                             {DAYS.map((_, dayIndex) => {
-                                const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds, ALL_PROFILES)
-                                const allViewCount = getEventsForCell(events, slot, dayIndex, "all", watchedIds, ALL_PROFILES).length
+                                const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds, allProfiles)
+                                const allViewCount = getEventsForCell(events, slot, dayIndex, "all", watchedIds, allProfiles).length
                                 const minHeight = `${Math.max(1, allViewCount) * 3}rem`
                                 return (
                                     <div key={dayIndex} className="px-1 py-1 flex flex-col gap-0.5 border-b border-white/10 border-r border-white/10 last:border-r-0" style={{ minHeight }}>
@@ -197,7 +216,12 @@ function TimetableWidget() {
                                                 profiles={ev.profiles}
                                                 merged={ev.profiles.length > 1}
                                                 editMode={editMode}
-                                                onRemove={() => setEvents((prev) => prev.filter((e) => !ev.ids.includes(e.id)))}
+                                                onRemove={() => {
+                                                    if (numId === undefined) return
+                                                    Promise.all(ev.ids.map((id) => deleteTimetableEvent(numId, id)))
+                                                        .then(() => setEvents((prev) => prev.filter((e) => !ev.ids.includes(e.id))))
+                                                        .catch(console.error)
+                                                }}
                                             />
                                         ))}
                                     </div>
