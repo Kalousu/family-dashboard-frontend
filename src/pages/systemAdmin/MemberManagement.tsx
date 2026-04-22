@@ -1,12 +1,13 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, Shield, User, Lock, Unlock, Trash2 } from "lucide-react"
+import { ArrowLeft, Shield, User, Trash2 } from "lucide-react"
 import GlassButton from "../../components/ui/GlassButton"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
 import imageIcons from "../../constants/imageIcons"
 import type { Family, FamilyMember, MemberRole } from "./systemAdminTypes"
 import useAdminTheme from "../../hooks/useAdminTheme"
+import { changeUserRole } from "../../api/userApi"
 
 // =============================================================================
 // API-ANBINDUNG — MemberManagement
@@ -42,28 +43,28 @@ interface MemberManagementProps {
 
 function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: MemberManagementProps) {
     const [pendingDelete, setPendingDelete] = useState<FamilyMember | null>(null)
-    const [pendingLockToggle, setPendingLockToggle] = useState<FamilyMember | null>(null)
 
-    const { glassCard, shine, textPrimary, textSecondary , inputWrapper, inputField, actionButton } = useAdminTheme(isDarkMode)
+    const { glassCard, shine, textPrimary, textSecondary , inputWrapper, inputField } = useAdminTheme(isDarkMode)
 
     function updateMembers(members: FamilyMember[]) {
         onFamilyChange({ ...family, members })
     }
 
-    function handleRoleChange(memberId: number, role: MemberRole) {
-        updateMembers(
-            family.members.map((m) => (m.id === memberId ? { ...m, role } : m))
-        )
-    }
-
-    function confirmLockToggle() {
-        if (!pendingLockToggle) return
-        updateMembers(
-            family.members.map((m) =>
-                m.id === pendingLockToggle.id ? { ...m, isLocked: !m.isLocked } : m
+    async function handleRoleChange(memberId: number, role: MemberRole) {
+        try {
+            // Map frontend role to backend role
+            const backendRole = role === 'Familienadministrator' ? 'FAMILY_ADMIN' : 'USER'
+            
+            await changeUserRole(memberId, { userRole: backendRole })
+            
+            // Only update UI if API call was successful
+            updateMembers(
+                family.members.map((m) => (m.id === memberId ? { ...m, role } : m))
             )
-        )
-        setPendingLockToggle(null)
+        } catch (error) {
+            console.error('Failed to change user role:', error)
+            // TODO: Show error message to user
+        }
     }
 
     function confirmDelete() {
@@ -116,17 +117,34 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
 
                             {/* Avatar */}
                             <div
-                                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-white/10"
+                                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-white/10 overflow-hidden"
                                 style={{ backgroundColor: member.color + "33" }}
                             >
-                                <IconComponent size={20} style={{ color: member.color }} />
+                                {member.icon.startsWith('http') ? (
+                                    // URL-based avatar
+                                    <img 
+                                        src={member.icon} 
+                                        alt={member.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            // Fallback to User icon if image fails to load
+                                            const target = e.target as HTMLImageElement
+                                            target.style.display = 'none'
+                                            target.nextElementSibling?.classList.remove('hidden')
+                                        }}
+                                    />
+                                ) : (
+                                    // Icon-based avatar
+                                    <IconComponent size={20} style={{ color: member.color }} />
+                                )}
+                                {/* Fallback icon (hidden by default, shown if image fails) */}
+                                <User size={20} style={{ color: member.color }} className="hidden" />
                             </div>
 
                             {/* Name & role */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
                                     <p className={`font-semibold truncate ${textPrimary}`}>{member.name}</p>
-                                    {member.isLocked && <Lock size={12} className="text-red-400 shrink-0" />}
                                 </div>
 
                                 {/* Role select */}
@@ -150,13 +168,6 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                             {/* Action buttons */}
                             <div className="flex gap-2 shrink-0">
                                 <button
-                                    onClick={() => setPendingLockToggle(member)}
-                                    title={member.isLocked ? "Entsperren" : "Sperren"}
-                                    className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${actionButton}`}
-                                >
-                                    {member.isLocked ? <Unlock size={14} /> : <Lock size={14} />}
-                                </button>
-                                <button
                                     onClick={() => setPendingDelete(member)}
                                     title="Entfernen"
                                     className="p-1.5 rounded-lg border transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300"
@@ -170,14 +181,6 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
             </div>
 
             {/* Modals */}
-            {pendingLockToggle && (
-                <ConfirmModal
-                    isDarkMode={isDarkMode}
-                    message={<>Mitglied <strong>{pendingLockToggle.name}</strong> {pendingLockToggle.isLocked ? "entsperren" : "sperren"}?</>}
-                    onConfirm={confirmLockToggle}
-                    onCancel={() => setPendingLockToggle(null)}
-                />
-            )}
             {pendingDelete && (
                 <ConfirmModal
                     isDarkMode={isDarkMode}

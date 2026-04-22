@@ -32,7 +32,12 @@ function App() {
 
               <Route path="/profile/edit" element={<UserProfileEditPage />} />
               <Route path="/newfamily" element={<NewFamilyRegisterPage />} />
-              <Route path="/admin" element={<SystemAdminPage />} />
+              
+              <Route path="/admin" element={
+                <ProtectedRoute allowedRoles={["SYSADMIN"]}>
+                  <SystemAdminPage />
+                </ProtectedRoute>
+              } />
             </Routes>
           </BrowserRouter>
         </DarkModeProvider>

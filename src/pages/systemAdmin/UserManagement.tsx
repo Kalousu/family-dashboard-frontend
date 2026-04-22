@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
-import { Lock, Unlock, Trash2, RefreshCw } from "lucide-react"
+import { Trash2, RefreshCw, User } from "lucide-react"
 import FormInput from "../../components/ui/FormInput"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
 import type { Family, FamilyMember, MemberRole, SystemUser } from "./systemAdminTypes"
 import useAdminTheme from "../../hooks/useAdminTheme"
+import imageIcons from "../../constants/imageIcons"
 
 // =============================================================================
 // API-ANBINDUNG — UserManagement
@@ -44,11 +45,10 @@ interface UserManagementProps {
 function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManagementProps) {
     const [searchTerm, setSearchTerm] = useState("")
     const [roleFilter, setRoleFilter] = useState<MemberRole | "alle">("alle")
-    const [pendingLockToggle, setPendingLockToggle] = useState<SystemUser | null>(null)
     const [pendingDelete, setPendingDelete] = useState<SystemUser | null>(null)
     const [pendingReset, setPendingReset] = useState<SystemUser | null>(null)
 
-    const { glassCard, shine, textPrimary, textSecondary, border, inputWrapper, inputField, actionButton } = useAdminTheme(isDarkMode)
+    const { glassCard, shine, textPrimary, textSecondary, border, inputWrapper, inputField } = useAdminTheme(isDarkMode)
 
     const allUsers = useMemo<SystemUser[]>(() =>
         families.flatMap((family) =>
@@ -91,12 +91,6 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
             return { ...family, members: family.members.filter((m) => m.id !== user.id) }
         })
         onFamiliesChange(updatedFamilies)
-    }
-
-    function confirmLockToggle() {
-        if (!pendingLockToggle) return
-        updateMemberInFamily(pendingLockToggle, (m) => ({ ...m, isLocked: !m.isLocked }))
-        setPendingLockToggle(null)
     }
 
     function confirmDelete() {
@@ -174,12 +168,35 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                         key={user.id}
                         className={`grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center px-4 py-3 ${index < filteredUsers.length - 1 ? `border-b ${border}` : ""}`}
                     >
-                        {/* Name */}
+                        {/* Name with profile picture */}
                         <div className="flex items-center gap-2 min-w-0">
                             <div
-                                className="w-7 h-7 rounded-lg shrink-0 border border-white/10"
+                                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-white/10 overflow-hidden"
                                 style={{ backgroundColor: user.color + "33" }}
-                            />
+                            >
+                                {user.icon.startsWith('http') ? (
+                                    // URL-based avatar
+                                    <img 
+                                        src={user.icon} 
+                                        alt={user.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            // Fallback to User icon if image fails to load
+                                            const target = e.target as HTMLImageElement
+                                            target.style.display = 'none'
+                                            target.nextElementSibling?.classList.remove('hidden')
+                                        }}
+                                    />
+                                ) : (
+                                    // Icon-based avatar
+                                    (() => {
+                                        const IconComponent = imageIcons[user.icon as keyof typeof imageIcons] ?? User
+                                        return <IconComponent size={14} style={{ color: user.color }} />
+                                    })()
+                                )}
+                                {/* Fallback icon (hidden by default, shown if image fails) */}
+                                <User size={14} style={{ color: user.color }} className="hidden" />
+                            </div>
                             <span className={`truncate text-sm font-semibold ${textPrimary} ${user.isLocked ? "opacity-50" : ""}`}>
                                 {user.name}
                             </span>
@@ -203,16 +220,9 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                             <button
                                 onClick={() => setPendingReset(user)}
                                 title="Passwort-Reset"
-                                className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${actionButton}`}
+                                className="p-1.5 rounded-lg border transition-all hover:brightness-110 border-blue-500/30 text-blue-400 hover:text-blue-300"
                             >
                                 <RefreshCw size={13} />
-                            </button>
-                            <button
-                                onClick={() => setPendingLockToggle(user)}
-                                title={user.isLocked ? "Entsperren" : "Sperren"}
-                                className={`p-1.5 rounded-lg border transition-all hover:brightness-110 ${actionButton}`}
-                            >
-                                {user.isLocked ? <Unlock size={13} /> : <Lock size={13} />}
                             </button>
                             <button
                                 onClick={() => setPendingDelete(user)}
@@ -227,14 +237,6 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
             </div>
 
             {/* Modals */}
-            {pendingLockToggle && (
-                <ConfirmModal
-                    isDarkMode={isDarkMode}
-                    message={<>Benutzer <strong>{pendingLockToggle.name}</strong> {pendingLockToggle.isLocked ? "entsperren" : "sperren"}?</>}
-                    onConfirm={confirmLockToggle}
-                    onCancel={() => setPendingLockToggle(null)}
-                />
-            )}
             {pendingDelete && (
                 <ConfirmModal
                     isDarkMode={isDarkMode}
