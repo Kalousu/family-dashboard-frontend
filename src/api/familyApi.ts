@@ -2,7 +2,7 @@ import axiosInstance from "./axiosInstance"
 import type { UserProfile } from "../types/authTypes"
 
 export interface UserSelectPageResponse {
-    userProfiles: UserProfile[]
+    userProfileResponses: UserProfile[]
 }
 
 export interface WidgetPosition {
@@ -43,7 +43,7 @@ export interface DashboardResponse {
 
 export const getUsersForFamily = async (familyId: number): Promise<UserProfile[]> => {
     const response = await axiosInstance.get<UserSelectPageResponse>(`/api/family/${familyId}/users`)
-    return response.data.userProfiles
+    return response.data.userProfileResponses || []
 }
 
 export const getDashboardByFamilyId = async (familyId: number): Promise<DashboardResponse> => {

@@ -111,17 +111,23 @@ function ProfileSelectPage() {
                         <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Wer bist du?</p>
                     </div>
                     <div className="p-4 flex flex-row items-center justify-center gap-4 flex-wrap">
-                        {profiles.map(profile => (
-                            <ProfileCard
-                                key={profile.id}
-                                name={profile.name}
-                                color="blue"
-                                icon={profile.avatar}
-                                avatarType={profile.avatarType}
-                                onSelect={() => setSelectedProfile(profile)}
-                                isDarkMode={isDarkMode}
-                            />
-                        ))}
+                        {profiles && profiles.length > 0 ? (
+                            profiles.map(profile => (
+                                <ProfileCard
+                                    key={profile.id}
+                                    name={profile.name}
+                                    color="blue"
+                                    icon={profile.avatar}
+                                    avatarType={profile.avatarType}
+                                    onSelect={() => setSelectedProfile(profile)}
+                                    isDarkMode={isDarkMode}
+                                />
+                            ))
+                        ) : (
+                            <p className={`text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                                Keine Profile gefunden
+                            </p>
+                        )}
                     </div>
                     <div className="absolute bottom-6 left-0 right-0 flex justify-center">
                         <GlassButton isDarkMode={!isDarkMode} onClick={handleFamilyLogout} className="px-4 py-2 backdrop-blur-sm">
