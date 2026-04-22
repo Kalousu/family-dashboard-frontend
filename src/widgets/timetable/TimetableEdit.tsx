@@ -1,29 +1,34 @@
 import { useState } from "react"
 import { Plus, X, Check } from "lucide-react"
-import type { Profile } from "./timetableTypes"
+import type { Profile, Reminder } from "./timetableTypes"
 import { DAYS, SLOTS } from "./timetableTypes"
 import { UserIcon } from "./TimetableComponents"
 
 interface TimetableEditProps {
     profiles: Profile[]
     watchedIds: number[]
+    reminders: Reminder[]
     onAddEvent: (body: { title: string; slot: number; day: number; userId: number }) => Promise<void>
+    onAddReminder: (body: { day: number; text: string }) => Promise<void>
+    onRemoveReminder: (reminderId: number) => void
     onAddUser: (userId: number) => void
     onRemoveUser: (userId: number) => void
 }
 
-function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUser }: TimetableEditProps) {
+function TimetableEdit({ profiles, watchedIds, reminders, onAddEvent, onAddReminder, onRemoveReminder, onAddUser, onRemoveUser }: TimetableEditProps) {
     const watchedProfiles = profiles.filter((p) => watchedIds.includes(p.id))
     const availableUsers  = profiles.filter((p) => !watchedIds.includes(p.id))
 
-    const [showForm, setShowForm] = useState(false)
-    const [newTitle,  setNewTitle]  = useState("")
-    const [newSlot,   setNewSlot]   = useState(1)
-    const [newDay,    setNewDay]    = useState(0)
-    const [newUserId, setNewUserId] = useState<number | undefined>(watchedProfiles[0]?.id)
-    const [addUserId, setAddUserId] = useState(
-        availableUsers[0]?.id ?? profiles[0]?.id
-    )
+    const [showForm, setShowForm]         = useState(false)
+    const [newTitle,  setNewTitle]        = useState("")
+    const [newSlot,   setNewSlot]         = useState(1)
+    const [newDay,    setNewDay]          = useState(0)
+    const [newUserId, setNewUserId]       = useState<number | undefined>(watchedProfiles[0]?.id)
+    const [addUserId, setAddUserId]       = useState(availableUsers[0]?.id ?? profiles[0]?.id)
+
+    const [showReminderForm, setShowReminderForm] = useState(false)
+    const [reminderDay,  setReminderDay]          = useState(0)
+    const [reminderText, setReminderText]         = useState("")
 
     const effectiveUserId = (newUserId !== undefined && watchedIds.includes(newUserId))
         ? newUserId
@@ -37,6 +42,17 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
             setShowForm(false)
         } catch (err) {
             console.error("Save error:", err)
+        }
+    }
+
+    async function handleAddReminder() {
+        if (!reminderText.trim()) return
+        try {
+            await onAddReminder({ day: reminderDay, text: reminderText.trim() })
+            setReminderText("")
+            setShowReminderForm(false)
+        } catch (err) {
+            console.error("Reminder save error:", err)
         }
     }
 
@@ -111,6 +127,49 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
                     <Plus size={13} /> Event hinzufügen
                 </button>
             )}
+
+            {/* Erinnerungen */}
+            <div className="flex flex-col gap-1.5">
+                {reminders.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                        {reminders.map((r) => (
+                            <div key={r.id} className="flex items-center gap-1 bg-red-500/30 border border-red-400/30 rounded-lg px-2 py-0.5">
+                                <span className="text-white/80 text-xs font-semibold">{DAYS[r.day]}:</span>
+                                <span className="text-white text-xs">{r.text}</span>
+                                <button onClick={() => onRemoveReminder(r.id)} className="text-white/50 hover:text-white ml-0.5">
+                                    <X size={10} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {showReminderForm ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <select value={reminderDay} onChange={(e) => setReminderDay(Number(e.target.value))} className="bg-white/10 text-white text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none">
+                            {DAYS.map((d, i) => <option key={i} value={i} className="text-black">{d}</option>)}
+                        </select>
+                        <input
+                            value={reminderText}
+                            onChange={(e) => setReminderText(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleAddReminder()}
+                            placeholder="Erinnerung…"
+                            autoFocus
+                            className="bg-white/10 text-white placeholder:text-white/40 text-xs rounded-lg px-2 py-1 border border-white/20 focus:outline-none w-36"
+                        />
+                        <button onClick={handleAddReminder} className="p-1 rounded-lg bg-green-500/60 hover:bg-green-500/80 text-white">
+                            <Check size={13} />
+                        </button>
+                        <button onClick={() => { setShowReminderForm(false); setReminderText("") }} className="p-1 rounded-lg bg-red-500/50 hover:bg-red-500/70 text-white">
+                            <X size={13} />
+                        </button>
+                    </div>
+                ) : (
+                    <button onClick={() => setShowReminderForm(true)} className="flex items-center gap-1 text-white/60 hover:text-white text-xs font-semibold w-fit">
+                        <Plus size={13} /> Erinnerung hinzufügen
+                    </button>
+                )}
+            </div>
         </div>
     )
 }

@@ -58,11 +58,8 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
     const [reminders, setReminders]     = useState<Reminder[]>([])
     const [watchedIds, setWatchedIds]   = useState<number[]>([])
     const [loading, setLoading]         = useState(true)
-
     const [activeTab, setActiveTab]     = useState<"all" | number>("all")
     const [editMode, setEditMode]       = useState(false)
-    const [editingDay, setEditingDay]   = useState<number | null>(null)
-    const [reminderText, setReminderText] = useState("")
 
     const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -97,29 +94,32 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
         await updateWatchedUsers(numId, newIds).catch(console.error)
     }
 
-    async function saveReminder(day: number) {
-        if (!reminderText.trim() || numId === undefined) return
+    async function handleAddEvent(body: { title: string; slot: number; day: number; userId: number }) {
+        if (numId === undefined) return
         try {
-            const existing = reminders.find((r) => r.day === day)
+            const created = await createTimetableEvent(numId, body)
+            setEvents((prev) => [...prev, created])
+        } catch (err) {
+            console.error("Event save error:", err)
+        }
+    }
+
+    async function handleAddReminder(body: { day: number; text: string }) {
+        if (numId === undefined) return
+        try {
+            const existing = reminders.find((r) => r.day === body.day)
             if (existing) await deleteTimetableReminder(numId, existing.id)
-            const created = await createTimetableReminder(numId, { day, text: reminderText.trim() })
-            setReminders((prev) => [...prev.filter((r) => r.day !== day), created])
-            setEditingDay(null)
-            setReminderText("")
+            const created = await createTimetableReminder(numId, body)
+            setReminders((prev) => [...prev.filter((r) => r.day !== body.day), created])
         } catch (err) {
             console.error("Reminder save error:", err)
         }
     }
 
-    async function handleAddEvent(body: { title: string; slot: number; day: number; userId: number }) {
+    async function handleRemoveReminder(reminderId: number) {
         if (numId === undefined) return
-        const created = await createTimetableEvent(numId, body)
-        setEvents((prev) => [...prev, created])
-    }
-
-    function toggleEdit() {
-        setEditMode((v) => !v)
-        setEditingDay(null)
+        await deleteTimetableReminder(numId, reminderId).catch(console.error)
+        setReminders((prev) => prev.filter((r) => r.id !== reminderId))
     }
 
     if (loading) {
@@ -145,7 +145,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 </div>
                 <div className="flex-1" />
                 <button
-                    onClick={toggleEdit}
+                    onClick={() => setEditMode((v) => !v)}
                     className={`flex items-center gap-1.5 px-3 py-1 mb-px rounded-t-lg border-t border-l border-r text-xs font-semibold transition-all ${
                         editMode
                             ? "bg-indigo-400/50 border-indigo-400/50 text-white"
@@ -162,7 +162,10 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 <TimetableEdit
                     profiles={allProfiles}
                     watchedIds={watchedIds}
+                    reminders={reminders}
                     onAddEvent={handleAddEvent}
+                    onAddReminder={handleAddReminder}
+                    onRemoveReminder={handleRemoveReminder}
                     onAddUser={addUser}
                     onRemoveUser={removeUser}
                 />
@@ -182,20 +185,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                             day={day}
                             reminder={reminders.find((r) => r.day === dayIndex)}
                             editMode={editMode}
-                            isEditing={editingDay === dayIndex}
-                            reminderText={reminderText}
-                            onReminderTextChange={setReminderText}
-                            onSave={() => saveReminder(dayIndex)}
-                            onCancelEdit={() => setEditingDay(null)}
-                            onStartEdit={() => { setEditingDay(dayIndex); setReminderText("") }}
-                            onRemove={() => {
-                                const r = reminders.find((r) => r.day === dayIndex)
-                                if (r && numId !== undefined) {
-                                    deleteTimetableReminder(numId, r.id)
-                                        .then(() => setReminders((prev) => prev.filter((rem) => rem.day !== dayIndex)))
-                                        .catch(console.error)
-                                }
-                            }}
+                            onRemove={() => handleRemoveReminder(reminders.find((r) => r.day === dayIndex)!.id)}
                         />
                     ))}
 
