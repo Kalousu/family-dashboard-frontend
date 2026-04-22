@@ -86,7 +86,7 @@ function AdminDrawer({ onBack, isDarkMode }: AdminDrawerProps) {
                 <AddDeleteSection
                     isDarkMode={isDarkMode}
                     members={members}
-                    onDelete={setMembers}
+                    onMembersUpdate={fetchMembers}
                 />
 
                 <RoleSection

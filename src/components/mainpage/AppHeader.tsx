@@ -24,7 +24,7 @@ function AppHeader({ onUserClick, user }: AppHeaderProps) {
                         return Icon ? (
                             <Icon className="w-24 h-24 p-1 rounded-xl border-2" style={{ backgroundColor: user.color, borderColor: user.color || '#ffffff50' }} size={48} />
                         ) : (
-                            <User className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: user.color || '#ffffff50' }} size={10} />
+                            <User className="w-24 h-24 p-1 rounded-xl border-2" style={{ backgroundColor: user.color, borderColor: user.color || '#ffffff50' }} size={10} />
                         )
                     })()
                 ) : (

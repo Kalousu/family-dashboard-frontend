@@ -4,6 +4,7 @@ import GlassButton from "../../../ui/GlassButton"
 import { handleToggle } from "./handleToggle"
 import imageIcons from "../../../../constants/imageIcons"
 import { changeUserRole, type ChangeUserRoleRequest } from "../../../../api/userApi"
+import useAuth from "../../../../hooks/useAuth"
 import type { Member } from "./AdminDrawer"
 
 interface RoleSectionProps {
@@ -15,6 +16,7 @@ interface RoleSectionProps {
 function RoleSection({ isDarkMode, members, onMembersUpdate }: RoleSectionProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [openDropdownId, setOpenDropdownId] = useState<number | null>(null)
+    const { currentUser } = useAuth()
 
     // Calculate roles directly from members data
     const memberRoles = Object.fromEntries(
@@ -53,6 +55,7 @@ function RoleSection({ isDarkMode, members, onMembersUpdate }: RoleSectionProps)
                     <div className="flex-col flex-wrap gap-3">
                         {members.map(member => {
                             const Icon = imageIcons[member.icon]
+                            const isCurrentUser = currentUser?.id === member.id
                             return (
                                 <div key={member.id} className="flex items-center gap-3 mb-3">
                                     <div
@@ -68,25 +71,33 @@ function RoleSection({ isDarkMode, members, onMembersUpdate }: RoleSectionProps)
                                         className="relative ml-auto"
                                         onClick={e => e.stopPropagation()}
                                     >
-                                        <button
-                                            onClick={() => setOpenDropdownId(openDropdownId === member.id ? null : member.id)}
-                                            className={`flex items-center gap-1 px-2 py-1 rounded-md border text-sm ${isDarkMode ? "bg-white/5 border-white/10 text-gray-300 hover:text-white" : "bg-white/60 border-cyan-950/20 text-gray-600 hover:text-cyan-600"}`}
-                                        >
-                                            {memberRoles[member.id]}
-                                            <ChevronDown size={14} />
-                                        </button>
-                                        {openDropdownId === member.id && (
-                                            <div className={`absolute right-0 top-full mt-1 z-10 rounded-md shadow-lg border ${isDarkMode ? "bg-gray-800 border-white/10" : "bg-white border-cyan-950/20"}`}>
-                                                {["Admin", "Mitglied"].map(role => (
-                                                    <button
-                                                        key={role}
-                                                        onClick={() => handleRoleChange(member.id, role)}
-                                                        className={`block w-full text-left px-3 py-1.5 text-sm ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-600 hover:bg-gray-100"}`}
-                                                    >
-                                                        {role}
-                                                    </button>
-                                                ))}
+                                        {isCurrentUser ? (
+                                            <div className={`px-2 py-1 rounded-md border text-sm ${isDarkMode ? "bg-white/5 border-white/10 text-gray-500" : "bg-white/60 border-cyan-950/20 text-gray-500"}`}>
+                                                {memberRoles[member.id]}
                                             </div>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    onClick={() => setOpenDropdownId(openDropdownId === member.id ? null : member.id)}
+                                                    className={`flex items-center gap-1 px-2 py-1 rounded-md border text-sm ${isDarkMode ? "bg-white/5 border-white/10 text-gray-300 hover:text-white" : "bg-white/60 border-cyan-950/20 text-gray-600 hover:text-cyan-600"}`}
+                                                >
+                                                    {memberRoles[member.id]}
+                                                    <ChevronDown size={14} />
+                                                </button>
+                                                {openDropdownId === member.id && (
+                                                    <div className={`absolute right-0 top-full mt-1 z-10 rounded-md shadow-lg border ${isDarkMode ? "bg-gray-800 border-white/10" : "bg-white border-cyan-950/20"}`}>
+                                                        {["Admin", "Mitglied"].map(role => (
+                                                            <button
+                                                                key={role}
+                                                                onClick={() => handleRoleChange(member.id, role)}
+                                                                className={`block w-full text-left px-3 py-1.5 text-sm ${isDarkMode ? "text-gray-300 hover:bg-white/10" : "text-gray-600 hover:bg-gray-100"}`}
+                                                            >
+                                                                {role}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>

@@ -91,7 +91,9 @@ function RegisterPage() {
             // After successful registration, the auth_token cookie is set by the backend
             // Set familyId so the dashboard can load the correct family data
             setFamilyId(state.familyId)
+            
             // Navigate to dashboard - the AuthContext will be loaded from the cookie
+            // The WidgetPage will load the user data via the dashboard API
             navigate("/dashboard")
         } catch (error) {
             console.error("Fehler bei der Benutzererstellung:", error)
