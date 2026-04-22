@@ -6,12 +6,21 @@ import useDarkMode from "../../../hooks/useDarkMode"
 interface SideBarNavProps {
     onWidgetsClick: () => void
     onAdminClick: () => void
+    permissions?: { canAddWidgets?: boolean }
 }
 
-function SideBarNav({ onWidgetsClick, onAdminClick }: SideBarNavProps) {
+function SideBarNav({ onWidgetsClick, onAdminClick, permissions }: SideBarNavProps) {
     const { isDarkMode, toggleDarkMode } = useDarkMode()
     const navigate = useNavigate()
-    const navItems = ["Widgets verwalten", "Familie verwalten", "Profil bearbeiten"]
+    
+    // Filter nav items based on permissions
+    const allNavItems = ["Widgets verwalten", "Familie verwalten", "Profil bearbeiten"]
+    const navItems = allNavItems.filter(item => {
+        if (item === "Widgets verwalten") {
+            return permissions?.canAddWidgets === true
+        }
+        return true // Show all other items
+    })
 
     const handleNavClick = (item: string) => {
         if (item === "Widgets verwalten") return onWidgetsClick()

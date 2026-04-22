@@ -3,6 +3,7 @@ import SideBarNav from "./SideBarNav"
 import WidgetDrawer from "./WidgetDrawer"
 import AdminDrawer from "./AdminDrawer/AdminDrawer"
 import GlassButton from "../../ui/GlassButton"
+import imageIcons from "../../../constants/imageIcons"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import useDarkMode from "../../../hooks/useDarkMode"
@@ -14,9 +15,10 @@ interface SideBarProps {
     onClose: () => void
     pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
     setPendingWidget: (widget: { type: string, colSpan: number, rowSpan: number } | null) => void
+    permissions?: { canAddWidgets?: boolean }
 }
 
-function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarProps) {
+function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget, permissions }: SideBarProps) {
     const [sideBarView, setSideBarView] = useState<"nav" | "widgets" | "admin">("nav")
     const { isDarkMode } = useDarkMode()
     const { currentUser, logoutUser } = useAuth()
@@ -47,9 +49,14 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarPr
                                 {currentUser && currentUser.avatarType === "URL" ? (
                                     <img src={currentUser.avatar} alt={currentUser.name} className="w-24 h-24 p-1 rounded-xl border-2 object-cover" style={{ borderColor: currentUser.color || '#ffffff50' }} />
                                 ) : currentUser && currentUser.avatarType === "ICON" ? (
-                                    <svg className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: currentUser.color || '#ffffff50' }}>
-                                        <use href={currentUser.avatar} />
-                                    </svg>
+                                    (() => {
+                                        const Icon = imageIcons[currentUser.avatar as keyof typeof imageIcons]
+                                        return Icon ? (
+                                            <Icon className="w-24 h-24 p-1 rounded-xl border-2" style={{ backgroundColor: currentUser.color, borderColor: currentUser.color || '#ffffff50' }} size={48} />
+                                        ) : (
+                                            <User className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: currentUser.color || '#ffffff50' }} size={48} />
+                                        )
+                                    })()
                                 ) : (
                                     <User className="w-24 h-24 p-1 rounded-xl border-2" style={{ borderColor: currentUser?.color || '#ffffff50' }} size={48} />
                                 )}
@@ -58,7 +65,7 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget }: SideBarPr
                                 Willkommen zurück, {currentUser?.name || "User"}!
                             </p>
                         </div>
-                        <SideBarNav onWidgetsClick={() => setSideBarView("widgets")} onAdminClick={() => setSideBarView("admin")}/>
+                        <SideBarNav onWidgetsClick={() => setSideBarView("widgets")} onAdminClick={() => setSideBarView("admin")} permissions={permissions}/>
                     </div>
                     <div className="flex flex-col items-center mt-auto">
                         <GlassButton isDarkMode={!isDarkMode} onClick={handleLogout} className="self-center mb-4 p-3 w-30">

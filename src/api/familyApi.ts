@@ -39,6 +39,7 @@ export interface DashboardResponse {
     familyId: number
     widgets: WidgetResponse[]
     permissions: Permissions
+    currentUser: UserProfile | null
 }
 
 export const getUsersForFamily = async (familyId: number): Promise<UserProfile[]> => {
@@ -57,6 +58,12 @@ export interface CreateFamilyRequest {
     email: string
 }
 
-export const createFamily = async (data: CreateFamilyRequest): Promise<void> => {
-    await axiosInstance.post('/api/family', data)
+export interface CreateFamilyResponse {
+    familyId: number
+    familyName: string
+}
+
+export const createFamily = async (data: CreateFamilyRequest): Promise<CreateFamilyResponse> => {
+    const response = await axiosInstance.post<CreateFamilyResponse>('/api/family', data)
+    return response.data
 }

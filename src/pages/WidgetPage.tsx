@@ -2,10 +2,9 @@ import AppHeader from "../components/mainpage/AppHeader"
 import SideBar from "../components/mainpage/sidebar/SideBar"
 import WidgetGrid from "../components/layout/WidgetGrid"
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 import DarkModeBackground from "../components/ui/DarkModeBackground"
 import useAuth from "../hooks/useAuth"
-import { getDashboardByFamilyId, type WidgetConfig } from "../api/familyApi"
+import { getDashboardByFamilyId, type WidgetConfig, type Permissions } from "../api/familyApi"
 import { createWidget, updateWidgetPosition, deleteWidget } from "../api/widgetApi"
 import GlassButton from "../components/ui/GlassButton"
 import useDarkMode from "../hooks/useDarkMode"
@@ -21,6 +20,12 @@ export interface PlacedWidget {
     config?: WidgetConfig
 }
 
+// Helper to generate temporary negative IDs for new widgets
+let tempIdCounter = -1;
+function generateTempId(): string {
+    return String(tempIdCounter--);
+}
+
 function WidgetPage() {
     const [sideBarOpen, setSideBarOpen] = useState(false)
     const [pendingWidget, setPendingWidget] = useState<{ type: string, colSpan: number, rowSpan: number } | null>(null)
@@ -29,11 +34,16 @@ function WidgetPage() {
     const [isSaving, setIsSaving] = useState(false)
     const [savedLayout, setSavedLayout] = useState("")
     const [dashboardId, setDashboardId] = useState<number | null>(null)
-    const { currentUser, isAuthenticated, familyId } = useAuth()
+    const [permissions, setPermissions] = useState<Permissions>({
+        canEditLayout: false,
+        canAddWidgets: false,
+        canDeleteWidgets: false,
+        canEditWidgetData: false
+    })
+    const { currentUser, familyId, setCurrentUser, setUserId } = useAuth()
     const { isDarkMode } = useDarkMode()
-    const navigate = useNavigate()
 
-    const hasChanges = JSON.stringify(placedWidgets) !== savedLayout
+    const hasChanges = placedWidgets.length > 0 && JSON.stringify(placedWidgets) !== savedLayout
 
     const handleSaveLayout = async () => {
         if (!dashboardId || isSaving) return
@@ -119,11 +129,7 @@ function WidgetPage() {
         return () => window.removeEventListener("keydown", handler)
     }, [])
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            navigate("/login")
-        }
-    }, [isAuthenticated, navigate])
+    // Removed authentication check - ProtectedRoute already handles this
 
     useEffect(() => {
         const fetchDashboard = async () => {
@@ -136,8 +142,19 @@ function WidgetPage() {
                 setIsLoading(true)
                 const dashboardData = await getDashboardByFamilyId(familyId)
                 
-                // Store dashboard ID
+                // Store dashboard ID and permissions
                 setDashboardId(dashboardData.id)
+                console.log('Dashboard permissions for user:', currentUser?.name, dashboardData.permissions)
+                setPermissions(dashboardData.permissions)
+                
+                // Load current user data if not already loaded
+                console.log('Dashboard currentUser from backend:', dashboardData.currentUser)
+                console.log('Frontend currentUser before:', currentUser)
+                if (!currentUser && dashboardData.currentUser) {
+                    console.log('Setting currentUser:', dashboardData.currentUser)
+                    setCurrentUser(dashboardData.currentUser)
+                    setUserId(dashboardData.currentUser.id)
+                }
                 
                 // Load widgets from backend
                 const widgets = dashboardData.widgets.map(widget => ({
@@ -180,7 +197,7 @@ function WidgetPage() {
                 <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)} user={currentUser}/>
                 <div className="absolute bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
                     <AnimatePresence>
-                        {hasChanges && (
+                        {hasChanges && permissions?.canEditLayout && (
                             <motion.div
                                 key="save-button"
                                 initial={{ y: 80, opacity: 0 }}
@@ -200,14 +217,24 @@ function WidgetPage() {
                         )}
                     </AnimatePresence>
                 </div>
-                <WidgetGrid placedWidgets={placedWidgets} pendingWidget={pendingWidget} onCellClick={(col, row) => {
-                    if (pendingWidget) {
-                        setPlacedWidgets([...placedWidgets, { id: crypto.randomUUID(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
-                        setPendingWidget(null)
-                    }
-                }} onRemoveWidget={(id) => setPlacedWidgets(placedWidgets.filter((w) => w.id !== id))}
+                <WidgetGrid 
+                    placedWidgets={placedWidgets} 
+                    pendingWidget={permissions?.canAddWidgets ? pendingWidget : null} 
+                    onCellClick={(col, row) => {
+                        if (pendingWidget && permissions?.canAddWidgets) {
+                            setPlacedWidgets([...placedWidgets, { id: generateTempId(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
+                            setPendingWidget(null)
+                        }
+                    }} 
+                    onRemoveWidget={permissions?.canDeleteWidgets ? (id) => setPlacedWidgets(placedWidgets.filter((w) => w.id !== id)) : () => {}}
                 />
-                <SideBar isOpen={sideBarOpen} onClose={() => setSideBarOpen(false)} pendingWidget={pendingWidget} setPendingWidget={setPendingWidget}/>
+                <SideBar 
+                    isOpen={sideBarOpen} 
+                    onClose={() => setSideBarOpen(false)} 
+                    pendingWidget={pendingWidget} 
+                    setPendingWidget={permissions?.canAddWidgets ? setPendingWidget : () => {}}
+                    permissions={permissions}
+                />
             </div>
         </div>
     )

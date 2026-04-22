@@ -29,7 +29,10 @@ function ProtectedRoute({ allowedRoles, children }: { allowedRoles: StatusRespon
                 setReady(true);
             }
         })
-        .catch(err => console.error(err))
+        .catch(err => {
+            console.error('ProtectedRoute: Error getting status:', err);
+            navigate("/login");
+        })
     }, [])
 
 

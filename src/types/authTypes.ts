@@ -44,3 +44,16 @@ export interface SysAdminLoginResponse {
 }
 
 export type LoginResponse = FamilyLoginResponse | SysAdminLoginResponse;
+
+export interface RegisterRequest {
+    name: string;
+    pin?: string;
+    email: string;
+    familyId: number;
+    pfpIcon: string;
+    color: string;
+}
+
+export interface AuthResponse {
+    token: string;
+}
