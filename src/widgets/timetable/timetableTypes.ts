@@ -6,7 +6,7 @@ export interface Profile {
 }
 
 export interface TimetableEvent {
-    id: string
+    id: number
     title: string
     slot: number
     day: number // 0=Mo, 1=Di, 2=Mi, 3=Do, 4=Fr
@@ -14,9 +14,15 @@ export interface TimetableEvent {
 }
 
 export interface Reminder {
-    id: string
+    id: number
     day: number
     text: string
+}
+
+export interface TimetableData {
+    events: TimetableEvent[]
+    reminders: Reminder[]
+    watchedUserIds: number[]
 }
 
 export const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"] as const
