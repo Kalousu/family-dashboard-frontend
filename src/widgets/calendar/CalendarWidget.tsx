@@ -139,7 +139,7 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
     const scrollableClass = getScrollableClass(isDarkMode);
 
     return (
-        <div className="h-full w-full">
+        <div className="h-full w-full border-white/20">
             {selectedDay ? (
                 <DayDetailView
                     isDarkMode={isDarkMode}
@@ -151,7 +151,7 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
                     removeEvent={removeEvent}
                 />
             ) : (
-                <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/40 to-cyan-400/30">
+                <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/30 to-cyan-400/20">
                     <div className={scrollableClass}>
                         <div className="flex items-center justify-between">
                             <span className="text-lg font-bold text-white">

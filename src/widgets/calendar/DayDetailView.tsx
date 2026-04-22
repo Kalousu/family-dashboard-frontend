@@ -81,7 +81,7 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, events, addEvent, upda
     const scrollableClass = getScrollableClass(isDarkMode);
 
     return (
-        <div className="relative rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/40 to-cyan-400/30">
+        <div className="relative rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/30 to-cyan-400/20">
             <div className={scrollableClass}>
                 <div className="flex items-center gap-2">
                     <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-1 text-white">
@@ -145,11 +145,11 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, events, addEvent, upda
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute inset-3 rounded-xl backdrop-blur-md bg-linear-to-b from-teal-700/90 to-cyan-700/80 border border-white/20 flex flex-col p-4 gap-4"
+                        className="absolute inset-3 rounded-xl backdrop-blur-lg bg-linear-to-b from-teal-800/90 to-cyan-900/90 border border-white/10 flex flex-col p-4 gap-4"
                         onKeyDown={e => { if (e.key === "Enter") submitForm(); }}
                     >
                         <div className="flex items-center gap-2">
-                            <GlassButton isDarkMode={isDarkMode} onClick={cancelForm} className="p-1 text-white">
+                            <GlassButton isDarkMode={!isDarkMode} onClick={cancelForm} className="p-1 text-white">
                                 <ChevronLeft size={18} />
                             </GlassButton>
                             <span className="text-white font-bold text-base flex-1">
