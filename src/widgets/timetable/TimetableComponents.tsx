@@ -83,9 +83,8 @@ export function EventCard({ title, profiles, merged, editMode, onRemove }: {
     )
 }
 
-export function DayHeader({ day, dayShort, reminder, editMode, onRemove, isToday, compact }: {
-    day: string
-    dayShort?: string
+export function DayHeader({ label, reminder, editMode, onRemove, isToday, compact }: {
+    label: string
     reminder?: Reminder
     editMode: boolean
     onRemove: () => void
@@ -95,12 +94,12 @@ export function DayHeader({ day, dayShort, reminder, editMode, onRemove, isToday
     return (
         <div className={`flex flex-col items-center justify-center gap-0.5 px-1 border-b border-r border-white/10 last:border-r-0 ${compact ? "py-1" : "py-1.5"} ${isToday ? "bg-indigo-500/15" : ""}`}>
             <span className={`text-xs font-bold tracking-wide text-center leading-none ${isToday ? "text-indigo-200" : "text-white/70"}`}>
-                {compact && dayShort ? dayShort : day}
+                {label}
             </span>
             {isToday && <div className="w-1 h-1 rounded-full bg-indigo-400 shrink-0" />}
 
             {reminder && (
-                <div className={`flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md py-0.5 w-full ${compact ? "px-1" : "px-1.5 border"}`}>
+                <div className={`flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md py-0.5 w-full ${compact ? "px-1" : "px-1.5"}`}>
                     <span className={`text-white font-semibold min-w-0 ${compact ? "text-[8px] truncate" : "text-[10px] wrap-break-word"}`}>! {reminder.text}</span>
                     {editMode && (
                         <button onClick={onRemove} className="text-white/70 hover:text-white shrink-0">
