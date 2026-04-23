@@ -18,6 +18,8 @@ function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
 
     const { ref, height, width } = useContainerSize()
     const isCompact = height < 220 || width < 200
+    // Narrow but tall (e.g. 2×2 or 2×3 in tablet landscape grid cell): use medium layout
+    const isMediumCompact = isCompact && height >= 220 && width < 200
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     
@@ -117,7 +119,66 @@ function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
 
     return (
         <div ref={ref} className={`relative w-full h-full flex flex-col overflow-hidden bg-linear-to-b ${getWeatherGradient(weatherData.weatherCode, isNight)} backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4`}>
-            {isCompact ? (
+            {isMediumCompact ? (
+                // Narrow but tall cell (e.g. 2×2 / 2×3 on tablet landscape): use available height
+                <div className="h-full flex flex-col gap-2">
+                    <div className="relative w-full shrink-0">
+                        <div className="border-2 border-white/20 focus-within:border-white/60 rounded-xl flex flex-row items-center transition-all">
+                            <input
+                                value={inputCity}
+                                onChange={handleInputChange}
+                                className="bg-transparent text-white placeholder:text-white/50 transition-all px-2 py-1.5 text-sm font-bold w-full focus:outline-none rounded-xl"
+                                placeholder="Stadt..."
+                            />
+                        </div>
+                        {showDropdown && searchResults.length > 0 && (
+                            <div className="absolute left-0 right-0 bg-white/20 backdrop-blur-md rounded-xl overflow-hidden z-50 mt-1">
+                                {searchResults.map((geo) =>
+                                    <div key={geo.latitude + "-" + geo.longitude} onClick={() => handleLocationSelect(geo)} className="px-3 py-1.5 text-white text-xs cursor-pointer hover:bg-white/30">
+                                        {geo.name}, {geo.admin1}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    {isLoading ? (
+                        <div className="flex-1 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-white" />
+                        </div>
+                    ) : error ? (
+                        <div className="flex-1 flex items-center justify-center">
+                            <p className="text-white/80 text-center text-xs font-semibold">{error}</p>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center gap-2 min-h-0">
+                            <div className="flex flex-row items-center gap-2">
+                                <p className="text-white text-3xl font-semibold leading-none">{weatherData.temperature}°C</p>
+                                {getWeatherIcon(weatherData.weatherCode, 32, isNight)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Wind color="white" size={14} />
+                                <p className="text-white text-xs font-bold">{weatherData.windSpeed} km/h</p>
+                            </div>
+                            {height >= 380 && daily && (
+                                <div className="flex flex-col gap-1 w-full mt-1">
+                                    {daily.time.slice(0, 3).map((time, i) => {
+                                        const date = new Date(time + "T12:00:00")
+                                        const dayLabel = i === 0 ? "Heute" : date.toLocaleDateString("de-DE", { weekday: "short" })
+                                        return (
+                                            <div key={time} className="flex flex-row items-center bg-white/10 rounded-lg px-2 py-1.5">
+                                                <p className="text-white/80 text-xs font-semibold w-10">{dayLabel}</p>
+                                                {getWeatherIcon(daily.weathercode[i], 16, isNight)}
+                                                <p className="text-white text-xs font-bold ml-auto">{daily.temperature_2m_max[i]}°C</p>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            ) : isCompact ? (
+                // Short or narrow cell: minimal layout, text-3xl to avoid overflow
                 <div className="h-full flex flex-col justify-between">
                     <div className="relative w-full">
                         <div className="border-2 border-white/20 focus-within:border-white/60 rounded-xl flex flex-row items-center transition-all">
@@ -131,11 +192,7 @@ function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
                         {showDropdown && searchResults.length > 0 && (
                             <div className="absolute left-0 right-0 bg-white/20 backdrop-blur-md rounded-xl overflow-hidden z-50 mt-1">
                                 {searchResults.map((geo) =>
-                                    <div
-                                        key={geo.latitude + "-" + geo.longitude}
-                                        onClick={() => handleLocationSelect(geo)}
-                                        className="px-3 py-1.5 text-white text-xs cursor-pointer hover:bg-white/30"
-                                    >
+                                    <div key={geo.latitude + "-" + geo.longitude} onClick={() => handleLocationSelect(geo)} className="px-3 py-1.5 text-white text-xs cursor-pointer hover:bg-white/30">
                                         {geo.name}, {geo.admin1}
                                     </div>
                                 )}
@@ -144,7 +201,7 @@ function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
                     </div>
                     {isLoading ? (
                         <div className="flex-1 flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-white"></div>
+                            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-white" />
                         </div>
                     ) : error ? (
                         <div className="flex-1 flex items-center justify-center">
@@ -152,8 +209,8 @@ function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
                         </div>
                     ) : (
                         <div className="flex-1 flex flex-row items-center justify-center gap-2">
-                            <p className="text-white text-4xl font-semibold leading-none">{weatherData.temperature}°C</p>
-                            {getWeatherIcon(weatherData.weatherCode, 40, isNight)}
+                            <p className="text-white text-3xl font-semibold leading-none">{weatherData.temperature}°C</p>
+                            {getWeatherIcon(weatherData.weatherCode, 32, isNight)}
                         </div>
                     )}
                 </div>
