@@ -1,7 +1,7 @@
 import { useState, Fragment, useRef, useEffect, useContext, useCallback } from "react"
 import { Pencil } from "lucide-react"
 import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
-import { DAYS, DAYS_SHORT, SLOTS } from "./timetableTypes"
+import { DAYS, SLOTS } from "./timetableTypes"
 import TimetableEdit from "./TimetableEdit"
 import { TabButton, EventCard, DayHeader } from "./TimetableComponents"
 import { AuthContext } from "../../context/AuthContext"
@@ -78,6 +78,16 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
 
     // 0=Mo, 1=Di, ..., 4=Fr; -1 on weekends
     const todayIdx = (() => { const d = (new Date().getDay() + 6) % 7; return d < 5 ? d : -1 })()
+
+    // Compact: only today + tomorrow (or Mon+Di on weekends, Fr+Mo on Fridays)
+    // Non-compact: all 5 days
+    const daysToRender: Array<{ dayIndex: number; label: string }> = isCompact
+        ? todayIdx === -1
+            ? [{ dayIndex: 0, label: "Mo" },    { dayIndex: 1, label: "Di" }]
+            : todayIdx === 4
+            ? [{ dayIndex: 4, label: "Heute" }, { dayIndex: 0, label: "Mo" }]
+            : [{ dayIndex: todayIdx, label: "Heute" }, { dayIndex: todayIdx + 1, label: "Morgen" }]
+        : DAYS.map((name, i) => ({ dayIndex: i, label: name }))
 
     useEffect(() => {
         if (numId === undefined || !familyId) return
@@ -178,15 +188,14 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{ overflowAnchor: "none" }}>
                 <div
                     className="grid"
-                    style={{ gridTemplateColumns: `${isCompact ? "1rem" : "1.5rem"} 1px repeat(5, minmax(0, 1fr))` }}
+                    style={{ gridTemplateColumns: `${isCompact ? "1rem" : "1.5rem"} 1px repeat(${daysToRender.length}, minmax(0, 1fr))` }}
                 >
                     <div className="border-b border-white/15" />
                     <div className="bg-white/15 border-b border-white/15" />
-                    {DAYS.map((day, dayIndex) => (
+                    {daysToRender.map(({ dayIndex, label }) => (
                         <DayHeader
-                            key={day}
-                            day={day}
-                            dayShort={DAYS_SHORT[dayIndex]}
+                            key={dayIndex}
+                            label={label}
                             compact={isCompact}
                             isToday={dayIndex === todayIdx}
                             reminder={reminders.find((r) => r.day === dayIndex)}
@@ -201,7 +210,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                                 {slot}
                             </div>
                             <div className="bg-white/15 border-b border-white/10" />
-                            {DAYS.map((_, dayIndex) => {
+                            {daysToRender.map(({ dayIndex }) => {
                                 const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds, allProfiles)
                                 const allViewCount = getEventsForCell(events, slot, dayIndex, "all", watchedIds, allProfiles).length
                                 const minHeight = `${Math.max(1, allViewCount) * (isCompact ? 2 : 3)}rem`
