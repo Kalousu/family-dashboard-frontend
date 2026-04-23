@@ -83,22 +83,28 @@ export function EventCard({ title, profiles, merged, editMode, onRemove }: {
     )
 }
 
-export function DayHeader({ day, reminder, editMode, onRemove }: {
+export function DayHeader({ day, dayShort, reminder, editMode, onRemove, isToday, compact }: {
     day: string
+    dayShort?: string
     reminder?: Reminder
     editMode: boolean
     onRemove: () => void
+    isToday?: boolean
+    compact?: boolean
 }) {
     return (
-        <div className="flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 border-b border-white/15 border-r border-white/10 last:border-r-0">
-            <span className="text-white/70 text-xs font-bold tracking-wide text-center">{day}</span>
+        <div className={`flex flex-col items-center justify-center gap-0.5 px-1 border-b border-r border-white/10 last:border-r-0 ${compact ? "py-1" : "py-1.5"} ${isToday ? "bg-indigo-500/15" : ""}`}>
+            <span className={`text-xs font-bold tracking-wide text-center leading-none ${isToday ? "text-indigo-200" : "text-white/70"}`}>
+                {compact && dayShort ? dayShort : day}
+            </span>
+            {isToday && <div className="w-1 h-1 rounded-full bg-indigo-400 shrink-0" />}
 
             {reminder && (
-                <div className="flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md px-1.5 py-0.5 w-full">
-                    <span className="text-white text-[10px] font-semibold break-words min-w-0">! {reminder.text}</span>
+                <div className={`flex items-center gap-0.5 bg-red-500/70 border border-red-400/40 rounded-md py-0.5 w-full ${compact ? "px-1" : "px-1.5 border"}`}>
+                    <span className={`text-white font-semibold min-w-0 ${compact ? "text-[8px] truncate" : "text-[10px] wrap-break-word"}`}>! {reminder.text}</span>
                     {editMode && (
                         <button onClick={onRemove} className="text-white/70 hover:text-white shrink-0">
-                            <X size={9} />
+                            <X size={compact ? 7 : 9} />
                         </button>
                     )}
                 </div>
