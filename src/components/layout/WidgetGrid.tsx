@@ -56,7 +56,55 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
     )
 
     const disableMobileDrag = COLS <= 4
+    const isMobile = containerWidth > 0 && containerWidth < 640
 
+    // Mobile card stack — no grid, mobile vertical layout
+    if (isMobile && !pendingWidget) {
+        const sorted = [...visibleWidgets].sort((a, b) =>
+            a.row !== b.row ? a.row - b.row : a.col - b.col
+        )
+        return (
+            <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto px-4 pt-2 pb-28 mt-14">
+                <div className="flex flex-col gap-4">
+                    {sorted.map((widget) => (
+                        <div
+                            key={widget.id}
+                            className={`relative w-full rounded-2xl border ${isDarkMode ? "bg-gray-700/40 border-white/10" : "bg-white/40 border-white/30"}`}
+                            style={{ height: `${Math.round(containerWidth * widget.rowSpan / widget.colSpan)}px` }}
+                        >
+                            {(() => {
+                                const WidgetComponent = getWidget(widget.type)
+                                return WidgetComponent
+                                    ? <WidgetComponent widgetId={widget.id} config={widget.config} />
+                                    : <p className="text-white p-2">{widget.type}</p>
+                            })()}
+                            {Number(widget.id) < 0 && (
+                                <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10">
+                                    <Lock size={20} className="text-white/80" />
+                                    <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
+                                </div>
+                            )}
+                            {canDelete && (
+                                <button
+                                    className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-1 touch-manipulation"
+                                    onClick={() => onRemoveWidget(widget.id)}
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                    {sorted.length === 0 && (
+                        <p className={`text-center text-sm mt-16 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                            Keine Widgets vorhanden
+                        </p>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    // Desktop (or mobile in placement mode): grid layout
     return (
         <div ref={containerRef} className="flex-1 h-full min-h-0 flex flex-col p-4 sm:p-8 mt-14 sm:mt-10">
             <div className="relative flex-1 h-full">
