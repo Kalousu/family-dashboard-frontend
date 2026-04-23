@@ -1,11 +1,12 @@
-import { useState, Fragment, useRef, useEffect, useContext } from "react"
+import { useState, Fragment, useRef, useEffect, useContext, useCallback } from "react"
 import { Pencil } from "lucide-react"
 import type { Profile, TimetableEvent, Reminder } from "./timetableTypes"
-import { DAYS, SLOTS } from "./timetableTypes"
+import { DAYS, DAYS_SHORT, SLOTS } from "./timetableTypes"
 import TimetableEdit from "./TimetableEdit"
 import { TabButton, EventCard, DayHeader } from "./TimetableComponents"
 import { AuthContext } from "../../context/AuthContext"
 import { getUsersForFamily } from "../../api/familyApi"
+
 import {
     getTimetable,
     createTimetableEvent,
@@ -62,6 +63,21 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
     const [editMode, setEditMode]       = useState(false)
 
     const scrollRef = useRef<HTMLDivElement>(null)
+    const roRef = useRef<ResizeObserver | null>(null)
+    const [containerWidth, setContainerWidth] = useState(0)
+    const isCompact = containerWidth > 0 && containerWidth < 400
+
+    const containerRef = useCallback((node: HTMLDivElement | null) => {
+        roRef.current?.disconnect()
+        roRef.current = null
+        if (!node) return
+        const ro = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width))
+        ro.observe(node)
+        roRef.current = ro
+    }, [])
+
+    // 0=Mo, 1=Di, ..., 4=Fr; -1 on weekends
+    const todayIdx = (() => { const d = (new Date().getDay() + 6) % 7; return d < 5 ? d : -1 })()
 
     useEffect(() => {
         if (numId === undefined || !familyId) return
@@ -120,16 +136,13 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
         setReminders((prev) => prev.filter((r) => r.id !== reminderId))
     }
 
-    if (loading) {
-        return (
-            <div className="w-full h-full bg-linear-to-b from-purple-900/50 to-indigo-400/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg flex items-center justify-center">
+    return (
+        <div ref={containerRef} className="w-full h-full bg-linear-to-b from-purple-900/50 to-indigo-400/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
+        {loading ? (
+            <div className="flex-1 flex items-center justify-center">
                 <span className="text-white/50 text-sm">Lädt…</span>
             </div>
-        )
-    }
-
-    return (
-        <div className="w-full h-full bg-linear-to-b from-purple-900/50 to-indigo-400/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
+        ) : (<>
 
             {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
@@ -146,7 +159,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                     }`}
                 >
                     <Pencil size={12} />
-                    {editMode ? "Fertig" : "Bearbeiten"}
+                    {!isCompact && (editMode ? "Fertig" : "Bearbeiten")}
                 </button>
             </div>
 
@@ -165,7 +178,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{ overflowAnchor: "none" }}>
                 <div
                     className="grid"
-                    style={{ gridTemplateColumns: "1.5rem 1px repeat(5, minmax(0, 1fr))" }}
+                    style={{ gridTemplateColumns: `${isCompact ? "1rem" : "1.5rem"} 1px repeat(5, minmax(0, 1fr))` }}
                 >
                     <div className="border-b border-white/15" />
                     <div className="bg-white/15 border-b border-white/15" />
@@ -173,6 +186,9 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                         <DayHeader
                             key={day}
                             day={day}
+                            dayShort={DAYS_SHORT[dayIndex]}
+                            compact={isCompact}
+                            isToday={dayIndex === todayIdx}
                             reminder={reminders.find((r) => r.day === dayIndex)}
                             editMode={editMode}
                             onRemove={() => handleRemoveReminder(reminders.find((r) => r.day === dayIndex)!.id)}
@@ -181,16 +197,16 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
 
                     {SLOTS.map((slot) => (
                         <Fragment key={slot}>
-                            <div className="flex items-center justify-center text-white/40 text-sm font-bold border-b border-white/10 last:border-b-0 py-1">
+                            <div className={`flex items-center justify-center text-white/40 font-bold border-b border-white/10 last:border-b-0 py-1 ${isCompact ? "text-[10px]" : "text-sm"}`}>
                                 {slot}
                             </div>
                             <div className="bg-white/15 border-b border-white/10" />
                             {DAYS.map((_, dayIndex) => {
                                 const cellEvents = getEventsForCell(events, slot, dayIndex, activeTab, watchedIds, allProfiles)
                                 const allViewCount = getEventsForCell(events, slot, dayIndex, "all", watchedIds, allProfiles).length
-                                const minHeight = `${Math.max(1, allViewCount) * 3}rem`
+                                const minHeight = `${Math.max(1, allViewCount) * (isCompact ? 2 : 3)}rem`
                                 return (
-                                    <div key={dayIndex} className="px-1 py-1 flex flex-col gap-0.5 border-b border-r border-white/10 last:border-r-0" style={{ minHeight }}>
+                                    <div key={dayIndex} className={`flex flex-col gap-0.5 border-b border-r border-white/10 last:border-r-0 ${isCompact ? "px-0.5 py-0.5" : "px-1 py-1"} ${dayIndex === todayIdx ? "bg-indigo-500/8" : ""}`} style={{ minHeight }}>
                                         {cellEvents.length === 0 ? (
                                             <div className="flex-1 rounded-lg border border-dashed border-white/10" />
                                         ) : cellEvents.map((ev) => (
@@ -215,6 +231,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                     ))}
                 </div>
             </div>
+        </>)}
         </div>
     )
 }

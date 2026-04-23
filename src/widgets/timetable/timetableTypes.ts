@@ -27,4 +27,5 @@ export interface TimetableData {
 }
 
 export const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"] as const
+export const DAYS_SHORT = ["Mo", "Di", "Mi", "Do", "Fr"] as const
 export const SLOTS = Array.from({ length: 9 }, (_, i) => i + 1)
