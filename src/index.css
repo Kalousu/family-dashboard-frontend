@@ -3,3 +3,7 @@
 :root {
   --sidebar-width: 280px;
 }
+
+html, body {
+  overscroll-behavior: none;
+}
