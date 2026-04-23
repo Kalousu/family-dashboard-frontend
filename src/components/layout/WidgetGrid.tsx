@@ -17,9 +17,14 @@ interface WidgetGridProps {
 
 const DOTS_PER_SLOT = 3
 
-function getGridDimensions(width: number): { COLS: number; ROWS: number } {
+function getGridDimensions(width: number, height: number): { COLS: number; ROWS: number } {
     if (width > 0 && width < 640) return { COLS: 2, ROWS: 4 }
-    if (width >= 640 && width <= 1024) return { COLS: 6, ROWS: 6 }
+    if (width >= 640 && width < 1024) {
+        const isLandscape = height > 0 && width > height
+        return isLandscape
+            ? { COLS: 8, ROWS: 5 }   // Tablet Querformat
+            : { COLS: 5, ROWS: 6 }   // Tablet Hochformat
+    }
     return { COLS: 10, ROWS: 5 }
 }
 
@@ -33,13 +38,14 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
     const [hoveredCell, setHoveredCell] = useState<{ col: number, row: number } | null>(null)
     const [hoveredWidget, setHoveredWidget] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
-    const { ref: containerRef, width: containerWidth } = useContainerSize()
+    const { ref: containerRef, width: containerWidth, height: containerHeight } = useContainerSize()
 
-    const { COLS, ROWS: gridROWS } = getGridDimensions(containerWidth)
+    const { COLS, ROWS: gridROWS } = getGridDimensions(containerWidth, containerHeight)
     const isMobile = containerWidth > 0 && containerWidth < 640
+    const isTabletPortrait = containerWidth >= 640 && containerWidth < 1024 && containerHeight > 0 && containerHeight > containerWidth
 
-    // On mobile, extend ROWS to cover all placed widgets so none are filtered out
-    const ROWS = isMobile
+    // On mobile/tablet-portrait, extend ROWS to cover all placed widgets
+    const ROWS = (isMobile || isTabletPortrait)
         ? Math.max(gridROWS, placedWidgets.reduce((max, w) => Math.max(max, w.row + w.rowSpan), gridROWS))
         : gridROWS
 
@@ -173,10 +179,118 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
         )
     }
 
+    // Tablet portrait — 2-column scrollable card stack
+    if (isTabletPortrait) {
+        const sorted = [...placedWidgets].sort((a, b) =>
+            a.row !== b.row ? a.row - b.row : a.col - b.col
+        )
+        const fullWidth = containerWidth - 32   // px-4 on each side
+        const halfWidth = Math.floor((fullWidth - 12) / 2)  // gap-3 = 12px
+
+        const findFirstAvailablePos = (): { col: number; row: number } | null => {
+            if (!pendingWidget) return null
+            for (let row = 0; row <= ROWS - pendingWidget.rowSpan; row++) {
+                for (let col = 0; col <= COLS - pendingWidget.colSpan; col++) {
+                    if (canPlace(col, row)) return { col, row }
+                }
+            }
+            return null
+        }
+        const availablePos = pendingWidget ? findFirstAvailablePos() : null
+        const widgetFits = pendingWidget
+            ? pendingWidget.colSpan <= COLS && pendingWidget.rowSpan <= ROWS
+            : false
+
+        return (
+            <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto px-4 pt-2 pb-28 mt-14">
+                <div className="grid grid-cols-2 gap-3">
+                    {sorted.map((widget) => {
+                        const isFullWidth = widget.colSpan * 2 > COLS
+                        const displaySize = widget.colSpan > COLS
+                            ? (getMobileFallbackSize(widget.type, COLS) ?? { colSpan: widget.colSpan, rowSpan: widget.rowSpan })
+                            : { colSpan: widget.colSpan, rowSpan: widget.rowSpan }
+                        const displayWidth = isFullWidth ? fullWidth : halfWidth
+
+                        return (
+                            <div
+                                key={widget.id}
+                                className={`relative rounded-2xl border ${isFullWidth ? "col-span-2" : ""} ${isDarkMode ? "bg-gray-700/40 border-white/10" : "bg-white/40 border-white/30"}`}
+                                style={{ height: `${Math.round(displayWidth * displaySize.rowSpan / displaySize.colSpan)}px` }}
+                            >
+                                {(() => {
+                                    const WidgetComponent = getWidget(widget.type)
+                                    return WidgetComponent
+                                        ? <WidgetComponent widgetId={widget.id} config={widget.config} />
+                                        : <p className="text-white p-2">{widget.type}</p>
+                                })()}
+                                {Number(widget.id) < 0 && (
+                                    <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10">
+                                        <Lock size={20} className="text-white/80" />
+                                        <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
+                                    </div>
+                                )}
+                                {canDelete && !pendingWidget && (
+                                    <button
+                                        className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-1 touch-manipulation"
+                                        onClick={() => onRemoveWidget(widget.id)}
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                )}
+                            </div>
+                        )
+                    })}
+
+                    {pendingWidget && (() => {
+                        const isFullWidth = pendingWidget.colSpan * 2 > COLS
+                        const displayWidth = isFullWidth ? fullWidth : halfWidth
+                        return (
+                            <div
+                                className={`relative rounded-2xl border-2 border-dashed ${isFullWidth ? "col-span-2" : ""} ${availablePos ? (isDarkMode ? "border-white/30" : "border-gray-400/40") : "border-red-400/40"}`}
+                                style={{ height: `${Math.round(displayWidth * pendingWidget.rowSpan / pendingWidget.colSpan)}px` }}
+                            >
+                                <div className={`absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-3 ${isDarkMode ? "bg-gray-700/20" : "bg-white/20"}`}>
+                                    {!widgetFits ? (
+                                        <p className={`text-sm font-semibold text-center px-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                            Dieses Widget ist zu groß für die Tablet-Ansicht
+                                        </p>
+                                    ) : availablePos ? (
+                                        <>
+                                            <p className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                                Widget hinzufügen?
+                                            </p>
+                                            <GlassButton
+                                                isDarkMode={!isDarkMode}
+                                                onClick={() => onCellClick(availablePos.col, availablePos.row)}
+                                                className="px-6 py-2 text-sm backdrop-blur-sm"
+                                            >
+                                                Hinzufügen
+                                            </GlassButton>
+                                        </>
+                                    ) : (
+                                        <p className="text-red-400 text-sm font-semibold px-6 text-center">
+                                            Kein Platz verfügbar. Entferne zuerst ein Widget.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    })()}
+
+                    {sorted.length === 0 && !pendingWidget && (
+                        <p className={`col-span-2 text-center text-sm mt-16 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                            Keine Widgets vorhanden
+                        </p>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
     // Desktop (or mobile in placement mode): grid layout
     return (
-        <div ref={containerRef} className="flex-1 h-full min-h-0 flex flex-col p-4 sm:p-8 mt-14 sm:mt-10">
-            <div className="relative flex-1 h-full">
+        <div ref={containerRef} className="flex-1 min-h-0 overflow-auto p-4 sm:p-6 lg:p-8 mt-14 sm:mt-13">
+            <div className="relative h-full" style={{ minWidth: `${dotCols * 20}px`, minHeight: `${dotRows * 24}px` }}>
                 <div className="absolute inset-0 grid place-items-center" style={gridStyle}>
                     {dots.map((_, index) => (
                         <div key={index} className={`w-1 h-1 rounded-full ${isDarkMode ? "bg-slate-700/50" : "bg-blue-300/70"}`} />
