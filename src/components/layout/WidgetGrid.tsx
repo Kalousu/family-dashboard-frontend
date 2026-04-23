@@ -126,7 +126,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                             )}
                             {canDelete && !pendingWidget && (
                                 <button
-                                    className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-1 touch-manipulation"
+                                    className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-2 touch-manipulation"
                                     onClick={() => onRemoveWidget(widget.id)}
                                 >
                                     <X size={14} />
@@ -202,8 +202,8 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
             : false
 
         return (
-            <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto px-4 pt-2 pb-28 mt-14">
-                <div className="grid grid-cols-2 gap-3">
+            <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pt-2 pb-28 mt-14 sm:mt-13">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     {sorted.map((widget) => {
                         const isFullWidth = widget.colSpan * 2 > COLS
                         const displaySize = widget.colSpan > COLS
@@ -231,7 +231,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                                 )}
                                 {canDelete && !pendingWidget && (
                                     <button
-                                        className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-1 touch-manipulation"
+                                        className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-2 touch-manipulation"
                                         onClick={() => onRemoveWidget(widget.id)}
                                     >
                                         <X size={14} />
@@ -324,13 +324,13 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                                     </div>
                                 )}
                                 <AnimatePresence>
-                                    {canDelete && hoveredWidget === widget.id && (
+                                    {canDelete && (COLS <= 8 || hoveredWidget === widget.id) && (
                                         <motion.button
                                             initial={{ opacity: 0, scale: 0.8 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.8 }}
                                             transition={{ duration: 0.1 }}
-                                            className="absolute top-3 right-3 bg-white-500/80 text-white rounded-full cursor-pointer"
+                                            className="absolute top-3 right-3 bg-white/20 text-white rounded-full cursor-pointer p-1.5 touch-manipulation"
                                             onClick={() => onRemoveWidget(widget.id)}
                                         >
                                             <X size={14} />
