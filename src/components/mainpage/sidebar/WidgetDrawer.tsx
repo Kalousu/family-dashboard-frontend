@@ -183,7 +183,7 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
                         </div>
                     )}
                 </div>
-            </div>
+            </motion.div>
         </>
     )
 }
