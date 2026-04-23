@@ -1,9 +1,10 @@
 import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { ArrowLeft } from "lucide-react"
 import GlassButton from "../components/ui/GlassButton"
 import FormInput from "../components/ui/FormInput"
-import AuthPageLayout from "../components/layout/AuthPageLayout"
+import DarkModeBackground from "../components/ui/DarkModeBackground"
 import useDarkMode from "../hooks/useDarkMode"
 import IconSelect from "../components/IconSelect"
 import ColorPickerButton from "../components/ui/ColorPickerButton"
@@ -23,23 +24,22 @@ function RegisterPage() {
         name: "",
         pin: "",
         pinWiederholen: "",
-        pfpIcon: "user", // Icon code instead of emoji
-        color: "#3B82F6" // Default blue color
+        pfpIcon: "user",
+        color: "#3B82F6"
     })
     const [avatarFile, setAvatarFile] = useState<File | null>(null)
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
     const [useCustomAvatar, setUseCustomAvatar] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
-    const [activeTab, setActiveTab] = useState<"profil" | "avatar">("profil")
-    const { isDarkMode } = useDarkMode()
+    const [activeTab, setActiveTab] = useState<"profil" | "icon">("profil")
+    const { isDarkMode, toggleDarkMode } = useDarkMode()
     const { setFamilyId, setUserId, setCurrentUser } = useAuth()
     const navigate = useNavigate()
     const location = useLocation()
-    
+
     const state = location.state as LocationState
-    
-    // Redirect if no family data is available
+
     if (!state?.familyId) {
         navigate("/newfamily")
         return null
@@ -51,14 +51,11 @@ function RegisterPage() {
 
     function validate(): string | null {
         if (!formData.name) return "Bitte einen Namen eingeben."
-        
-        // Only require PIN for admin registration (not when adding regular members)
         if (!isAddingMember) {
             if (!formData.pin) return "PIN ist erforderlich für Familienadministratoren."
             if (formData.pin.length < 3) return "PIN muss mindestens 3 Zeichen lang sein."
             if (formData.pin !== formData.pinWiederholen) return "PINs stimmen nicht überein."
         }
-        
         return null
     }
 
@@ -71,28 +68,24 @@ function RegisterPage() {
 
     async function handleCreateUser() {
         const err = validate()
-        if (err) { 
+        if (err) {
             setError(err)
-            return 
+            return
         }
-        
+
         setLoading(true)
         setError(null)
-        
+
         try {
             await register({
                 name: formData.name,
                 pin: isAddingMember ? undefined : formData.pin,
-                email: "", // Not needed for user creation
+                email: "",
                 familyId: state.familyId,
                 pfpIcon: formData.pfpIcon,
                 color: formData.color
             }, avatarFile || undefined)
 
-            // The register endpoint switches the backend session to the new user.
-            // Clear stale user state and go to profile select so the correct user
-            // can re-establish their session (admin re-selects themselves with PIN,
-            // or new member logs in for the first time).
             if (!isAddingMember) {
                 setFamilyId(state.familyId)
             }
@@ -123,146 +116,104 @@ function RegisterPage() {
         setAvatarFile(file)
         setUseCustomAvatar(true)
         const reader = new FileReader()
-        reader.onload = (e) => {
-            setAvatarPreview(e.target?.result as string)
+        reader.onload = (ev) => {
+            setAvatarPreview(ev.target?.result as string)
         }
         reader.readAsDataURL(file)
     }
 
-    function switchToIcon() {
-        setUseCustomAvatar(false)
-        setAvatarFile(null)
-        setAvatarPreview(null)
-    }
-
-    function switchToCustomAvatar() {
-        setUseCustomAvatar(true)
-    }
+    const currentIcon = useCustomAvatar && avatarPreview ? avatarPreview : formData.pfpIcon
+    const currentAvatarType = useCustomAvatar ? "URL" : "ICON"
 
     return (
-        <AuthPageLayout>
-            <motion.div
-                key="user-creation"
-                {...fadeSlideUp}
-                className="flex flex-col items-center gap-4 w-full overflow-y-auto px-4 py-4 max-h-[calc(100vh-2rem)]"
-                onKeyDown={(e) => e.key === "Enter" && handleCreateUser()}
-            >
-                <h1 className={`text-2xl font-bold tracking-tight ${text}`}>
-                    {isAddingMember ? "Neues Familienmitglied hinzufügen" : "Familienadministrator erstellen"}
-                </h1>
+        <div className="relative flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
+            <DarkModeBackground />
 
-                <p className={`text-center ${muted} mb-4`}>
-                    {isAddingMember
-                        ? `Neues Mitglied zur Familie "${state.familyName}" hinzufügen.`
-                        : `Familie "${state.familyName}" wurde erfolgreich erstellt!\nErstelle jetzt den ersten Benutzer als Familienadministrator.`
-                    }
-                </p>
+            {/* Back button — top left */}
+            <div className="fixed top-4 left-4 z-50">
+                <GlassButton
+                    isDarkMode={!isDarkMode}
+                    onClick={() => isAddingMember ? navigate("/dashboard") : navigate("/register-family")}
+                    className="px-3 py-2 backdrop-blur-sm"
+                >
+                    <ArrowLeft size={20} className="sm:hidden" />
+                    <span className="hidden sm:inline">
+                        {isAddingMember ? "Zurück zum Dashboard" : "Zurück zur Familienregistrierung"}
+                    </span>
+                </GlassButton>
+            </div>
 
-                {/* Tab bar — mobile only */}
-                <div className="sm:hidden flex gap-2">
-                    {(["profil", "avatar"] as const).map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all touch-manipulation min-h-11 ${
-                                activeTab === tab
-                                    ? isDarkMode ? "bg-indigo-500/30 text-white border border-white/20" : "bg-sky-300/50 text-gray-800 border border-sky-400/20"
-                                    : isDarkMode ? "bg-white/5 text-gray-400 border border-white/10" : "bg-white/30 text-gray-500 border border-gray-200/30"
-                            }`}
-                        >
-                            {tab === "profil" ? "Profil" : "Avatar"}
-                        </button>
-                    ))}
+            {/* Dark/Light Mode toggle — top right */}
+            <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+                <span className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    {isDarkMode ? "Dark Mode" : "Light Mode"}
+                </span>
+                <div
+                    className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer ${isDarkMode ? "bg-slate-500/50" : "bg-cyan-950/20"}`}
+                    onClick={toggleDarkMode}
+                >
+                    <motion.div
+                        className={`w-5 h-5 rounded-full ${isDarkMode ? "bg-gray-300" : "bg-white"}`}
+                        animate={{ x: isDarkMode ? 20 : 0 }}
+                        transition={{ duration: 0.2 }}
+                    />
                 </div>
+            </div>
 
-                <div className="flex flex-col sm:flex-row gap-8">
-                    <div className={`${activeTab === "profil" ? "flex" : "hidden"} sm:flex px-8 flex-col gap-4 items-center justify-center`}>
-                        <FormInput
-                            isDarkMode={isDarkMode}
-                            type="text"
-                            placeholder={isAddingMember ? "Name des neuen Mitglieds" : "Dein Name"}
-                            value={formData.name}
-                            onChange={handleChange("name")}
-                        />
-                        
-                        {!isAddingMember && (
-                            <>
-                                <FormInput
-                                    isDarkMode={isDarkMode}
-                                    type="password"
-                                    placeholder="PIN (erforderlich für Admin)"
-                                    value={formData.pin}
-                                    onChange={handleChange("pin")}
-                                />
-                                
-                                <FormInput
-                                    isDarkMode={isDarkMode}
-                                    type="password"
-                                    placeholder="PIN wiederholen"
-                                    value={formData.pinWiederholen}
-                                    onChange={handleChange("pinWiederholen")}
-                                />
-                            </>
-                        )}
-                        
-                        <div className="flex flex-row items-center gap-2">
-                            <ColorPickerButton
-                                color={formData.color}
-                                isDarkMode={isDarkMode}
-                                onChange={(newColor) => setFormData({...formData, color: newColor})}
-                            />
-                        </div>
-                    </div>
-                    
-                    <div className={`${activeTab === "avatar" ? "flex" : "hidden"} sm:flex flex-col items-center gap-4`}>
-                        {/* Avatar Type Selection */}
-                        <div className="flex flex-row gap-2 mb-2">
-                            <button
-                                type="button"
-                                onClick={switchToIcon}
-                                className={`px-3 py-1 rounded text-xs transition-colors ${
-                                    !useCustomAvatar 
-                                        ? (isDarkMode ? "bg-blue-600 text-white" : "bg-blue-500 text-white")
-                                        : (isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-700")
-                                }`}
-                            >
-                                Icon
-                            </button>
-                            <button
-                                type="button"
-                                onClick={switchToCustomAvatar}
-                                className={`px-3 py-1 rounded text-xs transition-colors ${
-                                    useCustomAvatar 
-                                        ? (isDarkMode ? "bg-blue-600 text-white" : "bg-blue-500 text-white")
-                                        : (isDarkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-700")
-                                }`}
-                            >
-                                Eigenes Bild
-                            </button>
+            <div className="relative flex flex-col items-center w-full h-full overflow-y-auto pt-20 pb-8">
+                <AnimatePresence mode="popLayout">
+                    <motion.div
+                        key="user-creation"
+                        {...fadeSlideUp}
+                        className="flex flex-col items-center gap-4 w-full px-4 my-auto"
+                        onKeyDown={(e) => e.key === "Enter" && handleCreateUser()}
+                    >
+                        <h1 className={`text-2xl font-bold tracking-tight ${text}`}>
+                            {isAddingMember ? "Neues Familienmitglied hinzufügen" : "Familienadministrator erstellen"}
+                        </h1>
+
+                        <p className={`text-center ${muted} mb-2`}>
+                            {isAddingMember
+                                ? `Neues Mitglied zur Familie "${state.familyName}" hinzufügen.`
+                                : `Familie "${state.familyName}" wurde erfolgreich erstellt!\nErstelle jetzt den ersten Benutzer als Familienadministrator.`
+                            }
+                        </p>
+
+                        {/* Tab bar — mobile only */}
+                        <div className="sm:hidden flex gap-2 mb-2">
+                            {(["profil", "icon"] as const).map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all touch-manipulation min-h-11 capitalize ${
+                                        activeTab === tab
+                                            ? isDarkMode ? "bg-indigo-500/30 text-white border border-white/20" : "bg-sky-300/50 text-gray-800 border border-sky-400/20"
+                                            : isDarkMode ? "bg-white/5 text-gray-400 border border-white/10" : "bg-white/30 text-gray-500 border border-gray-200/30"
+                                    }`}
+                                >
+                                    {tab === "profil" ? "Profil" : "Icon"}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Vorschau — mobile only, oberhalb des Icon-Grids */}
-                        <div className="sm:hidden flex flex-col items-center gap-1">
-                            <span className={`text-xs ${muted}`}>Vorschau:</span>
-                            <ProfileCard
-                                name={formData.name || "Dein Name"}
-                                color={formData.color}
-                                icon={useCustomAvatar && avatarPreview ? avatarPreview : formData.pfpIcon}
-                                avatarType={useCustomAvatar ? "URL" : "ICON"}
-                                onSelect={() => {}}
-                                isDarkMode={isDarkMode}
-                            />
-                        </div>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 w-full">
+                            {/* Left column: profile form */}
+                            <div className={`${activeTab === "profil" ? "flex" : "hidden"} sm:flex flex-col gap-4 items-center`}>
+                                {/* Profile preview */}
+                                <div className="scale-100 lg:scale-110 xl:scale-125 mb-2">
+                                    <ProfileCard
+                                        name={formData.name || "Neues Mitglied"}
+                                        color={formData.color}
+                                        icon={currentIcon}
+                                        avatarType={currentAvatarType}
+                                        onSelect={() => {}}
+                                        isDarkMode={isDarkMode}
+                                        showName={false}
+                                    />
+                                </div>
 
-                        <div className="flex flex-row items-center gap-6">
-                            {!useCustomAvatar ? (
-                                <IconSelect
-                                    selectedIcon={formData.pfpIcon}
-                                    isDarkMode={isDarkMode}
-                                    onSelect={(iconCode) => setFormData({...formData, pfpIcon: iconCode})}
-                                />
-                            ) : (
-                                <div className="flex flex-col items-center gap-2">
+                                {/* Upload + color row */}
+                                <div className="flex items-center gap-2">
                                     <input
                                         type="file"
                                         accept="image/jpeg"
@@ -270,78 +221,105 @@ function RegisterPage() {
                                         className="hidden"
                                         id="avatar-upload"
                                     />
-                                    <label
-                                        htmlFor="avatar-upload"
-                                        className={`cursor-pointer px-4 py-2 rounded-lg border-2 border-dashed transition-colors ${
-                                            isDarkMode
-                                                ? "border-gray-600 hover:border-gray-500 text-gray-300"
-                                                : "border-gray-300 hover:border-gray-400 text-gray-600"
-                                        }`}
-                                    >
-                                        {avatarFile ? "Bild ändern" : "Bild hochladen"}
+                                    <label htmlFor="avatar-upload">
+                                        <GlassButton
+                                            isDarkMode={!isDarkMode}
+                                            onClick={() => document.getElementById("avatar-upload")?.click()}
+                                            className="px-4 py-2 backdrop-blur-sm"
+                                        >
+                                            {avatarFile ? "Bild ändern" : "Hochladen"}
+                                        </GlassButton>
                                     </label>
-                                    {avatarFile && (
-                                        <span className={`text-xs ${muted}`}>
-                                            {avatarFile.name}
-                                        </span>
-                                    )}
+                                    <ColorPickerButton
+                                        color={formData.color}
+                                        isDarkMode={isDarkMode}
+                                        onChange={(newColor) => setFormData({ ...formData, color: newColor })}
+                                    />
                                 </div>
-                            )}
 
-                            {/* Vorschau — desktop only, neben dem Icon-Grid */}
-                            <div className="hidden sm:flex flex-col items-center gap-2">
-                                <span className={`text-xs ${muted}`}>Vorschau:</span>
-                                <ProfileCard
-                                    name={formData.name || "Dein Name"}
-                                    color={formData.color}
-                                    icon={useCustomAvatar && avatarPreview ? avatarPreview : formData.pfpIcon}
-                                    avatarType={useCustomAvatar ? "URL" : "ICON"}
-                                    onSelect={() => {}}
+                                <FormInput
                                     isDarkMode={isDarkMode}
+                                    type="text"
+                                    placeholder={isAddingMember ? "Name des neuen Mitglieds" : "Dein Name"}
+                                    value={formData.name}
+                                    onChange={handleChange("name")}
+                                />
+
+                                {!isAddingMember && (
+                                    <>
+                                        <FormInput
+                                            isDarkMode={isDarkMode}
+                                            type="password"
+                                            placeholder="PIN (erforderlich für Admin)"
+                                            value={formData.pin}
+                                            onChange={handleChange("pin")}
+                                        />
+                                        <FormInput
+                                            isDarkMode={isDarkMode}
+                                            type="password"
+                                            placeholder="PIN wiederholen"
+                                            value={formData.pinWiederholen}
+                                            onChange={handleChange("pinWiederholen")}
+                                        />
+                                    </>
+                                )}
+
+                                {error && (
+                                    <div className="px-4 py-2 rounded-lg backdrop-blur-sm text-sm bg-red-500/20 text-red-200 border border-red-500/30">
+                                        {error}
+                                    </div>
+                                )}
+
+                                {!isAddingMember && (
+                                    <p className={`text-xs ${muted} text-center max-w-xs`}>
+                                        Als Familienadministrator benötigst du eine PIN für den sicheren Zugang.
+                                    </p>
+                                )}
+
+                                <GlassButton
+                                    isDarkMode={!isDarkMode}
+                                    onClick={loading ? undefined : handleCreateUser}
+                                    className={`px-4 py-2 backdrop-blur-sm ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                >
+                                    {loading
+                                        ? "Wird erstellt..."
+                                        : isAddingMember
+                                            ? "Mitglied hinzufügen"
+                                            : "Administrator erstellen"
+                                    }
+                                </GlassButton>
+                            </div>
+
+                            {/* Right column: icon selector */}
+                            <div className={`${activeTab === "icon" ? "flex" : "hidden"} sm:flex flex-col items-center gap-4`}>
+                                {/* Preview on icon tab — mobile only */}
+                                <div className="sm:hidden">
+                                    <ProfileCard
+                                        name={formData.name || "Neues Mitglied"}
+                                        color={formData.color}
+                                        icon={currentIcon}
+                                        avatarType={currentAvatarType}
+                                        onSelect={() => {}}
+                                        isDarkMode={isDarkMode}
+                                        showName={false}
+                                    />
+                                </div>
+                                <IconSelect
+                                    selectedIcon={formData.pfpIcon}
+                                    isDarkMode={isDarkMode}
+                                    onSelect={(iconCode) => {
+                                        setFormData({ ...formData, pfpIcon: iconCode })
+                                        setUseCustomAvatar(false)
+                                        setAvatarFile(null)
+                                        setAvatarPreview(null)
+                                    }}
                                 />
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                {!isAddingMember && (
-                    <div className={`text-xs ${muted} text-center max-w-md`}>
-                        <p>Als Familienadministrator benötigst du eine PIN für den sicheren Zugang.</p>
-                        <p>Andere Familienmitglieder mit Benutzerrolle benötigen keine PIN.</p>
-                    </div>
-                )}
-
-                <p className={`text-sm font-semibold ${error ? "text-red-500" : "text-transparent"}`}>
-                    {error || "Platzhalter"}
-                </p>
-
-                <GlassButton 
-                    isDarkMode={!isDarkMode} 
-                    onClick={loading ? undefined : handleCreateUser} 
-                    className={`px-4 py-2 backdrop-blur-sm ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                    {loading 
-                        ? "Wird erstellt..." 
-                        : isAddingMember 
-                            ? "Mitglied hinzufügen" 
-                            : "Administrator erstellen"
-                    }
-                </GlassButton>
-
-                <div className="flex flex-col items-center gap-2 mt-2">
-                    <span className={`text-xs ${muted}`}>
-                        {isAddingMember ? "Zurück zur Familie verwalten?" : "Zurück zur Familienregistrierung?"}
-                    </span>
-                    <GlassButton 
-                        isDarkMode={!isDarkMode} 
-                        onClick={() => isAddingMember ? navigate("/dashboard") : navigate("/register-family")} 
-                        className="px-4 py-1.5 text-sm backdrop-blur-sm"
-                    >
-                        Zurück
-                    </GlassButton>
-                </div>
-            </motion.div>
-        </AuthPageLayout>
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+        </div>
     )
 }
 
