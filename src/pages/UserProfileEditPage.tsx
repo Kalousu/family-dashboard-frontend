@@ -206,7 +206,7 @@ function UserProfileEditPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="flex flex-col items-center gap-4 w-full px-4"
+                        className="flex flex-col items-center gap-4 w-full px-4 my-auto"
                     >
                         {/* Tab bar — mobile only */}
                         <div className="sm:hidden flex gap-2 mb-2">
