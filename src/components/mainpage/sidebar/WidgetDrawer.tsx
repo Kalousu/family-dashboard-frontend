@@ -5,6 +5,7 @@ import GlassButton from "../../ui/GlassButton"
 import useDarkMode from "../../../hooks/useDarkMode"
 import { WeatherPreview, CalendarPreview, TimetablePreview, TodoPreview, MemePreview, PicturePreview } from "./WidgetPreviews"
 import { useContainerSize } from "../../../hooks/useContainerSize"
+import { motion } from "framer-motion"
 
 const widgetPreviews: Record<string, React.ComponentType<{ onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }>> = {
     weather: WeatherPreview,
@@ -40,7 +41,7 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
     const widgets = Object.keys(registry)
 
     const handleSizeSelect = (type: string, colSpan: number, rowSpan: number) => {
-        if (window.innerWidth < 1024 && onAddWidget) {
+        if (window.innerWidth < 640 && onAddWidget) {
             onAddWidget({ type, colSpan, rowSpan })
             setSelectedType(null)
             onBack()
@@ -116,8 +117,14 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
                 </div>
             </div>
 
-            {/* Mobile: fill sidebar */}
-            <div ref={ref} className="lg:hidden flex flex-col h-full">
+            {/* Mobile: Bottom-Sheet */}
+            <motion.div
+                ref={ref}
+                className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] overflow-y-auto rounded-t-2xl z-[60] flex flex-col ${isDarkMode ? "bg-linear-to-b from-gray-950/90 via-gray-900/85 to-slate-900/80 border-2 border-white/5" : "bg-linear-to-b to-sky-100 from-blue-200 border-2 border-gray-400/20"}`}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
                 <div className="flex items-center gap-2 py-2">
                     <button onClick={selectedType !== null ? () => setSelectedType(null) : onBack} className="min-w-11 min-h-11 flex items-center justify-center touch-manipulation -ml-1">
                     <ChevronLeft className={chevronClass} size={30} />
