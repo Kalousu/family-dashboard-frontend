@@ -153,7 +153,7 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
                                 const Preview = widgetPreviews[selectedType]
                                 const isMobile = width < 640
                                 return sizes.map((size) => {
-                                    const isAvailable = !isMobile || (size.colSpan <= 2 && size.rowSpan <= 2)
+                                    const isAvailable = !isMobile || (size.colSpan <= 2 && size.rowSpan >= 0)
                                     return Preview ? (
                                         <div key={`${size.colSpan}x${size.rowSpan}`} className={`flex flex-col gap-1 shrink-0 ${!isAvailable ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}`} style={{ width: size.colSpan * baseUnit }}>
                                             <Preview
