@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Users, Building2, UserCog, Wrench, LogOut } from "lucide-react"
+import { Users, Building2, UserCog, LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import AuthPageLayout from "../../components/layout/AuthPageLayout"
 import useDarkMode from "../../hooks/useDarkMode"
@@ -9,9 +9,9 @@ import { fadeSlideUp } from "../../constants/animations"
 import FamilyOverview from "./FamilyOverview"
 import MemberManagement from "./MemberManagement"
 import UserManagement from "./UserManagement"
-import MaintenanceSettings from "./MaintenanceSettings"
-import { DEFAULT_MAINTENANCE_SETTINGS } from "./systemAdminTypes"
-import type { Family, MaintenanceSettings as MaintenanceSettingsType } from "./systemAdminTypes"
+// import MaintenanceSettings from "./MaintenanceSettings"
+// import { DEFAULT_MAINTENANCE_SETTINGS } from "./systemAdminTypes"
+import type { Family /*, MaintenanceSettings as MaintenanceSettingsType */ } from "./systemAdminTypes"
 import { getFamilies, getUsersForFamily } from "../../api/familyApi"
 import { logout } from "../../api/authApi"
 import GlassButton from "../../components/ui/GlassButton"
@@ -35,13 +35,13 @@ import GlassButton from "../../components/ui/GlassButton"
 //    GET /settings/maintenance   → ersetzt useState(DEFAULT_MAINTENANCE_SETTINGS)
 // =============================================================================
 
-type Tab = "familien" | "mitglieder" | "benutzer" | "wartung"
+type Tab = "familien" | "mitglieder" | "benutzer" /* | "wartung" */
 
 const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
     { id: "familien", label: "Kunden", icon: Building2 },
     { id: "mitglieder", label: "Mitglieder", icon: Users },
     { id: "benutzer", label: "Benutzer", icon: UserCog },
-    { id: "wartung", label: "Wartung", icon: Wrench },
+    // { id: "wartung", label: "Wartung", icon: Wrench },
 ]
 
 function SystemAdminPage() {
@@ -51,7 +51,7 @@ function SystemAdminPage() {
     const [activeTab, setActiveTab] = useState<Tab>("familien")
     const [families, setFamilies] = useState<Family[]>([])
     const [selectedFamily, setSelectedFamily] = useState<Family | null>(null)
-    const [maintenanceSettings, setMaintenanceSettings] = useState<MaintenanceSettingsType>(DEFAULT_MAINTENANCE_SETTINGS)
+    // const [maintenanceSettings, setMaintenanceSettings] = useState<MaintenanceSettingsType>(DEFAULT_MAINTENANCE_SETTINGS)
     const [isLoading, setIsLoading] = useState(true)
 
     const handleLogout = async () => {
@@ -228,6 +228,7 @@ function SystemAdminPage() {
                                 onFamiliesChange={setFamilies}
                             />
                         )}
+                        {/* Wartungs-Tab deaktiviert:
                         {activeTab === "wartung" && (
                             <MaintenanceSettings
                                 key="wartung"
@@ -236,6 +237,7 @@ function SystemAdminPage() {
                                 onSettingsChange={setMaintenanceSettings}
                             />
                         )}
+                        */}
                         </AnimatePresence>
                     )}
                 </div>
