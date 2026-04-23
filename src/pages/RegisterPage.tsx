@@ -108,17 +108,24 @@ function RegisterPage() {
 
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
-        if (file) {
-            setAvatarFile(file)
-            setUseCustomAvatar(true)
-            
-            // Create preview URL
-            const reader = new FileReader()
-            reader.onload = (e) => {
-                setAvatarPreview(e.target?.result as string)
-            }
-            reader.readAsDataURL(file)
+        if (!file) return
+        if (file.type !== "image/jpeg") {
+            setError("Bitte nur JPG-Dateien hochladen")
+            e.target.value = ""
+            return
         }
+        if (file.size > 5 * 1024 * 1024) {
+            setError("Foto darf maximal 5 MB groß sein")
+            e.target.value = ""
+            return
+        }
+        setAvatarFile(file)
+        setUseCustomAvatar(true)
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            setAvatarPreview(e.target?.result as string)
+        }
+        reader.readAsDataURL(file)
     }
 
     function switchToIcon() {
@@ -227,7 +234,7 @@ function RegisterPage() {
                                 <div className="flex flex-col items-center gap-2">
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/jpeg"
                                         onChange={handleFileChange}
                                         className="hidden"
                                         id="avatar-upload"

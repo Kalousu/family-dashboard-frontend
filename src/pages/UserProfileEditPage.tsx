@@ -62,6 +62,16 @@ function UserProfileEditPage() {
     async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file || !currentUser) return;
+        if (file.type !== "image/jpeg") {
+            setError("Bitte nur JPG-Dateien hochladen");
+            e.target.value = "";
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            setError("Foto darf maximal 5 MB groß sein");
+            e.target.value = "";
+            return;
+        }
 
         setLoading(true);
         setError(null);
@@ -212,7 +222,7 @@ function UserProfileEditPage() {
                                     <input
                                         ref={fileInputRef}
                                         type="file"
-                                        accept="image/jpeg,image/png"
+                                        accept="image/jpeg"
                                         className="hidden"
                                         onChange={handleFileChange}
                                     />
