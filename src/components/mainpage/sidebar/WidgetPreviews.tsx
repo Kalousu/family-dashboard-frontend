@@ -6,13 +6,16 @@ interface PreviewCardProps {
     border?: string
     className?: string
     children: React.ReactNode
+    colSpan?: number
+    rowSpan?: number
 }
 
-function PreviewCard({ onClick, gradient, border = "border-white/20", className = "", children }: PreviewCardProps) {
+function PreviewCard({ onClick, gradient, border = "border-white/20", className = "", children, colSpan, rowSpan }: PreviewCardProps) {
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col rounded-xl overflow-hidden ${border} border hover:scale-104 active:scale-98 transition-all cursor-pointer w-full shadow-md aspect-square ${className}`}
+            className={`flex flex-col rounded-xl overflow-hidden ${border} border hover:scale-104 active:scale-98 transition-all cursor-pointer w-full shadow-md ${(colSpan === undefined || rowSpan === undefined) ? "aspect-square" : ""} ${className}`}
+            style={(colSpan !== undefined && rowSpan !== undefined) ? { aspectRatio: `${colSpan}/${rowSpan}` } : undefined}
         >
             <div className={`${gradient} backdrop-blur-sm p-1.5 flex flex-col flex-1 w-full overflow-hidden`}>
                 {children}
@@ -21,25 +24,51 @@ function PreviewCard({ onClick, gradient, border = "border-white/20", className 
     )
 }
 
-export function WeatherPreview({ onClick, className }: { onClick: () => void; className?: string }) {
+export function WeatherPreview({ onClick, className, colSpan, rowSpan }: { onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }) {
+    const isCompact = rowSpan === 1
     return (
-        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-blue-400/70 to-yellow-200/60">
-            <div className="border border-white/30 rounded-md px-1 py-0.5 mb-1 shrink-0">
-                <span className="text-white text-[8px] font-bold">Mannheim</span>
-            </div>
-            <div className="flex-1 flex flex-row items-center justify-center gap-1.5">
-                <span className="text-white text-xl font-semibold leading-none">14°C</span>
-                <Sun className="text-white w-5 h-5 shrink-0" />
-            </div>
-            <div className="flex items-center gap-0.5 justify-center shrink-0">
-                <Wind className="text-white/60 w-2.5 h-2.5" />
-                <span className="text-white/60 text-[7px]">12 km/h</span>
-            </div>
+        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-blue-400/70 to-yellow-200/60" colSpan={colSpan} rowSpan={rowSpan}>
+            {isCompact ? (
+                <>
+                    <div className="border border-white/30 rounded-md px-1 py-0.5 mb-1 shrink-0 flex items-center gap-0.5">
+                        <span className="text-white text-[8px] font-bold">Mannheim</span>
+                    </div>
+                    <div className="flex-1 flex flex-row items-center justify-center gap-1.5">
+                        <span className="text-white text-lg font-semibold leading-none">14°C</span>
+                        <Sun className="text-white w-4 h-4 shrink-0" />
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="border border-white/30 rounded-md px-1 py-0.5 mb-1 shrink-0">
+                        <span className="text-white text-[8px] font-bold">Mannheim</span>
+                    </div>
+                    <div className="flex flex-row items-center justify-center gap-1.5 shrink-0">
+                        <span className="text-white text-xl font-semibold leading-none">14°C</span>
+                        <Sun className="text-white w-5 h-5 shrink-0" />
+                    </div>
+                    <div className="flex items-center gap-0.5 justify-center shrink-0 mb-1">
+                        <Wind className="text-white/60 w-2.5 h-2.5" />
+                        <span className="text-white/60 text-[7px]">12 km/h</span>
+                    </div>
+                    {rowSpan !== undefined && rowSpan >= 3 && (
+                        <div className="flex-1 flex flex-col gap-px min-h-0 overflow-hidden">
+                            {["Mo", "Di", "Mi", "Do"].map((day) => (
+                                <div key={day} className="flex flex-row items-center bg-white/10 rounded-sm px-1 flex-1 min-h-0">
+                                    <span className="text-white/70 text-[6px] font-semibold w-3">{day}</span>
+                                    <Sun className="text-white/60 w-2 h-2 shrink-0 mx-px" />
+                                    <span className="text-white text-[6px] font-bold ml-auto">18°C</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
+            )}
         </PreviewCard>
     )
 }
 
-export function CalendarPreview({ onClick, className }: { onClick: () => void; className?: string }) {
+export function CalendarPreview({ onClick, className, colSpan, rowSpan }: { onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }) {
     const weekdays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
     const rows = [
         [null, 1, 2, 3, 4, 5, 6],
@@ -50,7 +79,7 @@ export function CalendarPreview({ onClick, className }: { onClick: () => void; c
     const eventDays = new Set([3, 10, 17, 23])
     const today = 23
     return (
-        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-br from-teal-600/70 to-cyan-400/50">
+        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-br from-teal-600/70 to-cyan-400/50" colSpan={colSpan} rowSpan={rowSpan}>
             <div className="flex items-center justify-between mb-0.5 shrink-0">
                 <span className="text-white text-[8px] font-bold">April 2026</span>
                 <div className="flex gap-0.5">
@@ -81,7 +110,7 @@ export function CalendarPreview({ onClick, className }: { onClick: () => void; c
     )
 }
 
-export function TimetablePreview({ onClick, className }: { onClick: () => void; className?: string }) {
+export function TimetablePreview({ onClick, className, colSpan, rowSpan }: { onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }) {
     const days = ["Mo", "Di", "Mi", "Do", "Fr"]
     const grid = [
         ["bg-blue-300/70", null, "bg-pink-300/70", "bg-blue-300/70", null],
@@ -90,7 +119,7 @@ export function TimetablePreview({ onClick, className }: { onClick: () => void; 
         ["bg-red-300/70", null, "bg-green-300/70", "bg-orange-300/70", null],
     ]
     return (
-        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-purple-900/80 to-indigo-400/60">
+        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-purple-900/80 to-indigo-400/60" colSpan={colSpan} rowSpan={rowSpan}>
             <div className="flex items-end gap-px border-b border-white/20 mb-0.5 shrink-0">
                 <div className="bg-linear-to-b from-purple-900/50 to-indigo-400/30 border-t border-l border-r border-white/25 rounded-t-sm px-1 py-px">
                     <span className="text-white text-[6px] font-semibold">Alle</span>
@@ -121,14 +150,14 @@ export function TimetablePreview({ onClick, className }: { onClick: () => void; 
     )
 }
 
-export function TodoPreview({ onClick, className }: { onClick: () => void; className?: string }) {
+export function TodoPreview({ onClick, className, colSpan, rowSpan }: { onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }) {
     const items = [
         { done: true, label: "Einkaufen" },
         { done: false, label: "Aufräumen" },
         { done: false, label: "Sport" },
     ]
     return (
-        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-orange-400/60 to-yellow-200/50">
+        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-orange-400/60 to-yellow-200/50" colSpan={colSpan} rowSpan={rowSpan}>
             <p className="text-white text-[8px] font-bold text-center mb-1.5 shrink-0">To-Do Liste</p>
             <div className="flex flex-col gap-1.5 flex-1">
                 {items.map((item, i) => (
@@ -144,19 +173,22 @@ export function TodoPreview({ onClick, className }: { onClick: () => void; class
     )
 }
 
-export function MemePreview({ onClick, className }: { onClick: () => void; className?: string }) {
+export function MemePreview({ onClick, className, colSpan, rowSpan }: { onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }) {
+    const isSmallest = colSpan === 1 && rowSpan === 1
     return (
-        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-gray-500/80 via-gray-600/60 to-blue-400/50" border="border-white/25">
-            <div className="flex-1 flex items-center justify-center">
-                <Laugh className="text-white/50 w-10 h-10" strokeWidth={1.5} />
-            </div>
+        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-gray-500/80 via-gray-600/60 to-blue-400/50" border="border-white/25" colSpan={colSpan} rowSpan={rowSpan}>
+            {!isSmallest && (
+                <div className="flex-1 flex items-center justify-center">
+                    <Laugh className="text-white/50 w-10 h-10" strokeWidth={1.5} />
+                </div>
+            )}
         </PreviewCard>
     )
 }
 
-export function PicturePreview({ onClick, className }: { onClick: () => void; className?: string }) {
+export function PicturePreview({ onClick, className, colSpan, rowSpan }: { onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }) {
     return (
-        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-gray-500/80 via-gray-600/60 to-blue-400/50" border="border-white/25">
+        <PreviewCard onClick={onClick} className={className} gradient="bg-linear-to-b from-gray-500/80 via-gray-600/60 to-blue-400/50" border="border-white/25" colSpan={colSpan} rowSpan={rowSpan}>
             <div className="flex-1 flex flex-col items-center justify-center gap-1.5">
                 <Image className="text-white/50 w-8 h-8" strokeWidth={1.5} />
                 <span className="text-white/50 text-[8px]">Foto hinzufügen</span>

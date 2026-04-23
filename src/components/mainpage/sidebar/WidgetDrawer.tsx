@@ -5,7 +5,7 @@ import GlassButton from "../../ui/GlassButton"
 import useDarkMode from "../../../hooks/useDarkMode"
 import { WeatherPreview, CalendarPreview, TimetablePreview, TodoPreview, MemePreview, PicturePreview } from "./WidgetPreviews"
 
-const widgetPreviews: Record<string, React.ComponentType<{ onClick: () => void; className?: string }>> = {
+const widgetPreviews: Record<string, React.ComponentType<{ onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }>> = {
     weather: WeatherPreview,
     calendar: CalendarPreview,
     timetable: TimetablePreview,
@@ -65,11 +65,27 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget }: WidgetDrawerP
                     <div>
                         <div className="mt-2 flex flex-col">
                             <p className={`flex flex-col items-center font-semibold mb-2 capitalize ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{widgetLabels[selectedType] ?? selectedType}</p>
-                            {getWidgetSizes(selectedType).map((size) => (
-                                <GlassButton key={`${size.colSpan}x${size.rowSpan}`} isDarkMode={!isDarkMode} onClick={() => setPendingWidget({ type: selectedType, colSpan: size.colSpan, rowSpan: size.rowSpan })} className="mt-1 mb-1 p-3 w-full text-center">
-                                    {size.colSpan}x{size.rowSpan}
-                                </GlassButton>
-                            ))}
+                            <div className="flex flex-col gap-3 overflow-y-auto items-center">
+                                {(() => {
+                                    const sizes = getWidgetSizes(selectedType)
+                                    const maxCols = Math.max(...sizes.map(s => s.colSpan))
+                                    const baseUnit = Math.floor(140 / maxCols)
+                                    const Preview = widgetPreviews[selectedType]
+                                    return sizes.map((size) => Preview ? (
+                                        <div key={`${size.colSpan}x${size.rowSpan}`} className="flex flex-col gap-1" style={{ width: size.colSpan * baseUnit }}>
+                                            <Preview
+                                                onClick={() => setPendingWidget({ type: selectedType, colSpan: size.colSpan, rowSpan: size.rowSpan })}
+                                                className={reducedOpacityWidgets.has(selectedType) ? "opacity-60" : ""}
+                                                colSpan={size.colSpan}
+                                                rowSpan={size.rowSpan}
+                                            />
+                                            <span className={`text-center text-xs font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                                {size.colSpan}×{size.rowSpan}
+                                            </span>
+                                        </div>
+                                    ) : null)
+                                })()}
+                            </div>
                             {pendingWidget && (
                                 <GlassButton isDarkMode={!isDarkMode} onClick={() => { setPendingWidget(null); setSelectedType(null) }} className="mt-3 mb-1 p-3 w-full text-left text-red-400">
                                     Abbrechen
