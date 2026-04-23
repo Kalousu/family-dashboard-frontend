@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import GlassButton from "../components/ui/GlassButton";
 import ColorPickerButton from "../components/ui/ColorPickerButton";
 import ProfileCard from "../components/ProfileCard";
@@ -176,8 +177,9 @@ function UserProfileEditPage() {
             />
 
             <div className="fixed top-4 left-4 z-50">
-                <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/dashboard")} className="px-4 py-2 backdrop-blur-sm">
-                    Zurück zum Dashboard
+                <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/dashboard")} className="px-3 py-2 backdrop-blur-sm">
+                    <ArrowLeft size={20} className="sm:hidden" />
+                    <span className="hidden sm:inline">Zurück zum Dashboard</span>
                 </GlassButton>
             </div>
 
