@@ -69,7 +69,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             getUsersForFamily(familyId),
             getTimetable(numId),
         ]).then(([users, data]) => {
-            setAllProfiles(users.map((u) => ({ id: u.id, name: u.name, color: u.color, icon: u.avatar })))
+            setAllProfiles(users.map((u) => ({ id: u.id, name: u.name, color: u.color, icon: u.avatar, avatarType: u.avatarType })))
             setEvents(data.events)
             setReminders(data.reminders)
             setWatchedIds(data.watchedUserIds)
@@ -96,6 +96,10 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
 
     async function handleAddEvent(body: { title: string; slot: number; day: number; userId: number }) {
         if (numId === undefined) return
+        const alreadyExists = events.some(
+            (e) => e.slot === body.slot && e.day === body.day && e.userId === body.userId
+        )
+        if (alreadyExists) return
         try {
             const created = await createTimetableEvent(numId, body)
             setEvents((prev) => [...prev, created])

@@ -3,6 +3,7 @@ export interface Profile {
     name: string
     color: string
     icon: string
+    avatarType: "URL" | "ICON"
 }
 
 export interface TimetableEvent {
