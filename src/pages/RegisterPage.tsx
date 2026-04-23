@@ -31,6 +31,7 @@ function RegisterPage() {
     const [useCustomAvatar, setUseCustomAvatar] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [activeTab, setActiveTab] = useState<"profil" | "avatar">("profil")
     const { isDarkMode } = useDarkMode()
     const { setFamilyId, setUserId, setCurrentUser } = useAuth()
     const navigate = useNavigate()
@@ -140,25 +141,42 @@ function RegisterPage() {
 
     return (
         <AuthPageLayout>
-            <motion.div 
-                key="user-creation" 
-                {...fadeSlideUp} 
-                className="flex flex-col items-center gap-4"
+            <motion.div
+                key="user-creation"
+                {...fadeSlideUp}
+                className="flex flex-col items-center gap-4 w-full overflow-y-auto px-4 py-4 max-h-[calc(100vh-2rem)]"
                 onKeyDown={(e) => e.key === "Enter" && handleCreateUser()}
             >
                 <h1 className={`text-2xl font-bold tracking-tight ${text}`}>
                     {isAddingMember ? "Neues Familienmitglied hinzufügen" : "Familienadministrator erstellen"}
                 </h1>
-                
+
                 <p className={`text-center ${muted} mb-4`}>
-                    {isAddingMember 
+                    {isAddingMember
                         ? `Neues Mitglied zur Familie "${state.familyName}" hinzufügen.`
                         : `Familie "${state.familyName}" wurde erfolgreich erstellt!\nErstelle jetzt den ersten Benutzer als Familienadministrator.`
                     }
                 </p>
 
+                {/* Tab bar — mobile only */}
+                <div className="sm:hidden flex gap-2">
+                    {(["profil", "avatar"] as const).map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all touch-manipulation min-h-11 ${
+                                activeTab === tab
+                                    ? isDarkMode ? "bg-indigo-500/30 text-white border border-white/20" : "bg-sky-300/50 text-gray-800 border border-sky-400/20"
+                                    : isDarkMode ? "bg-white/5 text-gray-400 border border-white/10" : "bg-white/30 text-gray-500 border border-gray-200/30"
+                            }`}
+                        >
+                            {tab === "profil" ? "Profil" : "Avatar"}
+                        </button>
+                    ))}
+                </div>
+
                 <div className="flex flex-col sm:flex-row gap-8">
-                    <div className="px-8 flex flex-col gap-4 items-center justify-center">
+                    <div className={`${activeTab === "profil" ? "flex" : "hidden"} sm:flex px-8 flex-col gap-4 items-center justify-center`}>
                         <FormInput
                             isDarkMode={isDarkMode}
                             type="text"
@@ -196,7 +214,7 @@ function RegisterPage() {
                         </div>
                     </div>
                     
-                    <div className="flex flex-col items-center gap-4">
+                    <div className={`${activeTab === "avatar" ? "flex" : "hidden"} sm:flex flex-col items-center gap-4`}>
                         {/* Avatar Type Selection */}
                         <div className="flex flex-row gap-2 mb-2">
                             <button
@@ -221,6 +239,19 @@ function RegisterPage() {
                             >
                                 Eigenes Bild
                             </button>
+                        </div>
+
+                        {/* Vorschau — mobile only, oberhalb des Icon-Grids */}
+                        <div className="sm:hidden flex flex-col items-center gap-1">
+                            <span className={`text-xs ${muted}`}>Vorschau:</span>
+                            <ProfileCard
+                                name={formData.name || "Dein Name"}
+                                color={formData.color}
+                                icon={useCustomAvatar && avatarPreview ? avatarPreview : formData.pfpIcon}
+                                avatarType={useCustomAvatar ? "URL" : "ICON"}
+                                onSelect={() => {}}
+                                isDarkMode={isDarkMode}
+                            />
                         </div>
 
                         <div className="flex flex-row items-center gap-6">
@@ -257,8 +288,8 @@ function RegisterPage() {
                                 </div>
                             )}
 
-                            {/* Profile Preview */}
-                            <div className="flex flex-col items-center gap-2">
+                            {/* Vorschau — desktop only, neben dem Icon-Grid */}
+                            <div className="hidden sm:flex flex-col items-center gap-2">
                                 <span className={`text-xs ${muted}`}>Vorschau:</span>
                                 <ProfileCard
                                     name={formData.name || "Dein Name"}
