@@ -168,13 +168,13 @@ function RegisterPage() {
                         className="flex flex-col items-center gap-4 w-full px-4 my-auto"
                         onKeyDown={(e) => e.key === "Enter" && handleCreateUser()}
                     >
-                        <h1 className={`text-2xl font-bold tracking-tight ${text}`}>
+                        <h1 className={`hidden sm:block text-2xl font-bold tracking-tight ${text}`}>
                             {isAddingMember ? "Neues Familienmitglied hinzufügen" : "Familienadministrator erstellen"}
                         </h1>
 
-                        <p className={`text-center ${muted} mb-2`}>
+                        <p className={`hidden sm:block text-center ${muted} mb-2`}>
                             {isAddingMember
-                                ? `Neues Mitglied zur Familie "${state.familyName}" hinzufügen.`
+                                ? `Neues Mitglied zu dieser Familie hinzufügen.`
                                 : `Familie "${state.familyName}" wurde erfolgreich erstellt!\nErstelle jetzt den ersten Benutzer als Familienadministrator.`
                             }
                         </p>
