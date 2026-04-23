@@ -3,6 +3,7 @@ import CalendarWidget from "./calendar/CalendarWidget";
 import TimetableWidget from "./timetable/TimetableWidget";
 import ToDoWidget from "./toDo/ToDoWidget";
 import MemeWidget from "./meme/MemeWidget";
+import PictureWidget from "./picture/PictureWidget";
 
 interface WidgetSize {
     colSpan: number
@@ -49,6 +50,12 @@ registerWidget("todo", ToDoWidget, [
 registerWidget("meme", MemeWidget, [
     { colSpan: 1, rowSpan: 1 },
     { colSpan: 2, rowSpan: 2 },
+    { colSpan: 3, rowSpan: 3 },
+])
+
+registerWidget("picture", PictureWidget, [
+    { colSpan: 2, rowSpan: 2 },
+    { colSpan: 2, rowSpan: 3 },
     { colSpan: 3, rowSpan: 3 },
 ])
 
