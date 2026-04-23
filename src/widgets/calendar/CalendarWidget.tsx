@@ -34,7 +34,7 @@ function CalendarDayCell({ day, today, events, onSelect }: {
             whileHover="hover"
             whileTap="hover"
             className={`
-                relative flex flex-col items-center pt-1 text-sm rounded-lg min-h-8 cursor-pointer transition-all scale-93
+                relative flex flex-col items-center pt-1 text-sm rounded-lg min-h-11 cursor-pointer transition-all scale-93 touch-manipulation
                 ${!day.isCurrentMonth ? "text-white/30 font-semibold" : "text-white font-semibold"}
                 ${!isToday ? "hover:bg-white/10" : ""}
             `}
@@ -178,10 +178,10 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
                                         Heute
                                     </GlassButton>
                                 )}
-                                <GlassButton isDarkMode={!isDarkMode} onClick={prevMonth} className="p-1 text-white">
+                                <GlassButton isDarkMode={!isDarkMode} onClick={prevMonth} className="p-2 text-white">
                                     <ChevronLeft size={18} />
                                 </GlassButton>
-                                <GlassButton isDarkMode={!isDarkMode} onClick={nextMonth} className="p-1 text-white">
+                                <GlassButton isDarkMode={!isDarkMode} onClick={nextMonth} className="p-2 text-white">
                                     <ChevronRight size={18} />
                                 </GlassButton>
                             </div>

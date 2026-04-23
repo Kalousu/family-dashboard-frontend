@@ -30,10 +30,10 @@ function EventItem({ event, showTime, onEdit, onRemove }: {
                     )}
                 </div>
             </div>
-            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => onEdit(event)} className="pr-1 text-white/40 hover:text-white/80 transition-colors">
+            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => onEdit(event)} className="p-2 text-white/40 hover:text-white/80 transition-colors touch-manipulation">
                 <Pencil size={14} />
             </motion.button>
-            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => onRemove(event.id)} className="pr-3 text-white/40 hover:text-white/80 transition-colors">
+            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => onRemove(event.id)} className="p-2 pr-3 text-white/40 hover:text-white/80 transition-colors touch-manipulation">
                 <CircleMinus size={16} />
             </motion.button>
         </motion.div>
@@ -86,7 +86,7 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, hideBack = false, even
             <div className={scrollableClass}>
                 <div className="flex items-center gap-2">
                     {!hideBack && (
-                        <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-1 text-white">
+                        <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-2 text-white">
                             <ChevronLeft size={18} />
                         </GlassButton>
                     )}
@@ -98,9 +98,9 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, hideBack = false, even
                 <motion.button
                     whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
                     onClick={openAddForm}
-                    className="self-start text-white/40 hover:text-white/80 transition-colors"
+                    className="self-start p-2 -ml-2 text-white/40 hover:text-white/80 transition-colors touch-manipulation"
                 >
-                    <CirclePlus size={18} />
+                    <CirclePlus size={24} />
                 </motion.button>
 
                 {dayEvents.length === 0 ? (
@@ -152,14 +152,14 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, hideBack = false, even
                         onKeyDown={e => { if (e.key === "Enter") submitForm(); }}
                     >
                         <div className="flex items-center gap-2">
-                            <GlassButton isDarkMode={!isDarkMode} onClick={cancelForm} className="p-1 text-white">
-                                <ChevronLeft size={18} />
+                            <GlassButton isDarkMode={!isDarkMode} onClick={cancelForm} className="p-2 text-white">
+                                <ChevronLeft size={24} />
                             </GlassButton>
                             <span className="text-white font-bold text-base flex-1">
                                 {editingEventId ? "Termin bearbeiten" : "Neuer Termin"}
                             </span>
-                            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={submitForm} className="text-white/40 hover:text-white/80 transition-colors">
-                                <CirclePlus size={18} />
+                            <motion.button whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={submitForm} className="p-2 text-white/40 hover:text-white/80 transition-colors touch-manipulation">
+                                <CirclePlus size={24} />
                             </motion.button>
                         </div>
 
@@ -175,12 +175,12 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, hideBack = false, even
                             <span className="text-white/80 text-sm">Ganztägig</span>
                             <button
                                 onClick={toggleAllDay}
-                                className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${formAllDay ? "bg-cyan-400" : "bg-white/20"}`}
+                                className={`relative w-11 h-6 rounded-full transition-colors duration-200 touch-manipulation ${formAllDay ? "bg-cyan-400" : "bg-white/20"}`}
                             >
                                 <motion.div
-                                    animate={{ x: formAllDay ? 20 : 2 }}
+                                    animate={{ x: formAllDay ? 22 : 2 }}
                                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                    className="absolute top-0.5 w-4 h-4 rounded-full bg-white"
+                                    className="absolute top-1 w-4 h-4 rounded-full bg-white"
                                 />
                             </button>
                         </div>
@@ -214,7 +214,7 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, hideBack = false, even
                                         key={color}
                                         whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}
                                         onClick={() => setFormColor(color)}
-                                        className="w-6 h-6 rounded-full border-2 transition-all"
+                                        className="w-7 h-7 rounded-full border-2 transition-all touch-manipulation"
                                         style={{ backgroundColor: color, borderColor: formColor === color ? "white" : "transparent" }}
                                     />
                                 ))}
@@ -222,7 +222,7 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, hideBack = false, even
                             <motion.button
                                 whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}
                                 onClick={toggleColorPicker}
-                                className="w-6 h-6 rounded-full border-2 transition-all"
+                                className="w-7 h-7 rounded-full border-2 transition-all touch-manipulation"
                                 style={{ backgroundColor: localPickerColor, borderColor: localPickerColor === formColor ? "white" : "transparent" }}
                             />
                         </motion.div>
