@@ -244,7 +244,7 @@ function UserProfileEditPage() {
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     />
                                 </div>
-                                {currentUser?.role !== "USER" && (
+                                {(currentUser?.role === "FAMILY_ADMIN" || currentUser?.role === "SYSTEM_ADMIN" || !currentUser?.hasPin) && (
                                     <>
                                         <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
                                             <input
