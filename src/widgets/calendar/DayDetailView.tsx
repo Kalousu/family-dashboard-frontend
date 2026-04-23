@@ -44,13 +44,14 @@ type Props = {
     isDarkMode: boolean;
     selectedDay: Date;
     onBack: () => void;
+    hideBack?: boolean;
     events: CalendarEvent[];
     addEvent: (event: Omit<CalendarEvent, "id">) => void;
     updateEvent: (event: CalendarEvent) => void;
     removeEvent: (id: number) => void;
 };
 
-function DayDetailView({ isDarkMode, selectedDay, onBack, events, addEvent, updateEvent, removeEvent }: Props) {
+function DayDetailView({ isDarkMode, selectedDay, onBack, hideBack = false, events, addEvent, updateEvent, removeEvent }: Props) {
     const {
         showAddForm,
         formTitle, setFormTitle,
@@ -84,9 +85,11 @@ function DayDetailView({ isDarkMode, selectedDay, onBack, events, addEvent, upda
         <div className="relative rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/30 to-cyan-400/20">
             <div className={scrollableClass}>
                 <div className="flex items-center gap-2">
-                    <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-1 text-white">
-                        <ChevronLeft size={18} />
-                    </GlassButton>
+                    {!hideBack && (
+                        <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-1 text-white">
+                            <ChevronLeft size={18} />
+                        </GlassButton>
+                    )}
                     <span className="text-lg font-bold text-white flex-1">
                         {DAY_NAMES[selectedDay.getDay()]}, {selectedDay.getDate()}. {MONTH_NAMES[selectedDay.getMonth()]} {selectedDay.getFullYear()}
                     </span>
