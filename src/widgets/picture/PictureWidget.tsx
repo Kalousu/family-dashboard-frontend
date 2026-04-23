@@ -47,6 +47,11 @@ function PictureWidget({ widgetId }: PictureWidgetProps) {
             e.target.value = ""
             return
         }
+        if (file.size > 5 * 1024 * 1024) {
+            setUploadError("Foto darf maximal 5 MB groß sein")
+            e.target.value = ""
+            return
+        }
         setUploading(true)
         setUploadError(null)
         setImgBroken(false)
