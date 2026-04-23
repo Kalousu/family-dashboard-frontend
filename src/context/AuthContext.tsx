@@ -1,6 +1,7 @@
 import { createContext, useState } from "react"
 import type { ReactNode } from "react"
-import type { UserProfile } from "../types/authTypes"
+import type { UserProfile, UserRole } from "../types/authTypes"
+import { getCurrentUser } from "../api/userApi"
 
 interface AuthContextType {
     familyId: number | null
@@ -9,6 +10,7 @@ interface AuthContextType {
     setUserId: (id: number | null) => void
     currentUser: UserProfile | null
     setCurrentUser: (user: UserProfile | null) => void
+    refreshCurrentUser: () => Promise<void>
     isAuthenticated: boolean
     logout: () => void
     logoutUser: () => void
@@ -81,6 +83,24 @@ function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("currentUser")
     }
 
+    async function refreshCurrentUser() {
+        try {
+            const userData = await getCurrentUser()
+            const userProfile = {
+                id: userData.id,
+                name: userData.name,
+                avatar: userData.avatar,
+                avatarType: userData.avatarType,
+                color: userData.color,
+                role: userData.role as UserRole,
+                hasPin: userData.hasPin
+            }
+            setCurrentUser(userProfile)
+        } catch (error) {
+            console.error("Failed to refresh current user:", error)
+        }
+    }
+
     const isAuthenticated = familyId !== null && userId !== null
 
     return (
@@ -91,6 +111,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
             setUserId,
             currentUser,
             setCurrentUser,
+            refreshCurrentUser,
             isAuthenticated,
             logout,
             logoutUser
