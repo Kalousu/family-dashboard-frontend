@@ -29,7 +29,14 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
     const { isDarkMode } = useDarkMode()
     const { ref: containerRef, width: containerWidth } = useContainerSize()
 
-    const { COLS, ROWS } = getGridDimensions(containerWidth)
+    const { COLS, ROWS: gridROWS } = getGridDimensions(containerWidth)
+    const isMobile = containerWidth > 0 && containerWidth < 640
+
+    // On mobile, extend ROWS to cover all placed widgets so none are filtered out
+    const ROWS = isMobile
+        ? Math.max(gridROWS, placedWidgets.reduce((max, w) => Math.max(max, w.row + w.rowSpan), gridROWS))
+        : gridROWS
+
     const dotCols = (COLS * DOTS_PER_SLOT) + 1
     const dotRows = (ROWS * DOTS_PER_SLOT) + 1
     const dots = Array.from({ length: dotCols * dotRows })
@@ -57,11 +64,10 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
     )
 
     const disableMobileDrag = COLS <= 4
-    const isMobile = containerWidth > 0 && containerWidth < 640
 
     // Mobile card stack — no grid, iOS-style vertical layout
     if (isMobile) {
-        const sorted = [...visibleWidgets].sort((a, b) =>
+        const sorted = [...placedWidgets].sort((a, b) =>
             a.row !== b.row ? a.row - b.row : a.col - b.col
         )
 
