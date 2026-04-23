@@ -4,7 +4,7 @@ import { Trash2, RefreshCw, User } from "lucide-react"
 import FormInput from "../../components/ui/FormInput"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
-import type { Family, FamilyMember, MemberRole, SystemUser } from "./systemAdminTypes"
+import type { Family, MemberRole, SystemUser } from "./systemAdminTypes"
 import useAdminTheme from "../../hooks/useAdminTheme"
 import imageIcons from "../../constants/imageIcons"
 
@@ -71,19 +71,6 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
         }),
         [allUsers, searchTerm, roleFilter]
     )
-
-    function updateMemberInFamily(updatedUser: SystemUser, transform: (m: FamilyMember) => FamilyMember) {
-        const updatedFamilies = families.map((family) => {
-            if (family.id !== updatedUser.familyId) return family
-            return {
-                ...family,
-                members: family.members.map((m) =>
-                    m.id === updatedUser.id ? transform(m) : m
-                ),
-            }
-        })
-        onFamiliesChange(updatedFamilies)
-    }
 
     function removeMemberFromFamily(user: SystemUser) {
         const updatedFamilies = families.map((family) => {

@@ -136,13 +136,6 @@ function UserProfileEditPage() {
         }
     }
 
-    function handleDiscard() {
-        setFormData(originalData);
-        setPinData({ currentPin: "", newPin: "", confirmPin: "" });
-        setError(null);
-        setSuccess(null);
-    }
-
     const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
     const hasPinData = pinData.newPin || pinData.confirmPin;
 
