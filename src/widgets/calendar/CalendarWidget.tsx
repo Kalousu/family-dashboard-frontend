@@ -168,7 +168,7 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
             ) : (
                 <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/30 to-cyan-400/20">
                     <div className={scrollableClass}>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between pr-9">
                             <span className="text-lg font-bold text-white">
                                 {MONTH_NAMES[viewMonth]} {viewYear}
                             </span>
