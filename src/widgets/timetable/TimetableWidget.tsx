@@ -181,6 +181,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                     onAddEvent={handleAddEvent}
                     onAddUser={addUser}
                     onRemoveUser={removeUser}
+                    isCompact={isCompact}
                 />
             )}
 
