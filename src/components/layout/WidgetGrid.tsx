@@ -55,6 +55,8 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
         (w) => w.col < COLS && w.row < ROWS
     )
 
+    const disableMobileDrag = COLS <= 4
+
     return (
         <div ref={containerRef} className="flex-1 h-full min-h-0 flex flex-col p-4 sm:p-8 mt-14 sm:mt-10">
             <div className="relative flex-1 h-full">
@@ -67,7 +69,19 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                     {visibleWidgets.map((widget) => {
                         const { colSpan, rowSpan } = getVisualSpans(widget)
                         return (
-                            <div key={widget.id} className="relative bg-gray-700/40 rounded-2xl border border-white/10" style={{ gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(colSpan * DOTS_PER_SLOT) - 1}`, gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(rowSpan * DOTS_PER_SLOT) - 1}` }} onMouseEnter={() => setHoveredWidget(widget.id)} onMouseLeave={() => setHoveredWidget(null)}>
+                            <div
+                            key={widget.id}
+                            className="relative bg-gray-700/40 rounded-2xl border border-white/10"
+                            draggable={!disableMobileDrag}
+                            onDragStart={(e) => disableMobileDrag && e.preventDefault()}
+                            style={{
+                                gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(colSpan * DOTS_PER_SLOT) - 1}`,
+                                gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(rowSpan * DOTS_PER_SLOT) - 1}`,
+                                touchAction: disableMobileDrag ? "none" : "auto"
+                            }}
+                            onMouseEnter={() => setHoveredWidget(widget.id)}
+                            onMouseLeave={() => setHoveredWidget(null)}
+                        >
                                 {(() => {
                                     const WidgetComponent = getWidget(widget.type)
                                     return WidgetComponent ? <WidgetComponent widgetId={widget.id} config={widget.config} /> : <p className="text-white p-2">{widget.type}</p>
