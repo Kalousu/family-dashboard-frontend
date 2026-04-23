@@ -147,12 +147,26 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
     }
 
     return (
-        <div ref={containerRef} className="w-full h-full bg-linear-to-b from-purple-900/50 to-indigo-400/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
+        <div ref={containerRef} className="relative w-full h-full bg-linear-to-b from-purple-900/50 to-indigo-400/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
         {loading ? (
             <div className="flex-1 flex items-center justify-center">
                 <span className="text-white/50 text-sm">Lädt…</span>
             </div>
         ) : (<>
+
+            {/* Compact: Stift-Button absolut neben dem WidgetGrid-X-Button */}
+            {isCompact && (
+                <button
+                    onClick={() => setEditMode((v) => !v)}
+                    className={`absolute top-2 right-10 z-10 w-10 h-10 flex items-center justify-center rounded-full transition-all touch-manipulation ${
+                        editMode
+                            ? "bg-indigo-400/50 text-white"
+                            : "bg-white/10 text-white/50 hover:bg-white/20 hover:text-white/70"
+                    }`}
+                >
+                    <Pencil size={14} />
+                </button>
+            )}
 
             {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
@@ -160,17 +174,19 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                     <TabButton active={true} onClick={() => setActiveTab("all")}>Alle</TabButton>
                 </div>
                 <div className="flex-1" />
-                <button
-                    onClick={() => setEditMode((v) => !v)}
-                    className={`flex items-center gap-1.5 px-3 py-1 mb-px rounded-t-lg border-t border-l border-r text-xs font-semibold transition-all ${
-                        editMode
-                            ? "bg-indigo-400/50 border-indigo-400/50 text-white"
-                            : "bg-white/7 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
-                    }`}
-                >
-                    <Pencil size={12} />
-                    {!isCompact && (editMode ? "Fertig" : "Bearbeiten")}
-                </button>
+                {!isCompact && (
+                    <button
+                        onClick={() => setEditMode((v) => !v)}
+                        className={`flex items-center gap-1.5 px-3 py-1 mb-px rounded-t-lg border-t border-l border-r text-xs font-semibold transition-all ${
+                            editMode
+                                ? "bg-indigo-400/50 border-indigo-400/50 text-white"
+                                : "bg-white/7 border-white/15 text-white/50 hover:bg-white/10 hover:text-white/70"
+                        }`}
+                    >
+                        <Pencil size={12} />
+                        {editMode ? "Fertig" : "Bearbeiten"}
+                    </button>
+                )}
             </div>
 
             {/* Edit-Panel */}
