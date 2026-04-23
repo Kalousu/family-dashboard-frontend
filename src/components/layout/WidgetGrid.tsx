@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Lock } from "lucide-react"
-import { getWidget } from "../../widgets/WidgetRegistry"
+import { getWidget, getWidgetSizes } from "../../widgets/WidgetRegistry"
 import useDarkMode from "../../hooks/useDarkMode"
 import { useContainerSize } from "../../hooks/useContainerSize"
 import GlassButton from "../ui/GlassButton"
@@ -21,6 +21,12 @@ function getGridDimensions(width: number): { COLS: number; ROWS: number } {
     if (width > 0 && width < 640) return { COLS: 2, ROWS: 4 }
     if (width >= 640 && width <= 1024) return { COLS: 6, ROWS: 6 }
     return { COLS: 10, ROWS: 5 }
+}
+
+function getMobileFallbackSize(type: string, maxCols: number): { colSpan: number; rowSpan: number } | null {
+    const mobileSizes = getWidgetSizes(type).filter(s => s.colSpan <= maxCols)
+    if (mobileSizes.length === 0) return null
+    return mobileSizes.reduce((best, s) => s.rowSpan >= best.rowSpan ? s : best)
 }
 
 function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget, canDelete = false }: WidgetGridProps) {
@@ -89,11 +95,16 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
         return (
             <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto px-4 pt-2 pb-28 mt-14">
                 <div className="flex flex-col gap-4">
-                    {sorted.map((widget) => (
+                    {sorted.map((widget) => {
+                        const displaySize = widget.colSpan > COLS
+                            ? (getMobileFallbackSize(widget.type, COLS) ?? { colSpan: widget.colSpan, rowSpan: widget.rowSpan })
+                            : { colSpan: widget.colSpan, rowSpan: widget.rowSpan }
+
+                        return (
                         <div
                             key={widget.id}
                             className={`relative w-full rounded-2xl border ${isDarkMode ? "bg-gray-700/40 border-white/10" : "bg-white/40 border-white/30"}`}
-                            style={{ height: `${Math.round(containerWidth * widget.rowSpan / widget.colSpan)}px` }}
+                            style={{ height: `${Math.round(containerWidth * displaySize.rowSpan / displaySize.colSpan)}px` }}
                         >
                             {(() => {
                                 const WidgetComponent = getWidget(widget.type)
@@ -116,7 +127,8 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                                 </button>
                             )}
                         </div>
-                    ))}
+                        )
+                    })}
 
                     {/* Preview card for pending widget */}
                     {pendingWidget && (
