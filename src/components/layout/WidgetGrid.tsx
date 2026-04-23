@@ -4,6 +4,7 @@ import { X, Lock } from "lucide-react"
 import { getWidget } from "../../widgets/WidgetRegistry"
 import useDarkMode from "../../hooks/useDarkMode"
 import { useContainerSize } from "../../hooks/useContainerSize"
+import GlassButton from "../ui/GlassButton"
 import type { PlacedWidget } from "../../pages/WidgetPage"
 
 interface WidgetGridProps {
@@ -58,11 +59,27 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
     const disableMobileDrag = COLS <= 4
     const isMobile = containerWidth > 0 && containerWidth < 640
 
-    // Mobile card stack — no grid, mobile vertical layout
-    if (isMobile && !pendingWidget) {
+    // Mobile card stack — no grid, iOS-style vertical layout
+    if (isMobile) {
         const sorted = [...visibleWidgets].sort((a, b) =>
             a.row !== b.row ? a.row - b.row : a.col - b.col
         )
+
+        const findFirstAvailablePos = (): { col: number; row: number } | null => {
+            if (!pendingWidget) return null
+            for (let row = 0; row <= ROWS - pendingWidget.rowSpan; row++) {
+                for (let col = 0; col <= COLS - pendingWidget.colSpan; col++) {
+                    if (canPlace(col, row)) return { col, row }
+                }
+            }
+            return null
+        }
+
+        const availablePos = pendingWidget ? findFirstAvailablePos() : null
+        const widgetFits = pendingWidget
+            ? pendingWidget.colSpan <= COLS && pendingWidget.rowSpan <= ROWS
+            : false
+
         return (
             <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto px-4 pt-2 pb-28 mt-14">
                 <div className="flex flex-col gap-4">
@@ -84,7 +101,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                                     <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
                                 </div>
                             )}
-                            {canDelete && (
+                            {canDelete && !pendingWidget && (
                                 <button
                                     className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-1 touch-manipulation"
                                     onClick={() => onRemoveWidget(widget.id)}
@@ -94,7 +111,41 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                             )}
                         </div>
                     ))}
-                    {sorted.length === 0 && (
+
+                    {/* Preview card for pending widget */}
+                    {pendingWidget && (
+                        <div
+                            className={`relative w-full rounded-2xl border-2 border-dashed ${availablePos ? (isDarkMode ? "border-white/30" : "border-gray-400/40") : "border-red-400/40"}`}
+                            style={{ height: `${Math.round(containerWidth * pendingWidget.rowSpan / pendingWidget.colSpan)}px` }}
+                        >
+                            <div className={`absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-3 ${isDarkMode ? "bg-gray-700/20" : "bg-white/20"}`}>
+                                {!widgetFits ? (
+                                    <p className={`text-sm font-semibold text-center px-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                        Dieses Widget ist zu groß für die mobile Ansicht
+                                    </p>
+                                ) : availablePos ? (
+                                    <>
+                                        <p className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                            Widget hinzufügen?
+                                        </p>
+                                        <GlassButton
+                                            isDarkMode={!isDarkMode}
+                                            onClick={() => onCellClick(availablePos.col, availablePos.row)}
+                                            className="px-6 py-2 text-sm backdrop-blur-sm"
+                                        >
+                                            Hinzufügen
+                                        </GlassButton>
+                                    </>
+                                ) : (
+                                    <p className="text-red-400 text-sm font-semibold px-6 text-center">
+                                        Kein Platz verfügbar. Entferne zuerst ein Widget.
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {sorted.length === 0 && !pendingWidget && (
                         <p className={`text-center text-sm mt-16 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
                             Keine Widgets vorhanden
                         </p>
