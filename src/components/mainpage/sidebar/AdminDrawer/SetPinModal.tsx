@@ -16,8 +16,9 @@ function SetPinModal({ userName, isDarkMode, onConfirm, onCancel }: SetPinModalP
     const [error, setError] = useState<string | null>(null)
 
     function handleConfirm() {
-        if (pin.length < 3) {
-            setError("PIN muss mindestens 3 Zeichen lang sein.")
+        const pinRegex = /^[0-9]{4,6}$/
+        if (!pinRegex.test(pin)) {
+            setError("PIN muss 4–6 Ziffern enthalten (nur Zahlen).")
             return
         }
         if (pin !== pinRepeat) {
