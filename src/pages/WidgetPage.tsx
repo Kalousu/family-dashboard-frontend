@@ -214,6 +214,24 @@ function WidgetPage() {
                                 {saveError}
                             </motion.div>
                         )}
+                        {pendingWidget && (
+                            <motion.div
+                                key="cancel-button"
+                                initial={{ y: 80, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: 80, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                className="pointer-events-auto"
+                            >
+                                <GlassButton
+                                    isDarkMode={!isDarkMode}
+                                    onClick={() => setPendingWidget(null)}
+                                    className="px-6 py-2.5 text-sm backdrop-blur-sm text-red-400"
+                                >
+                                    Abbrechen
+                                </GlassButton>
+                            </motion.div>
+                        )}
                         {hasChanges && permissions?.canEditLayout && (
                             <motion.div
                                 key="save-button"
@@ -249,7 +267,10 @@ function WidgetPage() {
                     isOpen={sideBarOpen} 
                     onClose={() => setSideBarOpen(false)} 
                     pendingWidget={pendingWidget} 
-                    setPendingWidget={permissions?.canAddWidgets ? setPendingWidget : () => {}}
+                    setPendingWidget={permissions?.canAddWidgets ? (widget) => {
+                        setPendingWidget(widget)
+                        if (widget !== null) setSideBarOpen(false)
+                    } : () => {}}
                     permissions={permissions}
                 />
             </div>
