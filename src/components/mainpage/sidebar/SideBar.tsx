@@ -37,9 +37,13 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget, permissions
     }
 
     return(
-        <div className={`fixed z-20 right-0 top-0 h-full w-70 rounded-l-2xl p-4 transition-all duration-300 flex flex-col justify-between backdrop-blur-md ${isOpen ? "translate-x-0" : "translate-x-full"} ${isDarkMode ? "bg-linear-to-b from-gray-950/90 via-gray-900/85 to-slate-900/80 border-2 border-white/5" : "bg-linear-to-b to-sky-100 from-blue-200 border-2 border-gray-400/20"}`}>
+        <>
+        {isOpen && (
+            <div className="fixed inset-0 bg-black/40 z-10 lg:hidden" onClick={onClose} />
+        )}
+        <div className={`fixed z-20 right-0 top-0 h-full w-[280px] rounded-l-2xl p-4 transition-all duration-300 flex flex-col justify-between backdrop-blur-md ${isOpen ? "translate-x-0" : "translate-x-full"} ${isDarkMode ? "bg-linear-to-b from-gray-950/90 via-gray-900/85 to-slate-900/80 border-2 border-white/5" : "bg-linear-to-b to-sky-100 from-blue-200 border-2 border-gray-400/20"}`}>
             {sideBarView === "nav" ? (
-                <div className="flex flex-col h-full">
+                <div className="flex flex-col h-full overflow-y-auto">
                     <div>
                         <ChevronRight className={`w-7 h-7 hover:scale-105 transition-all ${isDarkMode ? "text-gray-400 hover:text-white" : "text-sky-900 hover:text-cyan-600"}`} size={30} onClick={onClose}/>
                         <div className="m-3 flex flex-col items-center">
@@ -74,15 +78,16 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget, permissions
                     </div>
                 </div>
             ) : sideBarView === "admin" ? (
-                <div>
+                <div className="h-full overflow-y-auto">
                     <AdminDrawer onBack={() => setSideBarView("nav")} isDarkMode={isDarkMode} />
                 </div>
             ) : (
-                <div>
+                <div className="h-full overflow-y-auto">
                     <WidgetDrawer onBack={() => setSideBarView("nav")} pendingWidget={pendingWidget} setPendingWidget={setPendingWidget} />
                 </div>
             )}
         </div>
+        </>
     )
 }
 

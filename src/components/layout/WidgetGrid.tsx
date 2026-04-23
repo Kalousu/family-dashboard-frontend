@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, Lock } from "lucide-react"
 import { getWidget } from "../../widgets/WidgetRegistry"
 import useDarkMode from "../../hooks/useDarkMode"
+import { useContainerSize } from "../../hooks/useContainerSize"
 import type { PlacedWidget } from "../../pages/WidgetPage"
 
 interface WidgetGridProps {
@@ -12,14 +13,22 @@ interface WidgetGridProps {
     onRemoveWidget: (id: string) => void
     canDelete?: boolean
 }
-const COLS = 10
-const ROWS = 5
+
 const DOTS_PER_SLOT = 3
+
+function getGridDimensions(width: number): { COLS: number; ROWS: number } {
+    if (width > 0 && width < 640) return { COLS: 4, ROWS: 8 }
+    if (width >= 640 && width <= 1024) return { COLS: 6, ROWS: 6 }
+    return { COLS: 10, ROWS: 5 }
+}
 
 function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget, canDelete = false }: WidgetGridProps) {
     const [hoveredCell, setHoveredCell] = useState<{ col: number, row: number } | null>(null)
     const [hoveredWidget, setHoveredWidget] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
+    const { ref: containerRef, width: containerWidth } = useContainerSize()
+
+    const { COLS, ROWS } = getGridDimensions(containerWidth)
     const dotCols = (COLS * DOTS_PER_SLOT) + 1
     const dotRows = (ROWS * DOTS_PER_SLOT) + 1
     const dots = Array.from({ length: dotCols * dotRows })
@@ -36,43 +45,56 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
         )
     }
 
+    function getVisualSpans(widget: PlacedWidget) {
+        const colSpan = Math.min(widget.colSpan, COLS - widget.col)
+        const rowSpan = Math.min(widget.rowSpan, ROWS - widget.row)
+        return { colSpan, rowSpan }
+    }
+
+    const visibleWidgets = placedWidgets.filter(
+        (w) => w.col < COLS && w.row < ROWS
+    )
+
     return (
-        <div className="flex-1 p-8 mt-10">
-            <div className="relative w-full h-full">
+        <div ref={containerRef} className="flex-1 h-full min-h-0 flex flex-col p-4 sm:p-8 mt-14 sm:mt-10">
+            <div className="relative flex-1 h-full">
                 <div className="absolute inset-0 grid place-items-center" style={gridStyle}>
                     {dots.map((_, index) => (
                         <div key={index} className={`w-1 h-1 rounded-full ${isDarkMode ? "bg-slate-700/50" : "bg-blue-300/70"}`} />
                     ))}
                 </div>
                 <div className="absolute inset-0 grid" style={gridStyle}>
-                    {placedWidgets.map((widget) => (
-                        <div key={widget.id} className="relative bg-gray-700/40 rounded-2xl border border-white/10" style={{ gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(widget.colSpan * DOTS_PER_SLOT) - 1}`, gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(widget.rowSpan * DOTS_PER_SLOT) - 1}` }} onMouseEnter={() => setHoveredWidget(widget.id)} onMouseLeave={() => setHoveredWidget(null)}>
-                            {(() => {
-                                const WidgetComponent = getWidget(widget.type)
-                                return WidgetComponent ? <WidgetComponent widgetId={widget.id} config={widget.config} /> : <p className="text-white p-2">{widget.type}</p>
-                            })()}
-                            {Number(widget.id) < 0 && (
-                                <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10" style={{ pointerEvents: "all" }}>
-                                    <Lock size={20} className="text-white/80" />
-                                    <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
-                                </div>
-                            )}
-                            <AnimatePresence>
-                                {canDelete && hoveredWidget === widget.id && (
-                                    <motion.button
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.8 }}
-                                        transition={{ duration: 0.1 }}
-                                        className="absolute top-3 right-3 bg-white-500/80 text-white rounded-full cursor-pointer"
-                                        onClick={() => onRemoveWidget(widget.id)}
-                                    >
-                                        <X size={14} />
-                                    </motion.button>
+                    {visibleWidgets.map((widget) => {
+                        const { colSpan, rowSpan } = getVisualSpans(widget)
+                        return (
+                            <div key={widget.id} className="relative bg-gray-700/40 rounded-2xl border border-white/10" style={{ gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(colSpan * DOTS_PER_SLOT) - 1}`, gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(rowSpan * DOTS_PER_SLOT) - 1}` }} onMouseEnter={() => setHoveredWidget(widget.id)} onMouseLeave={() => setHoveredWidget(null)}>
+                                {(() => {
+                                    const WidgetComponent = getWidget(widget.type)
+                                    return WidgetComponent ? <WidgetComponent widgetId={widget.id} config={widget.config} /> : <p className="text-white p-2">{widget.type}</p>
+                                })()}
+                                {Number(widget.id) < 0 && (
+                                    <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10" style={{ pointerEvents: "all" }}>
+                                        <Lock size={20} className="text-white/80" />
+                                        <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
+                                    </div>
                                 )}
-                            </AnimatePresence>
-                        </div>
-                    ))}
+                                <AnimatePresence>
+                                    {canDelete && hoveredWidget === widget.id && (
+                                        <motion.button
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.8 }}
+                                            transition={{ duration: 0.1 }}
+                                            className="absolute top-3 right-3 bg-white-500/80 text-white rounded-full cursor-pointer"
+                                            onClick={() => onRemoveWidget(widget.id)}
+                                        >
+                                            <X size={14} />
+                                        </motion.button>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        )
+                    })}
                     <AnimatePresence>
                         {pendingWidget && hoveredCell && (
                             <motion.div

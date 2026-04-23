@@ -197,10 +197,11 @@ function WidgetPage() {
     }
 
     return (
-        <div className="relative flex flex-col w-screen h-screen overflow-hidden">
+        <div className="relative flex flex-col min-h-screen min-w-full overflow-hidden">
             <DarkModeBackground />
-            <div className="relative flex flex-col w-full h-full">
+            <div className="relative flex flex-col min-h-screen w-full">
                 <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)} user={currentUser}/>
+                <div className="w-full md:max-w-[1600px] md:mx-auto flex flex-col min-h-screen relative">
                 <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-2 z-50 pointer-events-none">
                     <AnimatePresence>
                         {saveError && (
@@ -274,6 +275,7 @@ function WidgetPage() {
                     } : () => {}}
                     permissions={permissions}
                 />
+                </div>
             </div>
         </div>
     )
