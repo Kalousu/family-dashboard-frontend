@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { Image } from "lucide-react"
 import { getPicture, uploadPicture } from "../../api/pictureApi"
 import useAuth from "../../hooks/useAuth"
 import useDarkMode from "../../hooks/useDarkMode"
@@ -41,6 +42,11 @@ function PictureWidget({ widgetId }: PictureWidgetProps) {
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file || !familyId) return
+        if (file.type !== "image/jpeg") {
+            setUploadError("Bitte nur JPG-Dateien hochladen")
+            e.target.value = ""
+            return
+        }
         setUploading(true)
         setUploadError(null)
         setImgBroken(false)
@@ -85,7 +91,7 @@ function PictureWidget({ widgetId }: PictureWidgetProps) {
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg"
                 className="hidden"
                 onChange={handleFileChange}
             />
@@ -125,9 +131,7 @@ function PictureWidget({ widgetId }: PictureWidgetProps) {
                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white/60" />
                     ) : (
                         <>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 9.75a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75V9.75zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <Image className="w-12 h-12 text-white/50" strokeWidth={1.5} />
                             <span className="text-white/50 text-sm font-medium text-center px-4">
                                 {imgBroken ? "Bild nicht erreichbar – neues Foto hochladen" : isSaved ? "Foto hinzufügen" : "Layout erst speichern"}
                             </span>
