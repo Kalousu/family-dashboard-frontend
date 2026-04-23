@@ -64,9 +64,9 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget }: WidgetDrawerP
                 ) : (
                     <div>
                         <div className="mt-2 flex flex-col">
-                            <p className={`flex flex-col items-center font-semibold mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{selectedType}</p>
+                            <p className={`flex flex-col items-center font-semibold mb-2 capitalize ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{widgetLabels[selectedType] ?? selectedType}</p>
                             {getWidgetSizes(selectedType).map((size) => (
-                                <GlassButton key={`${size.colSpan}x${size.rowSpan}`} isDarkMode={!isDarkMode} onClick={() => setPendingWidget({ type: selectedType, colSpan: size.colSpan, rowSpan: size.rowSpan })} className="mt-1 mb-1 p-3 w-full text-left">
+                                <GlassButton key={`${size.colSpan}x${size.rowSpan}`} isDarkMode={!isDarkMode} onClick={() => setPendingWidget({ type: selectedType, colSpan: size.colSpan, rowSpan: size.rowSpan })} className="mt-1 mb-1 p-3 w-full text-center">
                                     {size.colSpan}x{size.rowSpan}
                                 </GlassButton>
                             ))}
