@@ -10,7 +10,7 @@ const DarkModeContext = createContext<DarkModeContextType | null>(null)
 
 function DarkModeProvider({ children }: { children: ReactNode }) {
     const [isDarkMode, setIsDarkMode] = useState(
-        () => localStorage.getItem("isDarkMode") === "true"
+        () => localStorage.getItem("isDarkMode") !== "false"
     )
 
     function toggleDarkMode() {
