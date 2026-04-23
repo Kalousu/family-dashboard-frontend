@@ -10,7 +10,6 @@ import {
     getTimetable,
     createTimetableEvent,
     deleteTimetableEvent,
-    createTimetableReminder,
     deleteTimetableReminder,
     updateWatchedUsers,
 } from "../../api/timetableApi"
@@ -86,8 +85,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
           .finally(() => setLoading(false))
     }, [numId, familyId, currentUserId])
 
-    const watchedProfiles = allProfiles.filter((p) => watchedIds.includes(p.id))
-
     async function addUser(userId: number) {
         if (watchedIds.includes(userId) || numId === undefined) return
         const newIds = [...watchedIds, userId]
@@ -117,18 +114,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
         }
     }
 
-    async function handleAddReminder(body: { day: number; text: string }) {
-        if (numId === undefined) return
-        try {
-            const existing = reminders.find((r) => r.day === body.day)
-            if (existing) await deleteTimetableReminder(numId, existing.id)
-            const created = await createTimetableReminder(numId, body)
-            setReminders((prev) => [...prev.filter((r) => r.day !== body.day), created])
-        } catch (err) {
-            console.error("Reminder save error:", err)
-        }
-    }
-
     async function handleRemoveReminder(reminderId: number) {
         if (numId === undefined) return
         await deleteTimetableReminder(numId, reminderId).catch(console.error)
@@ -149,12 +134,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
                 <div className="flex items-end gap-0.5">
-                    <TabButton active={activeTab === "all"} onClick={() => setActiveTab("all")}>Alle</TabButton>
-                    {watchedProfiles.map((p) => (
-                        <TabButton key={p.id} active={activeTab === p.id} onClick={() => setActiveTab(p.id)}>
-                            {p.name}
-                        </TabButton>
-                    ))}
+                    <TabButton active={true} onClick={() => setActiveTab("all")}>Alle</TabButton>
                 </div>
                 <div className="flex-1" />
                 <button
@@ -175,10 +155,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 <TimetableEdit
                     profiles={allProfiles}
                     watchedIds={watchedIds}
-                    reminders={reminders}
                     onAddEvent={handleAddEvent}
-                    onAddReminder={handleAddReminder}
-                    onRemoveReminder={handleRemoveReminder}
                     onAddUser={addUser}
                     onRemoveUser={removeUser}
                 />
