@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Plus, X, Check } from "lucide-react"
 import type { Profile, Reminder } from "./timetableTypes"
 import { DAYS, SLOTS } from "./timetableTypes"
@@ -23,16 +23,22 @@ function TimetableEdit({ profiles, watchedIds, reminders, onAddEvent, onAddRemin
     const [newTitle,  setNewTitle]        = useState("")
     const [newSlot,   setNewSlot]         = useState(1)
     const [newDay,    setNewDay]          = useState(0)
-    const [newUserId, setNewUserId]       = useState<number | undefined>(watchedProfiles[0]?.id)
+    const [newUserId, setNewUserId]       = useState<number | undefined>(undefined)
     const [addUserId, setAddUserId]       = useState(availableUsers[0]?.id ?? profiles[0]?.id)
 
     const [showReminderForm, setShowReminderForm] = useState(false)
     const [reminderDay,  setReminderDay]          = useState(0)
     const [reminderText, setReminderText]         = useState("")
 
-    const effectiveUserId = (newUserId !== undefined && watchedIds.includes(newUserId))
-        ? newUserId
-        : watchedProfiles[0]?.id
+    // Calculate effective user ID with fallback logic
+    const effectiveUserId = useMemo(() => {
+        // If newUserId is set and valid, use it
+        if (newUserId !== undefined && watchedIds.includes(newUserId)) {
+            return newUserId
+        }
+        // Otherwise, use the first watched profile
+        return watchedProfiles[0]?.id
+    }, [newUserId, watchedIds, watchedProfiles])
 
     async function handleAddEvent() {
         if (!newTitle.trim() || effectiveUserId === undefined) return

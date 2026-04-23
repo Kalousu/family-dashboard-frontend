@@ -51,6 +51,7 @@ function getEventsForCell(
 function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
     const auth = useContext(AuthContext)
     const familyId = auth?.familyId ?? null
+    const currentUserId = auth?.currentUser?.id
     const numId = widgetId !== undefined ? Number(widgetId) : undefined
 
     const [allProfiles, setAllProfiles] = useState<Profile[]>([])
@@ -72,10 +73,18 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             setAllProfiles(users.map((u) => ({ id: u.id, name: u.name, color: u.color, icon: u.avatar, avatarType: u.avatarType })))
             setEvents(data.events)
             setReminders(data.reminders)
-            setWatchedIds(data.watchedUserIds)
+            
+            // If no users are watched and current user exists, add current user automatically
+            if (data.watchedUserIds.length === 0 && currentUserId && users.some(u => u.id === currentUserId)) {
+                const newWatchedIds = [currentUserId]
+                setWatchedIds(newWatchedIds)
+                updateWatchedUsers(numId, newWatchedIds).catch(console.error)
+            } else {
+                setWatchedIds(data.watchedUserIds)
+            }
         }).catch(console.error)
           .finally(() => setLoading(false))
-    }, [numId, familyId])
+    }, [numId, familyId, currentUserId])
 
     const watchedProfiles = allProfiles.filter((p) => watchedIds.includes(p.id))
 
