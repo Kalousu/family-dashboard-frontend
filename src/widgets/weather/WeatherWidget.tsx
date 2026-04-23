@@ -16,8 +16,8 @@ interface WeatherWidgetProps {
 
 function WeatherWidget({ widgetId, config }: WeatherWidgetProps) {
 
-    const { ref, height } = useContainerSize()
-    const isCompact = height < 220
+    const { ref, height, width } = useContainerSize()
+    const isCompact = height < 220 || width < 200
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     

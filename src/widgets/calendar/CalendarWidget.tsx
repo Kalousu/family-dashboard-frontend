@@ -136,7 +136,7 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
     }
 
     const { ref, width } = useContainerSize();
-    const isCompact = width > 0 && width < 250;
+    const isCompact = width > 0 && width < 200;
 
     const days = getCalendarDays(viewYear, viewMonth);
     const isCurrentView = viewYear === today.getFullYear() && viewMonth === today.getMonth();

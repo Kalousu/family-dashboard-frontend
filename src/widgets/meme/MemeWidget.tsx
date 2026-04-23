@@ -43,10 +43,10 @@ function MemeWidget() {
             ) : meme && (
                 <div className="relative flex-1 flex items-center justify-center overflow-hidden">
                     {meme.isVideo ? (
-                        <video src={meme.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain"
+                        <video src={meme.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover"
                         />
                     ) : (
-                        <img src={meme.imageUrl} alt={meme.title} className="w-full h-full object-contain"
+                        <img src={meme.imageUrl} alt={meme.title} className="w-full h-full object-cover"
                         />
                     )}
                 </div>
