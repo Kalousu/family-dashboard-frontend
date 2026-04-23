@@ -32,7 +32,7 @@ function RegisterPage() {
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const { isDarkMode } = useDarkMode()
-    const { setFamilyId } = useAuth()
+    const { setFamilyId, setUserId, setCurrentUser } = useAuth()
     const navigate = useNavigate()
     const location = useLocation()
     
@@ -40,7 +40,7 @@ function RegisterPage() {
     
     // Redirect if no family data is available
     if (!state?.familyId) {
-        navigate("/register-family")
+        navigate("/newfamily")
         return null
     }
 
@@ -81,20 +81,23 @@ function RegisterPage() {
         try {
             await register({
                 name: formData.name,
-                pin: formData.pin,
+                pin: isAddingMember ? undefined : formData.pin,
                 email: "", // Not needed for user creation
                 familyId: state.familyId,
                 pfpIcon: formData.pfpIcon,
                 color: formData.color
             }, avatarFile || undefined)
-            
-            // After successful registration, the auth_token cookie is set by the backend
-            // Set familyId so the dashboard can load the correct family data
-            setFamilyId(state.familyId)
-            
-            // Navigate to dashboard - the AuthContext will be loaded from the cookie
-            // The WidgetPage will load the user data via the dashboard API
-            navigate("/dashboard")
+
+            // The register endpoint switches the backend session to the new user.
+            // Clear stale user state and go to profile select so the correct user
+            // can re-establish their session (admin re-selects themselves with PIN,
+            // or new member logs in for the first time).
+            if (!isAddingMember) {
+                setFamilyId(state.familyId)
+            }
+            setUserId(null)
+            setCurrentUser(null)
+            navigate("/home")
         } catch (error) {
             console.error("Fehler bei der Benutzererstellung:", error)
             setError("Benutzererstellung fehlgeschlagen. Bitte versuchen Sie es erneut.")
@@ -105,17 +108,24 @@ function RegisterPage() {
 
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
-        if (file) {
-            setAvatarFile(file)
-            setUseCustomAvatar(true)
-            
-            // Create preview URL
-            const reader = new FileReader()
-            reader.onload = (e) => {
-                setAvatarPreview(e.target?.result as string)
-            }
-            reader.readAsDataURL(file)
+        if (!file) return
+        if (file.type !== "image/jpeg") {
+            setError("Bitte nur JPG-Dateien hochladen")
+            e.target.value = ""
+            return
         }
+        if (file.size > 5 * 1024 * 1024) {
+            setError("Foto darf maximal 5 MB groß sein")
+            e.target.value = ""
+            return
+        }
+        setAvatarFile(file)
+        setUseCustomAvatar(true)
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            setAvatarPreview(e.target?.result as string)
+        }
+        reader.readAsDataURL(file)
     }
 
     function switchToIcon() {
@@ -224,7 +234,7 @@ function RegisterPage() {
                                 <div className="flex flex-col items-center gap-2">
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/jpeg"
                                         onChange={handleFileChange}
                                         className="hidden"
                                         id="avatar-upload"

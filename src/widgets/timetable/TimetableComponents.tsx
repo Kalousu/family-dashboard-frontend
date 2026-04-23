@@ -5,11 +5,22 @@ import imageIcons from "../../constants/imageIcons"
 import type { Profile, Reminder } from "./timetableTypes"
 
 export function UserIcon({ profile, size = 14 }: { profile: Profile; size?: number }) {
-    const Icon = imageIcons[profile.icon as keyof typeof imageIcons]
+    const boxSize = size + 6
+    if (profile.avatarType === "URL") {
+        return (
+            <div
+                className="rounded-md shrink-0 overflow-hidden"
+                style={{ width: boxSize, height: boxSize }}
+            >
+                <img src={profile.icon} alt={profile.name} style={{ width: boxSize, height: boxSize, objectFit: "cover" }} />
+            </div>
+        )
+    }
+    const Icon = imageIcons[profile.icon as keyof typeof imageIcons] ?? imageIcons["user"]
     return (
         <div
             className="rounded-md flex items-center justify-center shrink-0"
-            style={{ backgroundColor: profile.color, width: size + 6, height: size + 6 }}
+            style={{ backgroundColor: profile.color, width: boxSize, height: boxSize }}
         >
             <Icon size={size} color="white" />
         </div>

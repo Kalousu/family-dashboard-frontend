@@ -8,22 +8,143 @@ import IconSelect from "../components/IconSelect";
 import dashboardBgLight from "../assets/dashboardbglight.png";
 import dashboardBgDark from "../assets/dashboardbgdark.png";
 import useDarkMode from "../hooks/useDarkMode";
+import useAuth from "../hooks/useAuth";
+import { updateUserProfile, updateUserProfileWithAvatar, setUserPin } from "../api/userApi";
 
 function UserProfileEditPage() {
     const { isDarkMode, toggleDarkMode } = useDarkMode();
+    const { currentUser, refreshCurrentUser } = useAuth();
     const [formData, setFormData] = useState({
         name: "",
-        color: "hsl(50, 100%, 50%)",
-        icon: "sun",
+        color: "#3B82F6",
+        icon: "user",
+    });
+    const [pinData, setPinData] = useState({
+        currentPin: "",
+        newPin: "",
+        confirmPin: "",
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+    const [originalData, setOriginalData] = useState({
+        name: "",
+        color: "#3B82F6",
+        icon: "user",
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
 
-    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    // Load current user data
+    useEffect(() => {
+        if (currentUser) {
+            const userData = {
+                name: currentUser.name,
+                color: currentUser.color || "#3B82F6",
+                icon: currentUser.avatarType === 'ICON' ? currentUser.avatar : "user",
+            };
+            setFormData(userData);
+            setOriginalData(userData);
+        }
+    }, [currentUser]);
+
+    // Clear messages after 3 seconds
+    useEffect(() => {
+        if (error || success) {
+            const timer = setTimeout(() => {
+                setError(null);
+                setSuccess(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [error, success]);
+
+    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
-        if (file) alert(`Datei ausgewählt: ${file.name}`);
-        e.target.value = "";
+        if (!file || !currentUser) return;
+        if (file.type !== "image/jpeg") {
+            setError("Bitte nur JPG-Dateien hochladen");
+            e.target.value = "";
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            setError("Foto darf maximal 5 MB groß sein");
+            e.target.value = "";
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        try {
+            await updateUserProfileWithAvatar(currentUser.id, formData.name, formData.color, file);
+            await refreshCurrentUser();
+            setSuccess("Profilbild erfolgreich aktualisiert!");
+            
+            // Update formData to reflect the new avatar URL
+            // The refreshCurrentUser will trigger the useEffect that updates formData
+        } catch (error) {
+            setError("Fehler beim Hochladen des Profilbilds");
+        } finally {
+            setLoading(false);
+            e.target.value = "";
+        }
     }
+
+    async function handleSaveProfile() {
+        if (!currentUser) return;
+
+        setLoading(true);
+        setError(null);
+        try {
+            await updateUserProfile(currentUser.id, {
+                name: formData.name,
+                color: formData.color,
+                avatar: currentUser.avatarType === 'URL' ? currentUser.avatar : formData.icon,
+                avatarType: currentUser.avatarType || 'ICON'
+            });
+            await refreshCurrentUser();
+            setOriginalData(formData);
+            setSuccess("Profil erfolgreich aktualisiert!");
+        } catch (error) {
+            setError("Fehler beim Speichern des Profils");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleSetPin() {
+        if (!currentUser) return;
+        if (pinData.newPin !== pinData.confirmPin) {
+            setError("Passwörter stimmen nicht überein");
+            return;
+        }
+        if (pinData.newPin.length < 4) {
+            setError("PIN muss mindestens 4 Zeichen lang sein");
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        try {
+            await setUserPin(currentUser.id, pinData.newPin);
+            setPinData({ currentPin: "", newPin: "", confirmPin: "" });
+            setSuccess("PIN erfolgreich geändert!");
+        } catch (error) {
+            setError("Fehler beim Ändern der PIN");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    function handleDiscard() {
+        setFormData(originalData);
+        setPinData({ currentPin: "", newPin: "", confirmPin: "" });
+        setError(null);
+        setSuccess(null);
+    }
+
+    const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
+    const hasPinData = pinData.newPin || pinData.confirmPin;
 
     useEffect(() => {
         const img1 = new Image();
@@ -90,7 +211,8 @@ function UserProfileEditPage() {
                                     <ProfileCard
                                         name={formData.name || "User"}
                                         color={formData.color}
-                                        icon={formData.icon}
+                                        icon={currentUser?.avatarType === 'URL' ? currentUser.avatar : formData.icon}
+                                        avatarType={currentUser?.avatarType || 'ICON'}
                                         isDarkMode={isDarkMode}
                                         onSelect={() => {}}
                                         showName={false}
@@ -100,7 +222,7 @@ function UserProfileEditPage() {
                                     <input
                                         ref={fileInputRef}
                                         type="file"
-                                        accept="image/jpeg,image/png"
+                                        accept="image/jpeg"
                                         className="hidden"
                                         onChange={handleFileChange}
                                     />
@@ -122,18 +244,44 @@ function UserProfileEditPage() {
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     />
                                 </div>
-                                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                    <input className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`} type="password" placeholder="Aktuelles Passwort" />
-                                </div>
-                                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                    <input className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`} type="password" placeholder="Neues Passwort" />
-                                </div>
-                                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                    <input className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`} type="password" placeholder="Passwort wiederholen" />
-                                </div>
-                                <GlassButton isDarkMode={!isDarkMode} onClick={() => {}} className="px-4 py-2 backdrop-blur-sm">
-                                    Passwort ändern
-                                </GlassButton>
+                                {(currentUser?.role === "FAMILY_ADMIN" || currentUser?.role === "SYSTEM_ADMIN" || !currentUser?.hasPin) && (
+                                    <>
+                                        <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
+                                            <input
+                                                className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
+                                                type="password"
+                                                placeholder="Aktuelle PIN"
+                                                value={pinData.currentPin}
+                                                onChange={(e) => setPinData({ ...pinData, currentPin: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
+                                            <input
+                                                className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
+                                                type="password"
+                                                placeholder="Neue PIN"
+                                                value={pinData.newPin}
+                                                onChange={(e) => setPinData({ ...pinData, newPin: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
+                                            <input
+                                                className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
+                                                type="password"
+                                                placeholder="PIN wiederholen"
+                                                value={pinData.confirmPin}
+                                                onChange={(e) => setPinData({ ...pinData, confirmPin: e.target.value })}
+                                            />
+                                        </div>
+                                        <GlassButton
+                                            isDarkMode={!isDarkMode}
+                                            onClick={loading || !hasPinData ? () => {} : handleSetPin}
+                                            className={`px-4 py-2 backdrop-blur-sm ${loading || !hasPinData ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        >
+                                            {loading ? "Wird gespeichert..." : "PIN ändern"}
+                                        </GlassButton>
+                                    </>
+                                )}
                             </div>
                             <IconSelect
                                 selectedIcon={formData.icon}
@@ -141,12 +289,27 @@ function UserProfileEditPage() {
                                 onSelect={(key) => setFormData({ ...formData, icon: key })}
                             />
                         </div>
-                        <div className="flex justify-center gap-4 mt-10">
-                            <GlassButton isDarkMode={!isDarkMode} onClick={() => {}} className="px-6 py-2 backdrop-blur-sm">
-                                Speichern
-                            </GlassButton>
-                            <GlassButton isDarkMode={!isDarkMode} onClick={() => {}} className="px-6 py-2 backdrop-blur-sm">
-                                Verwerfen
+                        
+                        {/* Error/Success Messages */}
+                        {(error || success) && (
+                            <div className="flex justify-center mt-4">
+                                <div className={`px-4 py-2 rounded-lg backdrop-blur-sm ${
+                                    error 
+                                        ? 'bg-red-500/20 text-red-200 border border-red-500/30' 
+                                        : 'bg-green-500/20 text-green-200 border border-green-500/30'
+                                }`}>
+                                    {error || success}
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="flex justify-center mt-6">
+                            <GlassButton
+                                isDarkMode={!isDarkMode}
+                                onClick={loading || !hasChanges ? () => {} : handleSaveProfile}
+                                className={`px-6 py-2 backdrop-blur-sm ${loading || !hasChanges ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {loading ? "Wird gespeichert..." : "Speichern"}
                             </GlassButton>
                         </div>
                     </motion.div>

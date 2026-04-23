@@ -10,7 +10,6 @@ import {
     getTimetable,
     createTimetableEvent,
     deleteTimetableEvent,
-    createTimetableReminder,
     deleteTimetableReminder,
     updateWatchedUsers,
 } from "../../api/timetableApi"
@@ -51,6 +50,7 @@ function getEventsForCell(
 function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
     const auth = useContext(AuthContext)
     const familyId = auth?.familyId ?? null
+    const currentUserId = auth?.currentUser?.id
     const numId = widgetId !== undefined ? Number(widgetId) : undefined
 
     const [allProfiles, setAllProfiles] = useState<Profile[]>([])
@@ -69,15 +69,21 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             getUsersForFamily(familyId),
             getTimetable(numId),
         ]).then(([users, data]) => {
-            setAllProfiles(users.map((u) => ({ id: u.id, name: u.name, color: u.color, icon: u.avatar })))
+            setAllProfiles(users.map((u) => ({ id: u.id, name: u.name, color: u.color, icon: u.avatar, avatarType: u.avatarType })))
             setEvents(data.events)
             setReminders(data.reminders)
-            setWatchedIds(data.watchedUserIds)
+            
+            // If no users are watched and current user exists, add current user automatically
+            if (data.watchedUserIds.length === 0 && currentUserId && users.some(u => u.id === currentUserId)) {
+                const newWatchedIds = [currentUserId]
+                setWatchedIds(newWatchedIds)
+                updateWatchedUsers(numId, newWatchedIds).catch(console.error)
+            } else {
+                setWatchedIds(data.watchedUserIds)
+            }
         }).catch(console.error)
           .finally(() => setLoading(false))
-    }, [numId, familyId])
-
-    const watchedProfiles = allProfiles.filter((p) => watchedIds.includes(p.id))
+    }, [numId, familyId, currentUserId])
 
     async function addUser(userId: number) {
         if (watchedIds.includes(userId) || numId === undefined) return
@@ -96,23 +102,15 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
 
     async function handleAddEvent(body: { title: string; slot: number; day: number; userId: number }) {
         if (numId === undefined) return
+        const alreadyExists = events.some(
+            (e) => e.slot === body.slot && e.day === body.day && e.userId === body.userId
+        )
+        if (alreadyExists) return
         try {
             const created = await createTimetableEvent(numId, body)
             setEvents((prev) => [...prev, created])
         } catch (err) {
             console.error("Event save error:", err)
-        }
-    }
-
-    async function handleAddReminder(body: { day: number; text: string }) {
-        if (numId === undefined) return
-        try {
-            const existing = reminders.find((r) => r.day === body.day)
-            if (existing) await deleteTimetableReminder(numId, existing.id)
-            const created = await createTimetableReminder(numId, body)
-            setReminders((prev) => [...prev.filter((r) => r.day !== body.day), created])
-        } catch (err) {
-            console.error("Reminder save error:", err)
         }
     }
 
@@ -136,12 +134,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
                 <div className="flex items-end gap-0.5">
-                    <TabButton active={activeTab === "all"} onClick={() => setActiveTab("all")}>Alle</TabButton>
-                    {watchedProfiles.map((p) => (
-                        <TabButton key={p.id} active={activeTab === p.id} onClick={() => setActiveTab(p.id)}>
-                            {p.name}
-                        </TabButton>
-                    ))}
+                    <TabButton active={true} onClick={() => setActiveTab("all")}>Alle</TabButton>
                 </div>
                 <div className="flex-1" />
                 <button
@@ -162,10 +155,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 <TimetableEdit
                     profiles={allProfiles}
                     watchedIds={watchedIds}
-                    reminders={reminders}
                     onAddEvent={handleAddEvent}
-                    onAddReminder={handleAddReminder}
-                    onRemoveReminder={handleRemoveReminder}
                     onAddUser={addUser}
                     onRemoveUser={removeUser}
                 />

@@ -28,8 +28,8 @@ function NewFamilyRegisterPage() {
             return "Bitte alle Felder ausfüllen."
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
             return "Bitte eine gültige E-Mail-Adresse eingeben."
-        if (formData.passwort.length < 3)
-            return "Passwort muss mindestens 8 Zeichen lang sein."
+        if (formData.passwort.length < 4)
+            return "Passwort muss mindestens 4 Zeichen lang sein."
         if (formData.passwort !== formData.passwortWiederholen)
             return "Passwörter stimmen nicht überein."
         return null
@@ -65,9 +65,27 @@ function NewFamilyRegisterPage() {
                     familyName: response.familyName 
                 }
             })
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Fehler bei der Registrierung:", error)
-            setError("Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.")
+            
+            // Try to extract specific error message from backend
+            let errorMessage = "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut."
+            
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { message?: string }, status?: number } }
+                if (axiosError.response?.data?.message) {
+                    errorMessage = axiosError.response.data.message
+                } else if (axiosError.response?.status === 400) {
+                    errorMessage = "Ungültige Eingabedaten. Bitte überprüfen Sie Ihre Angaben."
+                } else if (axiosError.response?.status === 409) {
+                    errorMessage = "Eine Familie mit diesem Namen oder dieser E-Mail existiert bereits."
+                }
+            } else if (error && typeof error === 'object' && 'message' in error) {
+                const errorWithMessage = error as { message: string }
+                errorMessage = errorWithMessage.message
+            }
+            
+            setError(errorMessage)
         } finally {
             setLoading(false)
         }
