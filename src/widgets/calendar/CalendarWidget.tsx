@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import { useContainerSize } from "../../hooks/useContainerSize";
 import { ChevronLeft, ChevronRight, Dot } from "lucide-react";
 import { motion } from "framer-motion";
 import GlassButton from "../../components/ui/GlassButton";
@@ -134,13 +135,27 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
         setViewMonth(today.getMonth());
     }
 
+    const { ref, width } = useContainerSize();
+    const isCompact = width > 0 && width < 250;
+
     const days = getCalendarDays(viewYear, viewMonth);
     const isCurrentView = viewYear === today.getFullYear() && viewMonth === today.getMonth();
     const scrollableClass = getScrollableClass(isDarkMode);
 
     return (
-        <div className="h-full w-full border-white/20">
-            {selectedDay ? (
+        <div ref={ref} className="h-full w-full border-white/20">
+            {isCompact ? (
+                <DayDetailView
+                    isDarkMode={isDarkMode}
+                    selectedDay={today}
+                    onBack={() => {}}
+                    hideBack
+                    events={events}
+                    addEvent={addEvent}
+                    updateEvent={updateEvent}
+                    removeEvent={removeEvent}
+                />
+            ) : selectedDay ? (
                 <DayDetailView
                     isDarkMode={isDarkMode}
                     selectedDay={selectedDay}
