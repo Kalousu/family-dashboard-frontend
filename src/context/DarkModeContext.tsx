@@ -15,7 +15,11 @@ function DarkModeProvider({ children }: { children: ReactNode }) {
 
     function toggleDarkMode() {
         setIsDarkMode(prev => {
-            localStorage.setItem("isDarkMode", String(!prev))
+            try {
+                localStorage.setItem("isDarkMode", String(!prev))
+            } catch (error) {
+                console.warn("Failed to save dark mode preference to localStorage:", error)
+            }
             return !prev
         })
     }

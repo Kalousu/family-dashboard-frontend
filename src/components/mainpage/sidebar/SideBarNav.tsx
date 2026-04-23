@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
 import GlassButton from "../../ui/GlassButton"
 import useDarkMode from "../../../hooks/useDarkMode"
 
@@ -37,11 +38,15 @@ function SideBarNav({ onWidgetsClick, onAdminClick, permissions }: SideBarNavPro
                     {item}
                 </GlassButton>
             ))}
-            <GlassButton isDarkMode={!isDarkMode} onClick={toggleDarkMode} className="mt-1 mb-1 p-3 w-full text-left">
+            <GlassButton isDarkMode={!isDarkMode} className="mt-1 mb-1 p-3 w-full text-left">
                 <div className="flex justify-between items-center w-full">
                     <span>{isDarkMode ? "Dark Mode" : "Light Mode"}</span>
-                    <div className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer ${isDarkMode ? "bg-slate-500/50" : "bg-cyan-950/20"}`}>
-                        <div className={`w-5 h-5 rounded-full transition-transform duration-200 ${isDarkMode ? "translate-x-5 bg-gray-300" : "translate-x-0 bg-white"}`} />
+                    <div className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer ${isDarkMode ? "bg-slate-500/50" : "bg-cyan-950/20"}`} onClick={toggleDarkMode}>
+                        <motion.div
+                            className={`w-5 h-5 rounded-full ${isDarkMode ? "bg-gray-300" : "bg-white"}`}
+                            animate={{ x: isDarkMode ? 20 : 0 }}
+                            transition={{ duration: 0.2 }}
+                        />
                     </div>
                 </div>
             </GlassButton>

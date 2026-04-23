@@ -6,8 +6,7 @@ import GlassButton from "../components/ui/GlassButton";
 import ColorPickerButton from "../components/ui/ColorPickerButton";
 import ProfileCard from "../components/ProfileCard";
 import IconSelect from "../components/IconSelect";
-import dashboardBgLight from "../assets/dashboardbglight.png";
-import dashboardBgDark from "../assets/dashboardbgdark.png";
+import DarkModeBackground from "../components/ui/DarkModeBackground";
 import useDarkMode from "../hooks/useDarkMode";
 import useAuth from "../hooks/useAuth";
 import { updateUserProfile, updateUserProfileWithAvatar, setUserPin } from "../api/userApi";
@@ -141,13 +140,6 @@ function UserProfileEditPage() {
     const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
     const hasPinData = pinData.newPin || pinData.confirmPin;
 
-    useEffect(() => {
-        const img1 = new Image();
-        const img2 = new Image();
-        img1.src = dashboardBgDark;
-        img2.src = dashboardBgLight;
-    }, []);
-
     const inputWrapper = isDarkMode
         ? "bg-linear-to-b to-gray-700 via-gray-800/50 from-gray-700/50"
         : "bg-linear-to-b from-sky-200/50 via-slate-400/15 to-blue-400/30";
@@ -157,17 +149,7 @@ function UserProfileEditPage() {
 
     return (
         <div className="relative flex flex-col items-center justify-center h-screen gap-8 overflow-hidden">
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url(${dashboardBgDark})` }}
-            />
-            <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ease-out"
-                style={{
-                    backgroundImage: `url(${dashboardBgLight})`,
-                    opacity: isDarkMode ? 0 : 1,
-                }}
-            />
+            <DarkModeBackground />
 
             <div className="fixed top-4 left-4 z-50">
                 <GlassButton isDarkMode={!isDarkMode} onClick={() => navigate("/dashboard")} className="px-3 py-2 backdrop-blur-sm">
