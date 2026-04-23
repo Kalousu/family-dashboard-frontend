@@ -45,7 +45,9 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget, permissions
             {sideBarView === "nav" ? (
                 <div className="flex flex-col h-full overflow-y-auto">
                     <div>
-                        <ChevronRight className={`w-7 h-7 hover:scale-105 transition-all ${isDarkMode ? "text-gray-400 hover:text-white" : "text-sky-900 hover:text-cyan-600"}`} size={30} onClick={onClose}/>
+                        <button onClick={onClose} className="min-w-11 min-h-11 flex items-center justify-center touch-manipulation -ml-1">
+                            <ChevronRight className={`w-7 h-7 hover:scale-105 transition-all ${isDarkMode ? "text-gray-400 hover:text-white" : "text-sky-900 hover:text-cyan-600"}`} size={30} />
+                        </button>
                         <div className="m-3 flex flex-col items-center">
                             {/*profile card wurde für design copy pasted, vllt bessere lösung später?*/}
                             <div className={`relative rounded-2xl p-2 bg-linear-to-b transition-all hover:scale-103 hover:brightness-105 ${isDarkMode ? "from-gray-500/50 via-gray-600/20 to-blue-400/20 border-2 border-white/10" : "from-sky-200/30 via-slate-400/15 to-blue-400/20 border-2 border-cyan-950/5"}`}>

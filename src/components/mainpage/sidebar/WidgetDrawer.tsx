@@ -55,7 +55,9 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
         <>
             {/* Desktop: unchanged layout */}
             <div className="hidden lg:flex flex-col h-full">
-                <ChevronLeft className={chevronClass} size={30} onClick={selectedType !== null ? () => setSelectedType(null) : onBack} />
+                <button onClick={selectedType !== null ? () => setSelectedType(null) : onBack} className="min-w-11 min-h-11 flex items-center justify-center touch-manipulation -ml-1">
+                    <ChevronLeft className={chevronClass} size={30} />
+                </button>
                 <div>
                     {selectedType === null ? (
                         <div className="mt-2 flex flex-col gap-3 overflow-y-auto items-center">
@@ -117,7 +119,9 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
             {/* Mobile: fill sidebar */}
             <div ref={ref} className="lg:hidden flex flex-col h-full">
                 <div className="flex items-center gap-2 py-2">
-                    <ChevronLeft className={chevronClass} size={30} onClick={selectedType !== null ? () => setSelectedType(null) : onBack} />
+                    <button onClick={selectedType !== null ? () => setSelectedType(null) : onBack} className="min-w-11 min-h-11 flex items-center justify-center touch-manipulation -ml-1">
+                    <ChevronLeft className={chevronClass} size={30} />
+                </button>
                     <span className={`font-semibold text-base ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
                         {selectedType ? (widgetLabels[selectedType] ?? selectedType) : "Widget hinzufügen"}
                     </span>
