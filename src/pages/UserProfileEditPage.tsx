@@ -14,6 +14,7 @@ import { updateUserProfile, updateUserProfileWithAvatar, setUserPin } from "../a
 function UserProfileEditPage() {
     const { isDarkMode, toggleDarkMode } = useDarkMode();
     const { currentUser, refreshCurrentUser } = useAuth();
+    const [activeTab, setActiveTab] = useState<"profil" | "icon">("profil");
     const [formData, setFormData] = useState({
         name: "",
         color: "#3B82F6",
@@ -196,17 +197,35 @@ function UserProfileEditPage() {
                 </div>
             </div>
 
-            <div className="relative flex flex-col items-center justify-center w-full h-full gap-8 pb-16">
+            <div className="relative flex flex-col items-center w-full h-full overflow-y-auto pt-20 pb-8">
                 <AnimatePresence mode="popLayout">
                     <motion.div
                         key="edit"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="flex flex-col items-center gap-4 justify-center"
+                        className="flex flex-col items-center gap-4 w-full px-4"
                     >
-                        <div className="flex flex-col sm:flex-row items-center gap-8">
-                            <div className="px-8 flex flex-col gap-4 items-center">
+                        {/* Tab bar — mobile only */}
+                        <div className="sm:hidden flex gap-2 mb-2">
+                            {(["profil", "icon"] as const).map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all touch-manipulation min-h-11 capitalize ${
+                                        activeTab === tab
+                                            ? isDarkMode ? "bg-indigo-500/30 text-white border border-white/20" : "bg-sky-300/50 text-gray-800 border border-sky-400/20"
+                                            : isDarkMode ? "bg-white/5 text-gray-400 border border-white/10" : "bg-white/30 text-gray-500 border border-gray-200/30"
+                                    }`}
+                                >
+                                    {tab === "profil" ? "Profil" : "Icon"}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 w-full">
+                            {/* Left column: profile form */}
+                            <div className={`${activeTab === "profil" ? "flex" : "hidden"} sm:flex flex-col gap-4 items-center`}>
                                 <div className="scale-100 lg:scale-110 xl:scale-125 mb-2">
                                     <ProfileCard
                                         name={formData.name || "User"}
@@ -282,35 +301,44 @@ function UserProfileEditPage() {
                                         </GlassButton>
                                     </>
                                 )}
+                                {(error || success) && (
+                                    <div className={`px-4 py-2 rounded-lg backdrop-blur-sm text-sm ${
+                                        error
+                                            ? 'bg-red-500/20 text-red-200 border border-red-500/30'
+                                            : 'bg-green-500/20 text-green-200 border border-green-500/30'
+                                    }`}>
+                                        {error || success}
+                                    </div>
+                                )}
+                                <GlassButton
+                                    isDarkMode={!isDarkMode}
+                                    onClick={loading || !hasChanges ? () => {} : handleSaveProfile}
+                                    className={`px-6 py-2 backdrop-blur-sm ${loading || !hasChanges ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {loading ? "Wird gespeichert..." : "Speichern"}
+                                </GlassButton>
                             </div>
-                            <IconSelect
-                                selectedIcon={formData.icon}
-                                isDarkMode={isDarkMode}
-                                onSelect={(key) => setFormData({ ...formData, icon: key })}
-                            />
-                        </div>
-                        
-                        {/* Error/Success Messages */}
-                        {(error || success) && (
-                            <div className="flex justify-center mt-4">
-                                <div className={`px-4 py-2 rounded-lg backdrop-blur-sm ${
-                                    error 
-                                        ? 'bg-red-500/20 text-red-200 border border-red-500/30' 
-                                        : 'bg-green-500/20 text-green-200 border border-green-500/30'
-                                }`}>
-                                    {error || success}
+
+                            {/* Icon selector */}
+                            <div className={`${activeTab === "icon" ? "flex" : "hidden"} sm:flex flex-col items-center gap-4`}>
+                                {/* Preview on icon tab — mobile only */}
+                                <div className="sm:hidden">
+                                    <ProfileCard
+                                        name={formData.name || "User"}
+                                        color={formData.color}
+                                        icon={currentUser?.avatarType === 'URL' ? currentUser.avatar : formData.icon}
+                                        avatarType={currentUser?.avatarType || 'ICON'}
+                                        isDarkMode={isDarkMode}
+                                        onSelect={() => {}}
+                                        showName={false}
+                                    />
                                 </div>
+                                <IconSelect
+                                    selectedIcon={formData.icon}
+                                    isDarkMode={isDarkMode}
+                                    onSelect={(key) => setFormData({ ...formData, icon: key })}
+                                />
                             </div>
-                        )}
-                        
-                        <div className="flex justify-center mt-6">
-                            <GlassButton
-                                isDarkMode={!isDarkMode}
-                                onClick={loading || !hasChanges ? () => {} : handleSaveProfile}
-                                className={`px-6 py-2 backdrop-blur-sm ${loading || !hasChanges ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                {loading ? "Wird gespeichert..." : "Speichern"}
-                            </GlassButton>
                         </div>
                     </motion.div>
                 </AnimatePresence>
