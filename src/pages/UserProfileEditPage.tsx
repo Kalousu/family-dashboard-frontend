@@ -244,40 +244,44 @@ function UserProfileEditPage() {
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     />
                                 </div>
-                                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                    <input 
-                                        className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`} 
-                                        type="password" 
-                                        placeholder="Aktuelle PIN" 
-                                        value={pinData.currentPin}
-                                        onChange={(e) => setPinData({ ...pinData, currentPin: e.target.value })}
-                                    />
-                                </div>
-                                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                    <input 
-                                        className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`} 
-                                        type="password" 
-                                        placeholder="Neue PIN" 
-                                        value={pinData.newPin}
-                                        onChange={(e) => setPinData({ ...pinData, newPin: e.target.value })}
-                                    />
-                                </div>
-                                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
-                                    <input 
-                                        className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`} 
-                                        type="password" 
-                                        placeholder="PIN wiederholen" 
-                                        value={pinData.confirmPin}
-                                        onChange={(e) => setPinData({ ...pinData, confirmPin: e.target.value })}
-                                    />
-                                </div>
-                                <GlassButton 
-                                    isDarkMode={!isDarkMode} 
-                                    onClick={loading || !hasPinData ? () => {} : handleSetPin} 
-                                    className={`px-4 py-2 backdrop-blur-sm ${loading || !hasPinData ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    {loading ? "Wird gespeichert..." : "PIN ändern"}
-                                </GlassButton>
+                                {currentUser?.role !== "USER" && (
+                                    <>
+                                        <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
+                                            <input
+                                                className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
+                                                type="password"
+                                                placeholder="Aktuelle PIN"
+                                                value={pinData.currentPin}
+                                                onChange={(e) => setPinData({ ...pinData, currentPin: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
+                                            <input
+                                                className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
+                                                type="password"
+                                                placeholder="Neue PIN"
+                                                value={pinData.newPin}
+                                                onChange={(e) => setPinData({ ...pinData, newPin: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
+                                            <input
+                                                className={`px-4 py-2 rounded-xl focus:outline-none text-lg border ${inputBg}`}
+                                                type="password"
+                                                placeholder="PIN wiederholen"
+                                                value={pinData.confirmPin}
+                                                onChange={(e) => setPinData({ ...pinData, confirmPin: e.target.value })}
+                                            />
+                                        </div>
+                                        <GlassButton
+                                            isDarkMode={!isDarkMode}
+                                            onClick={loading || !hasPinData ? () => {} : handleSetPin}
+                                            className={`px-4 py-2 backdrop-blur-sm ${loading || !hasPinData ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        >
+                                            {loading ? "Wird gespeichert..." : "PIN ändern"}
+                                        </GlassButton>
+                                    </>
+                                )}
                             </div>
                             <IconSelect
                                 selectedIcon={formData.icon}
@@ -299,20 +303,13 @@ function UserProfileEditPage() {
                             </div>
                         )}
                         
-                        <div className="flex justify-center gap-4 mt-6">
-                            <GlassButton 
-                                isDarkMode={!isDarkMode} 
-                                onClick={loading || !hasChanges ? () => {} : handleSaveProfile} 
+                        <div className="flex justify-center mt-6">
+                            <GlassButton
+                                isDarkMode={!isDarkMode}
+                                onClick={loading || !hasChanges ? () => {} : handleSaveProfile}
                                 className={`px-6 py-2 backdrop-blur-sm ${loading || !hasChanges ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {loading ? "Wird gespeichert..." : "Speichern"}
-                            </GlassButton>
-                            <GlassButton 
-                                isDarkMode={!isDarkMode} 
-                                onClick={handleDiscard} 
-                                className="px-6 py-2 backdrop-blur-sm"
-                            >
-                                Verwerfen
                             </GlassButton>
                         </div>
                     </motion.div>
