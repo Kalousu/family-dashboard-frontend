@@ -1,3 +1,4 @@
+import type { ComponentType } from "react"
 import WeatherWidget from "./weather/WeatherWidget";
 import CalendarWidget from "./calendar/CalendarWidget";
 import TimetableWidget from "./timetable/TimetableWidget";
@@ -11,13 +12,13 @@ interface WidgetSize {
 }
 
 interface WidgetEntry {
-    component: React.ComponentType<any>
+    component: ComponentType<any>
     sizes: WidgetSize[]
 }
 
 const registry: Record<string, WidgetEntry> = {}
 
-const registerWidget = (name: string, component: React.ComponentType, sizes: WidgetSize[]) => {
+const registerWidget = (name: string, component: ComponentType<any>, sizes: WidgetSize[]) => {
     registry[name] = { component, sizes }
 }
 
