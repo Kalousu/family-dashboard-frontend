@@ -4,6 +4,7 @@ import { useState } from "react"
 import GlassButton from "../../ui/GlassButton"
 import useDarkMode from "../../../hooks/useDarkMode"
 import { WeatherPreview, CalendarPreview, TimetablePreview, TodoPreview, MemePreview, PicturePreview } from "./WidgetPreviews"
+import { useContainerSize } from "../../../hooks/useContainerSize"
 
 const widgetPreviews: Record<string, React.ComponentType<{ onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }>> = {
     weather: WeatherPreview,
@@ -35,6 +36,7 @@ interface WidgetDrawerProps {
 function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: WidgetDrawerProps) {
     const [selectedType, setSelectedType] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
+    const { ref, width } = useContainerSize()
     const widgets = Object.keys(registry)
 
     const handleSizeSelect = (type: string, colSpan: number, rowSpan: number) => {
@@ -113,7 +115,7 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
             </div>
 
             {/* Mobile: fill sidebar */}
-            <div className="lg:hidden flex flex-col h-full">
+            <div ref={ref} className="lg:hidden flex flex-col h-full">
                 <div className="flex items-center gap-2 py-2">
                     <ChevronLeft className={chevronClass} size={30} onClick={selectedType !== null ? () => setSelectedType(null) : onBack} />
                     <span className={`font-semibold text-base ${isDarkMode ? "text-gray-200" : "text-gray-700"}`}>
@@ -149,19 +151,23 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
                                 const maxCols = Math.max(...sizes.map(s => s.colSpan))
                                 const baseUnit = Math.floor(140 / maxCols)
                                 const Preview = widgetPreviews[selectedType]
-                                return sizes.map((size) => Preview ? (
-                                    <div key={`${size.colSpan}x${size.rowSpan}`} className="flex flex-col gap-1 shrink-0" style={{ width: size.colSpan * baseUnit }}>
-                                        <Preview
-                                            onClick={() => handleSizeSelect(selectedType, size.colSpan, size.rowSpan)}
-                                            className={reducedOpacityWidgets.has(selectedType) ? "opacity-60" : ""}
-                                            colSpan={size.colSpan}
-                                            rowSpan={size.rowSpan}
-                                        />
-                                        <span className={`text-center text-xs font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                            {size.colSpan}×{size.rowSpan}
-                                        </span>
-                                    </div>
-                                ) : null)
+                                const isMobile = width < 640
+                                return sizes.map((size) => {
+                                    const isAvailable = !isMobile || (size.colSpan <= 2 && size.rowSpan <= 2)
+                                    return Preview ? (
+                                        <div key={`${size.colSpan}x${size.rowSpan}`} className={`flex flex-col gap-1 shrink-0 ${!isAvailable ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}`} style={{ width: size.colSpan * baseUnit }}>
+                                            <Preview
+                                                onClick={() => isAvailable && handleSizeSelect(selectedType, size.colSpan, size.rowSpan)}
+                                                className={reducedOpacityWidgets.has(selectedType) ? "opacity-60" : ""}
+                                                colSpan={size.colSpan}
+                                                rowSpan={size.rowSpan}
+                                            />
+                                            <span className={`text-center text-xs font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                                {size.colSpan}×{size.rowSpan}
+                                            </span>
+                                        </div>
+                                    ) : null
+                                })
                             })()}
                         </div>
                     )}

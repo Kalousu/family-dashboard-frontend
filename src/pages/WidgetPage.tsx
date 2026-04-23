@@ -9,7 +9,6 @@ import { createWidget, updateWidgetPosition, deleteWidget } from "../api/widgetA
 import GlassButton from "../components/ui/GlassButton"
 import useDarkMode from "../hooks/useDarkMode"
 import { motion, AnimatePresence } from "framer-motion"
-import { useContainerSize } from "../hooks/useContainerSize"
 
 export interface PlacedWidget {
     id: string
@@ -25,12 +24,6 @@ export interface PlacedWidget {
 let tempIdCounter = -1;
 function generateTempId(): string {
     return String(tempIdCounter--);
-}
-
-function getGridDimensions(width: number): { COLS: number; ROWS: number } {
-    if (width > 0 && width < 640) return { COLS: 4, ROWS: 8 }
-    if (width >= 640 && width <= 1024) return { COLS: 6, ROWS: 6 }
-    return { COLS: 10, ROWS: 5 }
 }
 
 function WidgetPage() {
@@ -52,14 +45,8 @@ function WidgetPage() {
     })
     const { currentUser, familyId, setCurrentUser, setUserId } = useAuth()
     const { isDarkMode } = useDarkMode()
-    const { ref: containerRef, width: containerWidth } = useContainerSize()
-
-    const { COLS, ROWS } = getGridDimensions(containerWidth)
 
     const hasChanges = JSON.stringify(placedWidgets) !== savedLayout
-
-    const validWidgets = placedWidgets.filter(w => w.col < COLS && w.col + w.colSpan <= COLS && w.row < ROWS && w.row + w.rowSpan <= ROWS)
-    const invalidWidgets = placedWidgets.filter(w => !(w.col < COLS && w.col + w.colSpan <= COLS && w.row < ROWS && w.row + w.rowSpan <= ROWS))
 
     const handleSaveLayout = async () => {
         if (!dashboardId || isSavingRef.current) return
@@ -214,7 +201,7 @@ function WidgetPage() {
             <DarkModeBackground />
             <div className="relative flex flex-col min-h-screen w-full">
                 <AppHeader onUserClick={() => setSideBarOpen(!sideBarOpen)} user={currentUser}/>
-                <div className="w-full max-w-full px-4 lg:px-8 flex flex-col min-h-screen relative" ref={containerRef}>
+                <div className="w-full max-w-full px-4 lg:px-8 flex flex-col min-h-screen relative">
                 <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-2 z-50 pointer-events-none">
                     <AnimatePresence>
                         {saveError && (
@@ -267,7 +254,7 @@ function WidgetPage() {
                     </AnimatePresence>
                 </div>
                 <WidgetGrid 
-                    placedWidgets={validWidgets} 
+                    placedWidgets={placedWidgets} 
                     pendingWidget={permissions?.canAddWidgets ? pendingWidget : null} 
                     onCellClick={(col, row) => {
                         if (pendingWidget && permissions?.canAddWidgets) {
@@ -278,14 +265,6 @@ function WidgetPage() {
                     canDelete={permissions?.canDeleteWidgets}
                     onRemoveWidget={(id) => setPlacedWidgets(placedWidgets.filter((w) => w.id !== id))}
                 />
-                {invalidWidgets.length > 0 && (
-                    <div className="mt-4 p-4 bg-red-500/20 rounded-xl backdrop-blur-sm">
-                        <p className="text-white">Folgende Widgets sind auf diesem Breakpoint nicht kompatibel und wurden ausgeblendet:</p>
-                        <ul className="list-disc list-inside text-white/80">
-                            {invalidWidgets.map(w => <li key={w.id}>{w.type} (Position: col {w.col}, span {w.colSpan})</li>)}
-                        </ul>
-                    </div>
-                )}
                 <SideBar 
                     isOpen={sideBarOpen} 
                     onClose={() => setSideBarOpen(false)} 

@@ -17,7 +17,7 @@ interface WidgetGridProps {
 const DOTS_PER_SLOT = 3
 
 function getGridDimensions(width: number): { COLS: number; ROWS: number } {
-    if (width > 0 && width < 640) return { COLS: 4, ROWS: 8 }
+    if (width > 0 && width < 640) return { COLS: 2, ROWS: 4 }
     if (width >= 640 && width <= 1024) return { COLS: 6, ROWS: 6 }
     return { COLS: 10, ROWS: 5 }
 }
