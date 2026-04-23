@@ -261,7 +261,8 @@ function WidgetPage() {
                             setPendingWidget(null)
                         }
                     }} 
-                    onRemoveWidget={permissions?.canDeleteWidgets ? (id) => setPlacedWidgets(placedWidgets.filter((w) => w.id !== id)) : () => {}}
+                    canDelete={permissions?.canDeleteWidgets}
+                    onRemoveWidget={(id) => setPlacedWidgets(placedWidgets.filter((w) => w.id !== id))}
                 />
                 <SideBar 
                     isOpen={sideBarOpen} 

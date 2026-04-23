@@ -10,12 +10,13 @@ interface WidgetGridProps {
     pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
     onCellClick: (col: number, row: number) => void
     onRemoveWidget: (id: string) => void
+    canDelete?: boolean
 }
 const COLS = 10
 const ROWS = 5
 const DOTS_PER_SLOT = 3
 
-function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget }: WidgetGridProps) {
+function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget, canDelete = false }: WidgetGridProps) {
     const [hoveredCell, setHoveredCell] = useState<{ col: number, row: number } | null>(null)
     const [hoveredWidget, setHoveredWidget] = useState<string | null>(null)
     const { isDarkMode } = useDarkMode()
@@ -57,7 +58,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget 
                                 </div>
                             )}
                             <AnimatePresence>
-                                {hoveredWidget === widget.id && (
+                                {canDelete && hoveredWidget === widget.id && (
                                     <motion.button
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}

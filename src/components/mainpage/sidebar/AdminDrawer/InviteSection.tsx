@@ -27,7 +27,7 @@ function InviteSection({ isDarkMode }: InviteSectionProps) {
     return (
         <>
             <GlassButton isDarkMode={!isDarkMode} onClick={() => handleToggle(setIsOpen)} className="mt-1 mb-1 p-3 w-full text-left">
-                neues Mitglied einladen
+                Neues Mitglied einladen
             </GlassButton>
 
             {isOpen && (
