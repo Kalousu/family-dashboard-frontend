@@ -157,7 +157,7 @@ function RegisterPage() {
                     }
                 </p>
 
-                <div className="flex flex-row gap-8 h-96">
+                <div className="flex flex-col sm:flex-row gap-8">
                     <div className="px-8 flex flex-col gap-4 items-center justify-center">
                         <FormInput
                             isDarkMode={isDarkMode}

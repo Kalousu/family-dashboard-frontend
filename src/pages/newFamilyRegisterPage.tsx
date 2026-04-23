@@ -101,8 +101,8 @@ function NewFamilyRegisterPage() {
 
                 <div className="flex flex-col gap-4 items-stretch p-10 w-full">
 
-                    <div className="flex items-center gap-4">
-                        <span className={`w-44 text-sm font-medium text-right ${muted}`}>Familienname</span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4">
+                        <span className={`w-full sm:w-44 text-sm font-medium text-left sm:text-right ${muted}`}>Familienname</span>
                         <FormInput
                             isDarkMode={isDarkMode}
                             type="text"
@@ -112,8 +112,8 @@ function NewFamilyRegisterPage() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <span className={`w-44 text-sm font-medium text-right ${muted}`}>E-Mail</span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4">
+                        <span className={`w-full sm:w-44 text-sm font-medium text-left sm:text-right ${muted}`}>E-Mail</span>
                         <FormInput
                             isDarkMode={isDarkMode}
                             type="email"
@@ -123,8 +123,8 @@ function NewFamilyRegisterPage() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <span className={`w-44 text-sm font-medium text-right ${muted}`}>Passwort</span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4">
+                        <span className={`w-full sm:w-44 text-sm font-medium text-left sm:text-right ${muted}`}>Passwort</span>
                         <FormInput
                             isDarkMode={isDarkMode}
                             type="password"
@@ -134,8 +134,8 @@ function NewFamilyRegisterPage() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <span className={`w-44 text-sm font-medium text-right ${muted}`}>Passwort wiederholen</span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4">
+                        <span className={`w-full sm:w-44 text-sm font-medium text-left sm:text-right ${muted}`}>Passwort wiederholen</span>
                         <FormInput
                             isDarkMode={isDarkMode}
                             type="password"

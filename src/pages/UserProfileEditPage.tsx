@@ -205,7 +205,7 @@ function UserProfileEditPage() {
                         exit={{ opacity: 0, y: -20 }}
                         className="flex flex-col items-center gap-4 justify-center"
                     >
-                        <div className="flex flex-row items-center gap-8">
+                        <div className="flex flex-col sm:flex-row items-center gap-8">
                             <div className="px-8 flex flex-col gap-4 items-center">
                                 <div className="scale-100 lg:scale-110 xl:scale-125 mb-2">
                                     <ProfileCard

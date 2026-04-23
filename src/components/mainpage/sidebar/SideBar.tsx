@@ -41,7 +41,7 @@ function SideBar({ isOpen, onClose, pendingWidget, setPendingWidget, permissions
         {isOpen && (
             <div className="fixed inset-0 bg-black/40 z-10 lg:hidden" onClick={onClose} />
         )}
-        <div className={`fixed z-20 right-0 top-0 h-full w-[280px] rounded-l-2xl p-4 transition-all duration-300 flex flex-col justify-between backdrop-blur-md ${isOpen ? "translate-x-0" : "translate-x-full"} ${isDarkMode ? "bg-linear-to-b from-gray-950/90 via-gray-900/85 to-slate-900/80 border-2 border-white/5" : "bg-linear-to-b to-sky-100 from-blue-200 border-2 border-gray-400/20"}`}>
+        <div className={`fixed z-20 right-0 top-0 h-full w-[280px] rounded-l-2xl p-4 transition-all duration-300 will-change-transform flex flex-col justify-between backdrop-blur-md ${isOpen ? "translate-x-0" : "translate-x-full"} ${isDarkMode ? "bg-linear-to-b from-gray-950/90 via-gray-900/85 to-slate-900/80 border-2 border-white/5" : "bg-linear-to-b to-sky-100 from-blue-200 border-2 border-gray-400/20"}`}>
             {sideBarView === "nav" ? (
                 <div className="flex flex-col h-full overflow-y-auto">
                     <div>
