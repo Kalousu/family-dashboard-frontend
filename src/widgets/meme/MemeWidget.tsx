@@ -41,14 +41,18 @@ function MemeWidget() {
                     <p className="text-white/80 text-center text-sm font-semibold">{error}</p>
                 </div>
             ) : meme && (
-                <div className="relative flex-1 flex items-center justify-center overflow-hidden">
-                    {meme.isVideo ? (
-                        <video src={meme.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <img src={meme.imageUrl} alt={meme.title} className="w-full h-full object-cover"
-                        />
-                    )}
+                <div className="flex-1 flex flex-col p-3 gap-2 overflow-hidden">
+                    <p className="text-sm font-semibold text-center shrink-0
+                        text-gray-800 dark:text-white/90">{meme.title}</p>
+                    <div className="flex-1 flex items-center justify-center min-h-0">
+                        {meme.isVideo ? (
+                            <video src={meme.imageUrl} autoPlay loop muted playsInline
+                                className="max-w-full max-h-full object-contain rounded-lg" />
+                        ) : (
+                            <img src={meme.imageUrl} alt={meme.title}
+                                className="max-w-full max-h-full object-contain rounded-lg" />
+                        )}
+                    </div>
                 </div>
             )}
         </div>
