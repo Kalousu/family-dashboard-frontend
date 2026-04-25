@@ -141,7 +141,7 @@ function SystemAdminPage() {
             <motion.div
                 key="system-admin"
                 {...fadeSlideUp}
-                className="flex flex-col items-center w-full max-w-2xl px-4 gap-6"
+                className="flex flex-col items-center w-full max-w-2xl px-4 gap-6 will-change-transform"
             >
                 {/* Page title with logout button */}
                 <div className="flex items-start justify-between gap-3 w-full">
@@ -169,7 +169,7 @@ function SystemAdminPage() {
                             <button
                                 key={tab.id}
                                 onClick={() => handleTabChange(tab.id)}
-                                className={`relative flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 touch-manipulation
+                                className={`relative flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 touch-manipulation active:brightness-90
                                     ${isActive
                                         ? isDarkMode
                                             ? "bg-linear-to-b from-gray-500/50 via-gray-600/20 to-blue-400/20 text-gray-200 shadow-sm"

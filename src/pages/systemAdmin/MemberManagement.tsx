@@ -75,7 +75,7 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
     }
 
     return (
-        <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full">
+        <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
             {/* Header with back navigation */}
             <div className="flex items-center gap-3">
                 <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-2 shrink-0">
@@ -171,7 +171,7 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 <button
                                     onClick={() => setPendingDelete(member)}
                                     title="Entfernen"
-                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300"
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 active:scale-95 border-red-500/30 text-red-400 hover:text-red-300"
                                 >
                                     <Trash2 size={15} />
                                 </button>

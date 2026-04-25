@@ -125,7 +125,7 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
     }
 
     return (
-        <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full">
+        <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
             {/* Stats */}
             <div className="flex gap-3">
                 {[
@@ -194,11 +194,11 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                             </div>
                             <div className="flex gap-2 shrink-0">
                                 <button onClick={() => setPendingReset(user)} title="Passwort-Reset"
-                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 border-blue-500/30 text-blue-400 hover:text-blue-300">
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 active:scale-95 border-blue-500/30 text-blue-400 hover:text-blue-300">
                                     <RefreshCw size={16} />
                                 </button>
                                 <button onClick={() => setPendingDelete(user)} title="Löschen"
-                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300">
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 active:scale-95 border-red-500/30 text-red-400 hover:text-red-300">
                                     <Trash2 size={16} />
                                 </button>
                             </div>
@@ -238,11 +238,11 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                         </span>
                         <div className="flex gap-1.5">
                             <button onClick={() => setPendingReset(user)} title="Passwort-Reset"
-                                className="p-2 rounded-lg border transition-all hover:brightness-110 border-blue-500/30 text-blue-400 hover:text-blue-300">
+                                className="p-2 rounded-lg border touch-manipulation transition-all hover:brightness-110 active:scale-95 border-blue-500/30 text-blue-400 hover:text-blue-300">
                                 <RefreshCw size={14} />
                             </button>
                             <button onClick={() => setPendingDelete(user)} title="Löschen"
-                                className="p-2 rounded-lg border transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300">
+                                className="p-2 rounded-lg border touch-manipulation transition-all hover:brightness-110 active:scale-95 border-red-500/30 text-red-400 hover:text-red-300">
                                 <Trash2 size={14} />
                             </button>
                         </div>

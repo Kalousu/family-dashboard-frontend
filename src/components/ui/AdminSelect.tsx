@@ -38,7 +38,7 @@ function AdminSelect({ value, onChange, options, isDarkMode, className = "" }: A
                 <button
                     type="button"
                     onClick={() => setIsOpen(prev => !prev)}
-                    className={`w-full flex items-center justify-between gap-2 px-3 py-3 rounded-xl text-sm font-semibold border touch-manipulation focus:outline-none ${inputField}`}
+                    className={`w-full flex items-center justify-between gap-2 px-3 py-3 rounded-xl text-sm font-semibold border touch-manipulation active:brightness-90 focus:outline-none ${inputField}`}
                 >
                     <span>{selected?.label ?? value}</span>
                     <ChevronDown
@@ -55,7 +55,7 @@ function AdminSelect({ value, onChange, options, isDarkMode, className = "" }: A
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -6, scale: 0.97 }}
                         transition={{ duration: 0.13, ease: "easeOut" }}
-                        className={`absolute top-full mt-1 left-0 right-0 z-50 rounded-xl border overflow-hidden shadow-xl ${
+                        className={`absolute top-full mt-1 left-0 right-0 z-50 rounded-xl border overflow-hidden shadow-xl will-change-transform ${
                             isDarkMode
                                 ? "bg-gray-800/95 border-white/10 backdrop-blur-sm"
                                 : "bg-white/95 border-cyan-950/10 backdrop-blur-sm"
@@ -66,7 +66,7 @@ function AdminSelect({ value, onChange, options, isDarkMode, className = "" }: A
                                 key={option.value}
                                 type="button"
                                 onClick={() => { onChange(option.value); setIsOpen(false) }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left transition-colors touch-manipulation
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left transition-colors touch-manipulation active:brightness-90
                                     ${option.value === value
                                         ? isDarkMode ? "bg-white/10 text-gray-200" : "bg-sky-100/80 text-gray-700"
                                         : isDarkMode ? "text-gray-400 hover:bg-white/5 hover:text-gray-200" : "text-gray-500 hover:bg-sky-50 hover:text-gray-700"

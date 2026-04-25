@@ -69,7 +69,7 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
     }
 
     return (
-        <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full">
+        <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
@@ -97,7 +97,7 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                         <div className="flex items-center gap-2 px-4 py-2">
                             <button
                                 onClick={() => toggleExpand(family.id)}
-                                className={`flex-1 flex items-center gap-3 text-left min-h-11 ${textPrimary} touch-manipulation`}
+                                className={`flex-1 flex items-center gap-3 text-left min-h-11 ${textPrimary} touch-manipulation active:brightness-90`}
                             >
                                 <div className="flex-1 min-w-0">
                                     <p className="font-semibold truncate">{family.name}</p>
@@ -117,14 +117,14 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                                 <button
                                     onClick={() => onSelectFamily(family)}
                                     title="Mitglieder verwalten"
-                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 border-blue-500/30 text-blue-400 hover:text-blue-300"
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 active:scale-95 border-blue-500/30 text-blue-400 hover:text-blue-300"
                                 >
                                     <UserPlus size={15} />
                                 </button>
                                 <button
                                     onClick={() => setPendingDelete(family)}
                                     title="Löschen"
-                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300"
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 active:scale-95 border-red-500/30 text-red-400 hover:text-red-300"
                                 >
                                     <Trash2 size={15} />
                                 </button>
@@ -139,7 +139,7 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                                     animate={{ height: "auto", opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="overflow-hidden"
+                                    className="overflow-hidden will-change-transform"
                                 >
                                     <div className={`px-4 pb-3 pt-1 border-t flex flex-wrap gap-2 ${border}`}>
                                         <div className={`text-xs ${textSecondary}`}>
