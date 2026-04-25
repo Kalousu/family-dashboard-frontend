@@ -42,6 +42,37 @@ interface UserManagementProps {
     onFamiliesChange: (families: Family[]) => void
 }
 
+function UserAvatar({ user, size = "sm" }: { user: SystemUser; size?: "sm" | "md" }) {
+    const dim = size === "md" ? "w-9 h-9" : "w-7 h-7"
+    const iconSize = size === "md" ? 16 : 14
+    return (
+        <div
+            className={`${dim} rounded-lg flex items-center justify-center shrink-0 border border-white/10 overflow-hidden`}
+            style={{ backgroundColor: user.color + "33" }}
+        >
+            {user.icon.startsWith("http") ? (
+                <img
+                    src={user.icon}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = "none"
+                        target.nextElementSibling?.classList.remove("hidden")
+                    }}
+                />
+            ) : (
+                (() => {
+                    const IconComponent = imageIcons[user.icon as keyof typeof imageIcons] ?? User
+                    return <IconComponent size={iconSize} style={{ color: user.color }} />
+                })()
+            )}
+            <User size={iconSize} style={{ color: user.color }} className="hidden" />
+        </div>
+    )
+}
+
+
 function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManagementProps) {
     const [searchTerm, setSearchTerm] = useState("")
     const [roleFilter, setRoleFilter] = useState<MemberRole | "alle">("alle")
@@ -121,11 +152,11 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                         className="w-full text-sm"
                     />
                 </div>
-                <div className={`rounded-xl p-0.5 ${inputWrapper}`}>
+                <div className={`w-full sm:w-auto rounded-xl p-0.5 ${inputWrapper}`}>
                     <select
                         value={roleFilter}
                         onChange={(e) => setRoleFilter(e.target.value as MemberRole | "alle")}
-                        className={`px-3 py-2 rounded-xl text-sm font-semibold focus:outline-none border ${inputField}`}
+                        className={`w-full px-3 py-3 rounded-xl text-sm font-semibold focus:outline-none border touch-manipulation ${inputField}`}
                     >
                         <option value="alle">Alle Rollen</option>
                         <option value="Mitglied">Mitglied</option>
@@ -134,89 +165,84 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                 </div>
             </div>
 
-            {/* User table */}
-            <div className={`relative rounded-xl border overflow-hidden ${glassCard}`}>
+            {/* User list — mobile cards */}
+            <div className={`sm:hidden relative rounded-xl border overflow-hidden ${glassCard}`}>
                 <div className={`absolute inset-x-0 top-0 h-10 pointer-events-none ${shine}`} />
+                {filteredUsers.length === 0 && (
+                    <p className={`text-center py-8 text-sm ${textSecondary}`}>Keine Benutzer gefunden.</p>
+                )}
+                {filteredUsers.map((user, index) => (
+                    <div key={user.id} className={`px-4 py-3 flex flex-col gap-2 ${index < filteredUsers.length - 1 ? `border-b ${border}` : ""}`}>
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                                <UserAvatar user={user} size="md" />
+                                <span className={`truncate text-sm font-semibold ${textPrimary} ${user.isLocked ? "opacity-50" : ""}`}>
+                                    {user.name}
+                                </span>
+                            </div>
+                            <span className={`text-xs px-2 py-1 rounded-full font-semibold whitespace-nowrap shrink-0 ${user.isLocked ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"}`}>
+                                {user.isLocked ? "gesperrt" : "aktiv"}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                                <p className={`text-xs truncate ${textSecondary}`}>{user.familyName}</p>
+                                <p className={`text-xs font-medium ${textPrimary}`}>
+                                    {user.role === "Familienadministrator" ? "Familienadmin" : "Mitglied"}
+                                </p>
+                            </div>
+                            <div className="flex gap-2 shrink-0">
+                                <button onClick={() => setPendingReset(user)} title="Passwort-Reset"
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 border-blue-500/30 text-blue-400 hover:text-blue-300">
+                                    <RefreshCw size={16} />
+                                </button>
+                                <button onClick={() => setPendingDelete(user)} title="Löschen"
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300">
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
-                {/* Table header */}
+            {/* User table — desktop */}
+            <div className={`hidden sm:block relative rounded-xl border overflow-hidden ${glassCard}`}>
+                <div className={`absolute inset-x-0 top-0 h-10 pointer-events-none ${shine}`} />
                 <div className={`grid grid-cols-[1fr_1fr_auto_auto] gap-2 px-4 py-2 border-b text-xs font-semibold ${textSecondary} ${border}`}>
                     <span>Benutzer</span>
                     <span>Familie · Rolle</span>
                     <span className="text-center">Status</span>
                     <span className="text-center">Aktionen</span>
                 </div>
-
                 {filteredUsers.length === 0 && (
                     <p className={`text-center py-8 text-sm ${textSecondary}`}>Keine Benutzer gefunden.</p>
                 )}
-
                 {filteredUsers.map((user, index) => (
-                    <div
-                        key={user.id}
-                        className={`grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center px-4 py-3 ${index < filteredUsers.length - 1 ? `border-b ${border}` : ""}`}
-                    >
-                        {/* Name with profile picture */}
+                    <div key={user.id} className={`grid grid-cols-[1fr_1fr_auto_auto] gap-2 items-center px-4 py-3 ${index < filteredUsers.length - 1 ? `border-b ${border}` : ""}`}>
                         <div className="flex items-center gap-2 min-w-0">
-                            <div
-                                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-white/10 overflow-hidden"
-                                style={{ backgroundColor: user.color + "33" }}
-                            >
-                                {user.icon.startsWith('http') ? (
-                                    // URL-based avatar
-                                    <img 
-                                        src={user.icon} 
-                                        alt={user.name}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            // Fallback to User icon if image fails to load
-                                            const target = e.target as HTMLImageElement
-                                            target.style.display = 'none'
-                                            target.nextElementSibling?.classList.remove('hidden')
-                                        }}
-                                    />
-                                ) : (
-                                    // Icon-based avatar
-                                    (() => {
-                                        const IconComponent = imageIcons[user.icon as keyof typeof imageIcons] ?? User
-                                        return <IconComponent size={14} style={{ color: user.color }} />
-                                    })()
-                                )}
-                                {/* Fallback icon (hidden by default, shown if image fails) */}
-                                <User size={14} style={{ color: user.color }} className="hidden" />
-                            </div>
+                            <UserAvatar user={user} />
                             <span className={`truncate text-sm font-semibold ${textPrimary} ${user.isLocked ? "opacity-50" : ""}`}>
                                 {user.name}
                             </span>
                         </div>
-
-                        {/* Family & role */}
                         <div className="min-w-0">
                             <p className={`text-xs truncate ${textSecondary}`}>{user.familyName}</p>
                             <p className={`text-xs font-medium truncate ${textPrimary}`}>
                                 {user.role === "Familienadministrator" ? "Familienadmin" : "Mitglied"}
                             </p>
                         </div>
-
-                        {/* Status badge */}
                         <span className={`text-xs px-2 py-0.5 rounded-full font-semibold whitespace-nowrap ${user.isLocked ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"}`}>
                             {user.isLocked ? "gesperrt" : "aktiv"}
                         </span>
-
-                        {/* Actions */}
                         <div className="flex gap-1.5">
-                            <button
-                                onClick={() => setPendingReset(user)}
-                                title="Passwort-Reset"
-                                className="p-1.5 rounded-lg border transition-all hover:brightness-110 border-blue-500/30 text-blue-400 hover:text-blue-300"
-                            >
-                                <RefreshCw size={13} />
+                            <button onClick={() => setPendingReset(user)} title="Passwort-Reset"
+                                className="p-2 rounded-lg border transition-all hover:brightness-110 border-blue-500/30 text-blue-400 hover:text-blue-300">
+                                <RefreshCw size={14} />
                             </button>
-                            <button
-                                onClick={() => setPendingDelete(user)}
-                                title="Löschen"
-                                className="p-1.5 rounded-lg border transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300"
-                            >
-                                <Trash2 size={13} />
+                            <button onClick={() => setPendingDelete(user)} title="Löschen"
+                                className="p-2 rounded-lg border transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300">
+                                <Trash2 size={14} />
                             </button>
                         </div>
                     </div>

@@ -144,21 +144,19 @@ function SystemAdminPage() {
                 className="flex flex-col items-center w-full max-w-2xl px-4 gap-6"
             >
                 {/* Page title with logout button */}
-                <div className="relative text-center w-full">
-                    <h1 className={`text-2xl font-bold ${textPrimary}`}>System Administration</h1>
-                    <p className={`text-sm mt-1 ${textSecondary}`}>Verwaltung aller Familien und Benutzer</p>
-                    
-                    {/* Logout button in top right */}
-                    <div className="absolute top-0 right-0">
-                        <GlassButton 
-                            isDarkMode={!isDarkMode} 
-                            onClick={handleLogout}
-                            className="p-2 flex items-center gap-2"
-                        >
-                            <LogOut size={16} />
-                            <span className="text-sm">Logout</span>
-                        </GlassButton>
+                <div className="flex items-start justify-between gap-3 w-full">
+                    <div>
+                        <h1 className={`text-2xl font-bold ${textPrimary}`}>System Administration</h1>
+                        <p className={`text-sm mt-1 ${textSecondary}`}>Verwaltung aller Familien und Benutzer</p>
                     </div>
+                    <GlassButton
+                        isDarkMode={!isDarkMode}
+                        onClick={handleLogout}
+                        className="p-2 flex items-center gap-2 shrink-0"
+                    >
+                        <LogOut size={16} />
+                        <span className="text-sm hidden sm:inline">Logout</span>
+                    </GlassButton>
                 </div>
 
                 {/* Tab bar */}
@@ -171,7 +169,7 @@ function SystemAdminPage() {
                             <button
                                 key={tab.id}
                                 onClick={() => handleTabChange(tab.id)}
-                                className={`relative flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all duration-200
+                                className={`relative flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 touch-manipulation
                                     ${isActive
                                         ? isDarkMode
                                             ? "bg-linear-to-b from-gray-500/50 via-gray-600/20 to-blue-400/20 text-gray-200 shadow-sm"

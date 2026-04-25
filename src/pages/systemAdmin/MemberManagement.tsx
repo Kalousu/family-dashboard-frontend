@@ -77,14 +77,14 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
         <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full">
             {/* Header with back navigation */}
             <div className="flex items-center gap-3">
-                <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-2">
+                <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-2 shrink-0">
                     <ArrowLeft size={16} />
                 </GlassButton>
-                <div>
-                    <h2 className={`font-bold text-lg ${textPrimary}`}>{family.name}</h2>
-                    <p className={`text-xs ${textSecondary}`}>{family.email}</p>
+                <div className="flex-1 min-w-0">
+                    <h2 className={`font-bold text-lg truncate ${textPrimary}`}>{family.name}</h2>
+                    <p className={`text-xs truncate ${textSecondary}`}>{family.email}</p>
                 </div>
-                <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-semibold ${family.status === "aktiv" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-semibold ${family.status === "aktiv" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
                     {family.status}
                 </span>
             </div>
@@ -148,11 +148,11 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 </div>
 
                                 {/* Role select */}
-                                <div className={`inline-flex mt-1 rounded-lg p-0.5 ${inputWrapper}`}>
+                                <div className={`flex mt-1 rounded-lg p-0.5 ${inputWrapper}`}>
                                     <select
                                         value={member.role}
                                         onChange={(e) => handleRoleChange(member.id, e.target.value as MemberRole)}
-                                        className={`text-xs px-2 py-1 rounded-md font-semibold focus:outline-none border ${inputField}`}
+                                        className={`w-full text-sm px-3 py-2.5 rounded-md font-semibold focus:outline-none border touch-manipulation ${inputField}`}
                                     >
                                         <option value="Mitglied">Mitglied</option>
                                         <option value="Familienadministrator">Familienadmin</option>
@@ -170,9 +170,9 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 <button
                                     onClick={() => setPendingDelete(member)}
                                     title="Entfernen"
-                                    className="p-1.5 rounded-lg border transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300"
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300"
                                 >
-                                    <Trash2 size={14} />
+                                    <Trash2 size={15} />
                                 </button>
                             </div>
                         </div>
