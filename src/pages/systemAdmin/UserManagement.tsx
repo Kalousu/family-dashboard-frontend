@@ -2,6 +2,7 @@ import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
 import { Trash2, RefreshCw, User } from "lucide-react"
 import FormInput from "../../components/ui/FormInput"
+import AdminSelect from "../../components/ui/AdminSelect"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
 import type { Family, MemberRole, SystemUser } from "./systemAdminTypes"
@@ -79,7 +80,7 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
     const [pendingDelete, setPendingDelete] = useState<SystemUser | null>(null)
     const [pendingReset, setPendingReset] = useState<SystemUser | null>(null)
 
-    const { glassCard, shine, textPrimary, textSecondary, border, inputWrapper, inputField } = useAdminTheme(isDarkMode)
+    const { glassCard, shine, textPrimary, textSecondary, border } = useAdminTheme(isDarkMode)
 
     const allUsers = useMemo<SystemUser[]>(() =>
         families.flatMap((family) =>
@@ -152,17 +153,17 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                         className="w-full text-sm"
                     />
                 </div>
-                <div className={`w-full sm:w-auto rounded-xl p-0.5 ${inputWrapper}`}>
-                    <select
-                        value={roleFilter}
-                        onChange={(e) => setRoleFilter(e.target.value as MemberRole | "alle")}
-                        className={`w-full px-3 py-3 rounded-xl text-sm font-semibold focus:outline-none border touch-manipulation ${inputField}`}
-                    >
-                        <option value="alle">Alle Rollen</option>
-                        <option value="Mitglied">Mitglied</option>
-                        <option value="Familienadministrator">Familienadmin</option>
-                    </select>
-                </div>
+                <AdminSelect
+                    value={roleFilter}
+                    onChange={(val) => setRoleFilter(val as MemberRole | "alle")}
+                    options={[
+                        { value: "alle", label: "Alle Rollen" },
+                        { value: "Mitglied", label: "Mitglied" },
+                        { value: "Familienadministrator", label: "Familienadmin" },
+                    ]}
+                    isDarkMode={isDarkMode}
+                    className="w-full sm:w-48"
+                />
             </div>
 
             {/* User list — mobile cards */}

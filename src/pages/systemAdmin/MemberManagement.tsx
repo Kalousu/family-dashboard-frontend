@@ -2,6 +2,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, Shield, User, Trash2 } from "lucide-react"
 import GlassButton from "../../components/ui/GlassButton"
+import AdminSelect from "../../components/ui/AdminSelect"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
 import imageIcons from "../../constants/imageIcons"
@@ -44,7 +45,7 @@ interface MemberManagementProps {
 function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: MemberManagementProps) {
     const [pendingDelete, setPendingDelete] = useState<FamilyMember | null>(null)
 
-    const { glassCard, shine, textPrimary, textSecondary , inputWrapper, inputField } = useAdminTheme(isDarkMode)
+    const { glassCard, shine, textPrimary, textSecondary } = useAdminTheme(isDarkMode)
 
     function updateMembers(members: FamilyMember[]) {
         onFamilyChange({ ...family, members })
@@ -148,16 +149,16 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 </div>
 
                                 {/* Role select */}
-                                <div className={`flex mt-1 rounded-lg p-0.5 ${inputWrapper}`}>
-                                    <select
-                                        value={member.role}
-                                        onChange={(e) => handleRoleChange(member.id, e.target.value as MemberRole)}
-                                        className={`w-full text-sm px-3 py-2.5 rounded-md font-semibold focus:outline-none border touch-manipulation ${inputField}`}
-                                    >
-                                        <option value="Mitglied">Mitglied</option>
-                                        <option value="Familienadministrator">Familienadmin</option>
-                                    </select>
-                                </div>
+                                <AdminSelect
+                                    value={member.role}
+                                    onChange={(val) => handleRoleChange(member.id, val as MemberRole)}
+                                    options={[
+                                        { value: "Mitglied", label: "Mitglied" },
+                                        { value: "Familienadministrator", label: "Familienadmin" },
+                                    ]}
+                                    isDarkMode={isDarkMode}
+                                    className="mt-1"
+                                />
                             </div>
 
                             {/* Admin badge */}
