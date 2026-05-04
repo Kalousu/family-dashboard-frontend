@@ -2,6 +2,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, Shield, User, Trash2 } from "lucide-react"
 import GlassButton from "../../components/ui/GlassButton"
+import AdminSelect from "../../components/ui/AdminSelect"
 import ConfirmModal from "../../components/mainpage/sidebar/AdminDrawer/ConfirmModal"
 import { fadeSlideUp } from "../../constants/animations"
 import imageIcons from "../../constants/imageIcons"
@@ -44,7 +45,7 @@ interface MemberManagementProps {
 function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: MemberManagementProps) {
     const [pendingDelete, setPendingDelete] = useState<FamilyMember | null>(null)
 
-    const { glassCard, shine, textPrimary, textSecondary , inputWrapper, inputField } = useAdminTheme(isDarkMode)
+    const { glassCard, shine, textPrimary, textSecondary } = useAdminTheme(isDarkMode)
 
     function updateMembers(members: FamilyMember[]) {
         onFamilyChange({ ...family, members })
@@ -74,17 +75,17 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
     }
 
     return (
-        <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full">
+        <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
             {/* Header with back navigation */}
             <div className="flex items-center gap-3">
-                <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-2">
+                <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-2 shrink-0">
                     <ArrowLeft size={16} />
                 </GlassButton>
-                <div>
-                    <h2 className={`font-bold text-lg ${textPrimary}`}>{family.name}</h2>
-                    <p className={`text-xs ${textSecondary}`}>{family.email}</p>
+                <div className="flex-1 min-w-0">
+                    <h2 className={`font-bold text-lg truncate ${textPrimary}`}>{family.name}</h2>
+                    <p className={`text-xs truncate ${textSecondary}`}>{family.email}</p>
                 </div>
-                <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-semibold ${family.status === "aktiv" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-semibold ${family.status === "aktiv" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
                     {family.status}
                 </span>
             </div>
@@ -148,16 +149,16 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 </div>
 
                                 {/* Role select */}
-                                <div className={`inline-flex mt-1 rounded-lg p-0.5 ${inputWrapper}`}>
-                                    <select
-                                        value={member.role}
-                                        onChange={(e) => handleRoleChange(member.id, e.target.value as MemberRole)}
-                                        className={`text-xs px-2 py-1 rounded-md font-semibold focus:outline-none border ${inputField}`}
-                                    >
-                                        <option value="Mitglied">Mitglied</option>
-                                        <option value="Familienadministrator">Familienadmin</option>
-                                    </select>
-                                </div>
+                                <AdminSelect
+                                    value={member.role}
+                                    onChange={(val) => handleRoleChange(member.id, val as MemberRole)}
+                                    options={[
+                                        { value: "Mitglied", label: "Mitglied" },
+                                        { value: "Familienadministrator", label: "Familienadmin" },
+                                    ]}
+                                    isDarkMode={isDarkMode}
+                                    className="mt-1"
+                                />
                             </div>
 
                             {/* Admin badge */}
@@ -170,9 +171,9 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 <button
                                     onClick={() => setPendingDelete(member)}
                                     title="Entfernen"
-                                    className="p-1.5 rounded-lg border transition-all hover:brightness-110 border-red-500/30 text-red-400 hover:text-red-300"
+                                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg border touch-manipulation transition-all hover:brightness-110 active:scale-95 border-red-500/30 text-red-400 hover:text-red-300"
                                 >
-                                    <Trash2 size={14} />
+                                    <Trash2 size={15} />
                                 </button>
                             </div>
                         </div>
