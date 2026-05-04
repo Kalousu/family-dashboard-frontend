@@ -4,6 +4,7 @@ import { useState } from "react"
 import GlassButton from "../../ui/GlassButton"
 import useDarkMode from "../../../hooks/useDarkMode"
 import { WeatherPreview, CalendarPreview, TimetablePreview, TodoPreview, MemePreview, PicturePreview } from "./WidgetPreviews"
+import { BREAKPOINT_SM } from "../../../constants/config"
 
 const widgetPreviews: Record<string, React.ComponentType<{ onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }>> = {
     weather: WeatherPreview,
@@ -38,7 +39,7 @@ function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: 
 const widgets = Object.keys(registry)
 
     const handleSizeSelect = (type: string, colSpan: number, rowSpan: number) => {
-        if (window.innerWidth < 640 && onAddWidget) {
+        if (window.innerWidth < BREAKPOINT_SM && onAddWidget) {
             onAddWidget({ type, colSpan, rowSpan })
             setSelectedType(null)
             onBack()

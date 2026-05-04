@@ -39,6 +39,7 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
     const [searchTerm, setSearchTerm] = useState("")
     const [expandedFamilyId, setExpandedFamilyId] = useState<number | null>(null)
     const [pendingDelete, setPendingDelete] = useState<Family | null>(null)
+    const [deleteError, setDeleteError] = useState<string | null>(null)
 
     const { glassCard, textPrimary, textSecondary, border } = useAdminTheme(isDarkMode)
 
@@ -55,21 +56,20 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
 
     async function confirmDelete() {
         if (!pendingDelete) return
-        
+        setDeleteError(null)
         try {
             await deleteFamily(pendingDelete.id)
-            // Only update UI if API call was successful
             onFamiliesChange(families.filter((f) => f.id !== pendingDelete.id))
             setPendingDelete(null)
-        } catch (error) {
-            console.error('Failed to delete family:', error)
-            // TODO: Show error message to user
+        } catch {
+            setDeleteError("Familie konnte nicht gelöscht werden.")
             setPendingDelete(null)
         }
     }
 
     return (
         <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
+            {deleteError && <p className="text-red-400 text-sm text-center">{deleteError}</p>}
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">

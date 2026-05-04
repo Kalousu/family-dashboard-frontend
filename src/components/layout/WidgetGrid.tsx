@@ -5,7 +5,7 @@ import { getWidget, getWidgetSizes } from "../../widgets/WidgetRegistry"
 import useDarkMode from "../../hooks/useDarkMode"
 import { useContainerSize } from "../../hooks/useContainerSize"
 import GlassButton from "../ui/GlassButton"
-import type { PlacedWidget } from "../../pages/WidgetPage"
+import type { PlacedWidget } from "../../hooks/useDashboardLayout"
 
 interface WidgetGridProps {
     placedWidgets: PlacedWidget[]
@@ -22,8 +22,8 @@ function getGridDimensions(width: number, height: number): { COLS: number; ROWS:
     if (width >= 640 && width < 1024) {
         const isLandscape = height > 0 && width > height
         return isLandscape
-            ? { COLS: 8, ROWS: 5 }   // Tablet Querformat
-            : { COLS: 5, ROWS: 6 }   // Tablet Hochformat
+            ? { COLS: 8, ROWS: 5 }
+            : { COLS: 5, ROWS: 6 }
     }
     return { COLS: 10, ROWS: 5 }
 }
@@ -32,6 +32,72 @@ function getMobileFallbackSize(type: string, maxCols: number): { colSpan: number
     const mobileSizes = getWidgetSizes(type).filter(s => s.colSpan <= maxCols)
     if (mobileSizes.length === 0) return null
     return mobileSizes.reduce((best, s) => s.rowSpan >= best.rowSpan ? s : best)
+}
+
+// Shared inner content for mobile/tablet widget cards (widget + lock overlay + delete button)
+function WidgetContent({ widget, canDelete, pendingWidget, onRemoveWidget }: {
+    widget: PlacedWidget
+    canDelete: boolean
+    pendingWidget: { type: string } | null
+    onRemoveWidget: (id: string) => void
+}) {
+    return (
+        <>
+            {(() => {
+                // eslint-disable-next-line react-hooks/static-components
+                const WidgetComponent = getWidget(widget.type)
+                return WidgetComponent
+                    ? <WidgetComponent widgetId={widget.id} config={widget.config} />
+                    : <p className="text-white p-2">{widget.type}</p>
+            })()}
+            {Number(widget.id) < 0 && (
+                <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10">
+                    <Lock size={20} className="text-white/80" />
+                    <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
+                </div>
+            )}
+            {canDelete && !pendingWidget && (
+                <button
+                    className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-2 touch-manipulation"
+                    onClick={() => onRemoveWidget(widget.id)}
+                >
+                    <X size={14} />
+                </button>
+            )}
+        </>
+    )
+}
+
+// Shared inner content for the "click to place" pending widget card (mobile/tablet)
+function PendingWidgetContent({ availablePos, widgetFits, onPlace, isDarkMode, tooLargeMessage }: {
+    availablePos: { col: number; row: number } | null
+    widgetFits: boolean
+    onPlace: () => void
+    isDarkMode: boolean
+    tooLargeMessage: string
+}) {
+    return (
+        <div className={`absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-3 ${isDarkMode ? "bg-gray-700/20" : "bg-white/20"}`}>
+            {!widgetFits ? (
+                <p className={`text-sm font-semibold text-center px-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    {tooLargeMessage}
+                </p>
+            ) : availablePos ? (
+                <>
+                    <p className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                        Widget hinzufügen?
+                    </p>
+                    <GlassButton isDarkMode={!isDarkMode} onClick={onPlace} className="px-6 py-2 text-sm backdrop-blur-sm">
+                        Hinzufügen
+                    </GlassButton>
+                </>
+            ) : (
+                <p className="text-red-400 text-sm font-semibold px-6 text-center">
+                    Kein Platz verfügbar. Entferne zuerst ein Widget.
+                </p>
+            )}
+        </div>
+    )
 }
 
 function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget, canDelete = false }: WidgetGridProps) {
@@ -71,32 +137,27 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
         return { colSpan, rowSpan }
     }
 
-    const visibleWidgets = placedWidgets.filter(
-        (w) => w.col < COLS && w.row < ROWS
-    )
-
+    const visibleWidgets = placedWidgets.filter(w => w.col < COLS && w.row < ROWS)
     const disableMobileDrag = COLS <= 4
+
+    // Computed once, shared between mobile and tablet branches
+    const availablePos = pendingWidget ? (() => {
+        for (let row = 0; row <= ROWS - pendingWidget.rowSpan; row++) {
+            for (let col = 0; col <= COLS - pendingWidget.colSpan; col++) {
+                if (canPlace(col, row)) return { col, row }
+            }
+        }
+        return null
+    })() : null
+    const widgetFits = pendingWidget
+        ? pendingWidget.colSpan <= COLS && pendingWidget.rowSpan <= ROWS
+        : false
 
     // Mobile card stack — no grid, iOS-style vertical layout
     if (isMobile) {
         const sorted = [...placedWidgets].sort((a, b) =>
             a.row !== b.row ? a.row - b.row : a.col - b.col
         )
-
-        const findFirstAvailablePos = (): { col: number; row: number } | null => {
-            if (!pendingWidget) return null
-            for (let row = 0; row <= ROWS - pendingWidget.rowSpan; row++) {
-                for (let col = 0; col <= COLS - pendingWidget.colSpan; col++) {
-                    if (canPlace(col, row)) return { col, row }
-                }
-            }
-            return null
-        }
-
-        const availablePos = pendingWidget ? findFirstAvailablePos() : null
-        const widgetFits = pendingWidget
-            ? pendingWidget.colSpan <= COLS && pendingWidget.rowSpan <= ROWS
-            : false
 
         return (
             <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto px-4 pt-2 pb-28 mt-14">
@@ -107,65 +168,28 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                             : { colSpan: widget.colSpan, rowSpan: widget.rowSpan }
 
                         return (
-                        <div
-                            key={widget.id}
-                            className={`relative w-full rounded-2xl border ${isDarkMode ? "bg-gray-700/40 border-white/10" : "bg-white/40 border-white/30"}`}
-                            style={{ height: `${Math.round(containerWidth * displaySize.rowSpan / displaySize.colSpan)}px` }}
-                        >
-                            {(() => {
-                                const WidgetComponent = getWidget(widget.type)
-                                return WidgetComponent
-                                    ? <WidgetComponent widgetId={widget.id} config={widget.config} />
-                                    : <p className="text-white p-2">{widget.type}</p>
-                            })()}
-                            {Number(widget.id) < 0 && (
-                                <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10">
-                                    <Lock size={20} className="text-white/80" />
-                                    <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
-                                </div>
-                            )}
-                            {canDelete && !pendingWidget && (
-                                <button
-                                    className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-2 touch-manipulation"
-                                    onClick={() => onRemoveWidget(widget.id)}
-                                >
-                                    <X size={14} />
-                                </button>
-                            )}
-                        </div>
+                            <div
+                                key={widget.id}
+                                className={`relative w-full rounded-2xl border ${isDarkMode ? "bg-gray-700/40 border-white/10" : "bg-white/40 border-white/30"}`}
+                                style={{ height: `${Math.round(containerWidth * displaySize.rowSpan / displaySize.colSpan)}px` }}
+                            >
+                                <WidgetContent widget={widget} canDelete={canDelete} pendingWidget={pendingWidget} onRemoveWidget={onRemoveWidget} />
+                            </div>
                         )
                     })}
 
-                    {/* Preview card for pending widget */}
                     {pendingWidget && (
                         <div
                             className={`relative w-full rounded-2xl border-2 border-dashed ${availablePos ? (isDarkMode ? "border-white/30" : "border-gray-400/40") : "border-red-400/40"}`}
                             style={{ height: `${Math.round(containerWidth * pendingWidget.rowSpan / pendingWidget.colSpan)}px` }}
                         >
-                            <div className={`absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-3 ${isDarkMode ? "bg-gray-700/20" : "bg-white/20"}`}>
-                                {!widgetFits ? (
-                                    <p className={`text-sm font-semibold text-center px-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                        Dieses Widget ist zu groß für die mobile Ansicht
-                                    </p>
-                                ) : availablePos ? (
-                                    <>
-                                        <p className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                            Widget hinzufügen?
-                                        </p>
-                                        <GlassButton
-                                            isDarkMode={!isDarkMode}
-                                            onClick={() => onCellClick(availablePos.col, availablePos.row)}
-                                            className="px-6 py-2 text-sm backdrop-blur-sm"
-                                        >
-                                            Hinzufügen
-                                        </GlassButton>
-                                    </>
-                                ) : (
-                                    <p className="text-red-400 text-sm font-semibold px-6 text-center">
-                                        Kein Platz verfügbar. Entferne zuerst ein Widget.
-                                    </p>
-                                )}
-                            </div>
+                            <PendingWidgetContent
+                                availablePos={availablePos}
+                                widgetFits={widgetFits}
+                                onPlace={() => availablePos && onCellClick(availablePos.col, availablePos.row)}
+                                isDarkMode={isDarkMode}
+                                tooLargeMessage="Dieses Widget ist zu groß für die mobile Ansicht"
+                            />
                         </div>
                     )}
 
@@ -184,22 +208,8 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
         const sorted = [...placedWidgets].sort((a, b) =>
             a.row !== b.row ? a.row - b.row : a.col - b.col
         )
-        const fullWidth = containerWidth - 32   // px-4 on each side
-        const halfWidth = Math.floor((fullWidth - 12) / 2)  // gap-3 = 12px
-
-        const findFirstAvailablePos = (): { col: number; row: number } | null => {
-            if (!pendingWidget) return null
-            for (let row = 0; row <= ROWS - pendingWidget.rowSpan; row++) {
-                for (let col = 0; col <= COLS - pendingWidget.colSpan; col++) {
-                    if (canPlace(col, row)) return { col, row }
-                }
-            }
-            return null
-        }
-        const availablePos = pendingWidget ? findFirstAvailablePos() : null
-        const widgetFits = pendingWidget
-            ? pendingWidget.colSpan <= COLS && pendingWidget.rowSpan <= ROWS
-            : false
+        const fullWidth = containerWidth - 32
+        const halfWidth = Math.floor((fullWidth - 12) / 2)
 
         return (
             <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pt-2 pb-28 mt-14 sm:mt-13">
@@ -217,26 +227,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                                 className={`relative rounded-2xl border ${isFullWidth ? "col-span-2" : ""} ${isDarkMode ? "bg-gray-700/40 border-white/10" : "bg-white/40 border-white/30"}`}
                                 style={{ height: `${Math.round(displayWidth * displaySize.rowSpan / displaySize.colSpan)}px` }}
                             >
-                                {(() => {
-                                    const WidgetComponent = getWidget(widget.type)
-                                    return WidgetComponent
-                                        ? <WidgetComponent widgetId={widget.id} config={widget.config} />
-                                        : <p className="text-white p-2">{widget.type}</p>
-                                })()}
-                                {Number(widget.id) < 0 && (
-                                    <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10">
-                                        <Lock size={20} className="text-white/80" />
-                                        <p className="text-white/90 text-xs text-center px-4 leading-snug">Layout speichern, um dieses Widget zu aktivieren</p>
-                                    </div>
-                                )}
-                                {canDelete && !pendingWidget && (
-                                    <button
-                                        className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-2 touch-manipulation"
-                                        onClick={() => onRemoveWidget(widget.id)}
-                                    >
-                                        <X size={14} />
-                                    </button>
-                                )}
+                                <WidgetContent widget={widget} canDelete={canDelete} pendingWidget={pendingWidget} onRemoveWidget={onRemoveWidget} />
                             </div>
                         )
                     })}
@@ -249,30 +240,13 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                                 className={`relative rounded-2xl border-2 border-dashed ${isFullWidth ? "col-span-2" : ""} ${availablePos ? (isDarkMode ? "border-white/30" : "border-gray-400/40") : "border-red-400/40"}`}
                                 style={{ height: `${Math.round(displayWidth * pendingWidget.rowSpan / pendingWidget.colSpan)}px` }}
                             >
-                                <div className={`absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-3 ${isDarkMode ? "bg-gray-700/20" : "bg-white/20"}`}>
-                                    {!widgetFits ? (
-                                        <p className={`text-sm font-semibold text-center px-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                            Dieses Widget ist zu groß für die Tablet-Ansicht
-                                        </p>
-                                    ) : availablePos ? (
-                                        <>
-                                            <p className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                                Widget hinzufügen?
-                                            </p>
-                                            <GlassButton
-                                                isDarkMode={!isDarkMode}
-                                                onClick={() => onCellClick(availablePos.col, availablePos.row)}
-                                                className="px-6 py-2 text-sm backdrop-blur-sm"
-                                            >
-                                                Hinzufügen
-                                            </GlassButton>
-                                        </>
-                                    ) : (
-                                        <p className="text-red-400 text-sm font-semibold px-6 text-center">
-                                            Kein Platz verfügbar. Entferne zuerst ein Widget.
-                                        </p>
-                                    )}
-                                </div>
+                                <PendingWidgetContent
+                                    availablePos={availablePos}
+                                    widgetFits={widgetFits}
+                                    onPlace={() => availablePos && onCellClick(availablePos.col, availablePos.row)}
+                                    isDarkMode={isDarkMode}
+                                    tooLargeMessage="Dieses Widget ist zu groß für die Tablet-Ansicht"
+                                />
                             </div>
                         )
                     })()}
@@ -287,7 +261,7 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
         )
     }
 
-    // Desktop (or mobile in placement mode): grid layout
+    // Desktop: full CSS grid layout
     return (
         <div ref={containerRef} className="flex-1 min-h-0 overflow-auto p-4 sm:p-6 lg:p-8 mt-14 sm:mt-13">
             <div className="relative h-full" style={{ minWidth: `${dotCols * 20}px`, minHeight: `${dotRows * 24}px` }}>
@@ -299,24 +273,25 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                 <div className="absolute inset-0 grid" style={gridStyle}>
                     {visibleWidgets.map((widget) => {
                         const { colSpan, rowSpan } = getVisualSpans(widget)
+                        const WidgetComponent = getWidget(widget.type)
                         return (
                             <div
-                            key={widget.id}
-                            className="relative bg-gray-700/40 rounded-2xl border border-white/10"
-                            draggable={!disableMobileDrag}
-                            onDragStart={(e) => disableMobileDrag && e.preventDefault()}
-                            style={{
-                                gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(colSpan * DOTS_PER_SLOT) - 1}`,
-                                gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(rowSpan * DOTS_PER_SLOT) - 1}`,
-                                touchAction: disableMobileDrag ? "none" : "auto"
-                            }}
-                            onMouseEnter={() => setHoveredWidget(widget.id)}
-                            onMouseLeave={() => setHoveredWidget(null)}
-                        >
-                                {(() => {
-                                    const WidgetComponent = getWidget(widget.type)
-                                    return WidgetComponent ? <WidgetComponent widgetId={widget.id} config={widget.config} /> : <p className="text-white p-2">{widget.type}</p>
-                                })()}
+                                key={widget.id}
+                                className="relative bg-gray-700/40 rounded-2xl border border-white/10"
+                                draggable={!disableMobileDrag}
+                                onDragStart={(e) => disableMobileDrag && e.preventDefault()}
+                                style={{
+                                    gridColumn: `${(widget.col * DOTS_PER_SLOT) + 2} / span ${(colSpan * DOTS_PER_SLOT) - 1}`,
+                                    gridRow: `${(widget.row * DOTS_PER_SLOT) + 2} / span ${(rowSpan * DOTS_PER_SLOT) - 1}`,
+                                    touchAction: disableMobileDrag ? "none" : "auto"
+                                }}
+                                onMouseEnter={() => setHoveredWidget(widget.id)}
+                                onMouseLeave={() => setHoveredWidget(null)}
+                            >
+                                {WidgetComponent
+                                    ? <WidgetComponent widgetId={widget.id} config={widget.config} />
+                                    : <p className="text-white p-2">{widget.type}</p>
+                                }
                                 {Number(widget.id) < 0 && (
                                     <div className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10" style={{ pointerEvents: "all" }}>
                                         <Lock size={20} className="text-white/80" />
@@ -360,7 +335,14 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
                             const col = index % COLS
                             const row = Math.floor(index / COLS)
                             return (
-                                <div key={index} className="cursor-pointer rounded-xl" style={{ gridColumn: `${(col * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}`, gridRow: `${(row * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}` }} onMouseEnter={() => setHoveredCell({ col, row })} onMouseLeave={() => setHoveredCell(null)} onClick={() => canPlace(col, row) && onCellClick(col, row)} />
+                                <div
+                                    key={index}
+                                    className="cursor-pointer rounded-xl"
+                                    style={{ gridColumn: `${(col * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}`, gridRow: `${(row * DOTS_PER_SLOT) + 2} / span ${DOTS_PER_SLOT - 1}` }}
+                                    onMouseEnter={() => setHoveredCell({ col, row })}
+                                    onMouseLeave={() => setHoveredCell(null)}
+                                    onClick={() => canPlace(col, row) && onCellClick(col, row)}
+                                />
                             )
                         })}
                     </div>
@@ -369,4 +351,5 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
         </div>
     )
 }
+
 export default WidgetGrid

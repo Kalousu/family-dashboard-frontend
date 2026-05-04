@@ -8,7 +8,7 @@ import { DarkModeProvider } from './context/DarkModeContext';
 import { UserProvider } from './context/UserContext';
 import { AuthProvider } from './context/AuthContext';
 import UserProfileEditPage from './pages/UserProfileEditPage';
-import NewFamilyRegisterPage from './pages/newFamilyRegisterPage';
+import NewFamilyRegisterPage from './pages/NewFamilyRegisterPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import SystemAdminPage from './pages/systemAdmin/SystemAdminPage';
 

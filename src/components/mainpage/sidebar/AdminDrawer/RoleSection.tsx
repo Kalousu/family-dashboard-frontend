@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
 import GlassButton from "../../../ui/GlassButton"
-import { handleToggle } from "./handleToggle"
 import imageIcons from "../../../../constants/imageIcons"
 import { changeUserRole, setUserPin } from "../../../../api/userApi"
 import useAuth from "../../../../hooks/useAuth"
@@ -72,7 +71,7 @@ function RoleSection({ isDarkMode, members, onMembersUpdate }: RoleSectionProps)
                     onCancel={() => setPinModalFor(null)}
                 />
             )}
-            <GlassButton isDarkMode={!isDarkMode} onClick={() => handleToggle(setIsOpen)} className="mt-1 mb-1 p-3 w-full text-left">
+            <GlassButton isDarkMode={!isDarkMode} onClick={() => setIsOpen(prev => !prev)} className="mt-1 mb-1 p-3 w-full text-left">
                 Rollen verwalten
             </GlassButton>
 

@@ -19,26 +19,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 function AuthProvider({ children }: { children: ReactNode }) {
-    const [familyId, setFamilyIdState] = useState<number | null>(
-        () => {
-            const stored = localStorage.getItem("familyId")
-            return stored ? Number(stored) : null
-        }
-    )
-    
-    const [userId, setUserIdState] = useState<number | null>(
-        () => {
-            const stored = localStorage.getItem("userId")
-            return stored ? Number(stored) : null
-        }
-    )
+    const [familyId, setFamilyIdState] = useState<number | null>(() => {
+        const stored = localStorage.getItem("familyId")
+        const parsed = stored ? Number(stored) : null
+        return parsed !== null && !Number.isNaN(parsed) ? parsed : null
+    })
 
-    const [currentUser, setCurrentUserState] = useState<UserProfile | null>(
-        () => {
-            const stored = localStorage.getItem("currentUser")
-            return stored ? JSON.parse(stored) : null
+    const [userId, setUserIdState] = useState<number | null>(() => {
+        const stored = localStorage.getItem("userId")
+        const parsed = stored ? Number(stored) : null
+        return parsed !== null && !Number.isNaN(parsed) ? parsed : null
+    })
+
+    const [currentUser, setCurrentUserState] = useState<UserProfile | null>(() => {
+        const stored = localStorage.getItem("currentUser")
+        if (!stored) return null
+        try {
+            return JSON.parse(stored)
+        } catch {
+            localStorage.removeItem("currentUser")
+            return null
         }
-    )
+    })
 
     function setFamilyId(id: number | null) {
         setFamilyIdState(id)

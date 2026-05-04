@@ -8,6 +8,7 @@ import { WEEKDAYS, MONTH_NAMES, getCalendarDays, isSameDay, getScrollableClass }
 import type { CalendarDay } from "./calendarUtils";
 import type { CalendarEvent } from "./calendarTypes";
 import { getCalendarEvents, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "../../api/calendarApi";
+import { CALENDAR_DOT_THRESHOLD, CALENDAR_MAX_DOTS, CALENDAR_MAX_DOTS_COMPACT } from "../../constants/config";
 import DayDetailView from "./DayDetailView";
 
 function CalendarDayCell({ day, today, events, onSelect }: {
@@ -23,7 +24,7 @@ function CalendarDayCell({ day, today, events, onSelect }: {
             if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
             return (a.startTime ?? "").localeCompare(b.startTime ?? "");
         });
-    const MAX_DOTS = dayEvents.length >= 4 ? 1 : 3;
+    const MAX_DOTS = dayEvents.length >= CALENDAR_DOT_THRESHOLD ? CALENDAR_MAX_DOTS_COMPACT : CALENDAR_MAX_DOTS;
     const visibleEvents = dayEvents.slice(0, MAX_DOTS);
     const overflow = dayEvents.length - MAX_DOTS;
 
@@ -71,10 +72,13 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [viewYear, setViewYear] = useState(today.getFullYear());
     const [viewMonth, setViewMonth] = useState(today.getMonth());
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (numericWidgetId === undefined) return;
-        getCalendarEvents(numericWidgetId).then(setEvents).catch(console.error);
+        getCalendarEvents(numericWidgetId)
+            .then(setEvents)
+            .catch(() => setError("Kalender konnte nicht geladen werden."));
     }, [numericWidgetId]);
 
     useEffect(() => {
@@ -96,8 +100,9 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
         try {
             const created = await createCalendarEvent(numericWidgetId, event);
             setEvents(prev => [...prev, created]);
-        } catch (e) {
-            console.error(e);
+            setError(null);
+        } catch {
+            setError("Event konnte nicht gespeichert werden.");
         }
     }
 
@@ -106,8 +111,9 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
             const { id, ...rest } = updated;
             const saved = await updateCalendarEvent(id, rest);
             setEvents(prev => prev.map(e => e.id === saved.id ? saved : e));
-        } catch (e) {
-            console.error(e);
+            setError(null);
+        } catch {
+            setError("Event konnte nicht aktualisiert werden.");
         }
     }
 
@@ -115,8 +121,9 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
         try {
             await deleteCalendarEvent(id);
             setEvents(prev => prev.filter(e => e.id !== id));
-        } catch (e) {
-            console.error(e);
+            setError(null);
+        } catch {
+            setError("Event konnte nicht gelöscht werden.");
         }
     }
 
@@ -167,6 +174,11 @@ function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
                 />
             ) : (
                 <div className="rounded-2xl h-full w-full overflow-hidden backdrop-blur-sm bg-linear-to-br from-teal-600/30 to-cyan-400/20">
+                    {error && (
+                        <div className="px-3 py-2 text-xs text-red-300 text-center bg-red-500/10">
+                            {error}
+                        </div>
+                    )}
                     <div className={scrollableClass}>
                         <div className="flex items-center justify-between pr-9">
                             <span className="text-lg font-bold text-white">

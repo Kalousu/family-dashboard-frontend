@@ -1,6 +1,16 @@
 import axiosInstance from "./axiosInstance";
 import type { CalendarEvent } from "../widgets/calendar/calendarTypes";
 
+interface CalendarEventRaw {
+    id: number;
+    date: string;
+    title: string;
+    color: string;
+    allDay: boolean;
+    startTime?: string;
+    endTime?: string;
+}
+
 function parseDate(dateStr: string): Date {
     const [y, m, d] = dateStr.split("-").map(Number);
     return new Date(y, m - 1, d);
@@ -15,7 +25,7 @@ function formatDate(date: Date): string {
 
 export const getCalendarEvents = async (widgetId: number): Promise<CalendarEvent[]> => {
     const response = await axiosInstance.get(`/api/widgets/calendar/${widgetId}`);
-    return response.data.map((e: any) => ({ ...e, date: parseDate(e.date) }));
+    return response.data.map((e: CalendarEventRaw) => ({ ...e, date: parseDate(e.date) }));
 };
 
 export const createCalendarEvent = async (widgetId: number, event: Omit<CalendarEvent, "id">): Promise<CalendarEvent> => {

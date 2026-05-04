@@ -1,8 +1,9 @@
 import type { ComponentType } from "react"
+import type { WidgetConfig } from "../api/familyApi"
 import WeatherWidget from "./weather/WeatherWidget";
 import CalendarWidget from "./calendar/CalendarWidget";
 import TimetableWidget from "./timetable/TimetableWidget";
-import ToDoWidget from "./toDo/ToDoWidget";
+import ToDoWidget from "./toDo/TodoWidget";
 import MemeWidget from "./meme/MemeWidget";
 import PictureWidget from "./picture/PictureWidget";
 
@@ -11,14 +12,19 @@ interface WidgetSize {
     rowSpan: number
 }
 
+export interface BaseWidgetProps {
+    widgetId: string
+    config?: WidgetConfig
+}
+
 interface WidgetEntry {
-    component: ComponentType<any>
+    component: ComponentType<BaseWidgetProps>
     sizes: WidgetSize[]
 }
 
 const registry: Record<string, WidgetEntry> = {}
 
-const registerWidget = (name: string, component: ComponentType<any>, sizes: WidgetSize[]) => {
+const registerWidget = (name: string, component: ComponentType<BaseWidgetProps>, sizes: WidgetSize[]) => {
     registry[name] = { component, sizes }
 }
 

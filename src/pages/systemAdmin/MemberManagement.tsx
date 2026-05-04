@@ -44,6 +44,7 @@ interface MemberManagementProps {
 
 function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: MemberManagementProps) {
     const [pendingDelete, setPendingDelete] = useState<FamilyMember | null>(null)
+    const [actionError, setActionError] = useState<string | null>(null)
 
     const { glassCard, shine, textPrimary, textSecondary } = useAdminTheme(isDarkMode)
 
@@ -52,19 +53,15 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
     }
 
     async function handleRoleChange(memberId: number, role: MemberRole) {
+        setActionError(null)
         try {
-            // Map frontend role to backend role
             const backendRole = role === 'Familienadministrator' ? 'FAMILY_ADMIN' : 'USER'
-            
             await changeUserRole(memberId, { userRole: backendRole })
-            
-            // Only update UI if API call was successful
             updateMembers(
                 family.members.map((m) => (m.id === memberId ? { ...m, role } : m))
             )
-        } catch (error) {
-            console.error('Failed to change user role:', error)
-            // TODO: Show error message to user
+        } catch {
+            setActionError("Rolle konnte nicht geändert werden.")
         }
     }
 
@@ -76,6 +73,7 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
 
     return (
         <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
+            {actionError && <p className="text-red-400 text-sm text-center">{actionError}</p>}
             {/* Header with back navigation */}
             <div className="flex items-center gap-3">
                 <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-2 shrink-0">

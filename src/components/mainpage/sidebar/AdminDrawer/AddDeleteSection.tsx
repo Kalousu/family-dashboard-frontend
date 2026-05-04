@@ -2,7 +2,6 @@ import { useState, useCallback } from "react"
 import { Trash2, Plus } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import GlassButton from "../../../ui/GlassButton"
-import { handleToggle } from "./handleToggle"
 import imageIcons from "../../../../constants/imageIcons"
 import ConfirmModal from "./ConfirmModal"
 import useAuth from "../../../../hooks/useAuth"
@@ -36,7 +35,6 @@ function AddSection({ isDarkMode, members, onMembersUpdate }: AddSectionProps) {
 
     const handleAddMember = useCallback(() => {
         if (familyId) {
-            // Use a placeholder family name or fetch it if needed
             const familyName = "Familie" // Placeholder - could be improved by fetching actual family name
             navigate("/register", { 
                 state: { 
@@ -50,7 +48,7 @@ function AddSection({ isDarkMode, members, onMembersUpdate }: AddSectionProps) {
 
     return (
         <>
-            <GlassButton isDarkMode={!isDarkMode} onClick={() => handleToggle(setIsOpen)} className="mt-1 mb-1 p-3 w-full text-left">
+            <GlassButton isDarkMode={!isDarkMode} onClick={() => setIsOpen(prev => !prev)} className="mt-1 mb-1 p-3 w-full text-left">
                 Mitglieder verwalten
             </GlassButton>
 

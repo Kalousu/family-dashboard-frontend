@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import type { ToDoItem } from "./todoTypes";
 import {
     getTodos,
@@ -12,26 +12,27 @@ import {
 export function useToDo(widgetId: number) {
     const [todos, setTodosState] = useState<ToDoItem[]>([]);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const nextTempId = useRef(-1);
     const textareaRefs = useRef<Map<number, HTMLTextAreaElement>>(new Map());
     const originalTextRef = useRef<string>("");
     const savingIds = useRef<Set<number>>(new Set());
 
     useEffect(() => {
-        getTodos(widgetId).then(data =>
-            setTodosState(data.sort((a, b) => a.sortOrder - b.sortOrder))
-        );
+        getTodos(widgetId)
+            .then(data => setTodosState(data.sort((a, b) => a.sortOrder - b.sortOrder)))
+            .catch(() => setError("Todos konnten nicht geladen werden."));
     }, [widgetId]);
 
     const focusItem = (id: number) =>
         setTimeout(() => textareaRefs.current.get(id)?.focus(), 0);
 
-    // Called by framer-motion's Reorder.Group onReorder — optimistic update + API sync
     const setTodos = (newTodos: ToDoItem[]) => {
         setTodosState(newTodos);
         const realTodos = newTodos.filter(t => t.id > 0);
         if (realTodos.length > 0) {
-            updateTodoPositions(realTodos.map((t, index) => ({ id: t.id, sortOrder: index })));
+            void updateTodoPositions(realTodos.map((t, index) => ({ id: t.id, sortOrder: index })))
+                .catch(() => setError("Reihenfolge konnte nicht gespeichert werden."));
         }
     };
 
@@ -53,7 +54,7 @@ export function useToDo(widgetId: number) {
         focusItem(id);
     };
 
-    const finishEditing = async (id: number) => {
+    const finishEditing = useCallback(async (id: number) => {
         if (savingIds.current.has(id)) return;
         savingIds.current.add(id);
 
@@ -68,39 +69,53 @@ export function useToDo(widgetId: number) {
 
         const textChanged = item.text !== originalTextRef.current;
 
-        if (id < 0) {
-            const created = await createTodo(widgetId, item.text, item.completed);
-            setTodosState(prev => prev.map(t => t.id === id ? created : t));
-        } else if (textChanged) {
-            await updateTodoText(id, item.text);
+        try {
+            if (id < 0) {
+                const created = await createTodo(widgetId, item.text, item.completed);
+                setTodosState(prev => prev.map(t => t.id === id ? created : t));
+            } else if (textChanged) {
+                await updateTodoText(id, item.text);
+            }
+        } catch {
+            setError("Todo konnte nicht gespeichert werden.");
         }
 
         savingIds.current.delete(id);
         setEditingId(null);
-    };
+    }, [todos, widgetId]);
 
-    const deleteTodo = async (id: number) => {
-        if (id > 0) {
-            await deleteTodoApi(id);
+    const deleteTodo = useCallback(async (id: number) => {
+        try {
+            if (id > 0) {
+                await deleteTodoApi(id);
+            }
+        } catch {
+            setError("Todo konnte nicht gelöscht werden.");
+            return;
         }
         setTodosState(prev => prev.filter(t => t.id !== id));
-    };
+    }, []);
 
-    const toggleComplete = async (id: number) => {
-        if (id < 0) return; // Noch nicht gespeichertes Todo kann nicht getoggled werden
+    const toggleComplete = useCallback(async (id: number) => {
+        if (id < 0) return;
         const item = todos.find(t => t.id === id);
         if (!item) return;
         const newCompleted = !item.completed;
         setTodosState(prev => prev.map(t => t.id === id ? { ...t, completed: newCompleted } : t));
-        console.log(`Toggling todo ${id} to completed=${newCompleted}`);
-        await updateTodoCompleted(id, newCompleted);
-    };
+        try {
+            await updateTodoCompleted(id, newCompleted);
+        } catch {
+            setTodosState(prev => prev.map(t => t.id === id ? { ...t, completed: item.completed } : t));
+            setError("Status konnte nicht gespeichert werden.");
+        }
+    }, [todos]);
 
     return {
         todos,
         setTodos,
         editingId,
         isAnyEditing: editingId !== null,
+        error,
         textareaRefs,
         addTodo,
         updateText,

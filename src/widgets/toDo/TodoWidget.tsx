@@ -1,10 +1,10 @@
 import { LayoutGroup, Reorder } from "framer-motion"
-import { useToDo } from "./useToDo"
+import { useToDo } from "./useTodo"
 import { ToDoItemRow, AddButton } from "./ToDoItemRow"
 import { useContainerSize } from "../../hooks/useContainerSize"
 
-function ToDoWidget({ widgetId = 1 }: { widgetId?: number }) {
-    const { todos, setTodos, editingId, isAnyEditing, textareaRefs, addTodo, updateText, startEditing, finishEditing, deleteTodo, toggleComplete } = useToDo(widgetId);
+function ToDoWidget({ widgetId }: { widgetId: string }) {
+    const { todos, setTodos, editingId, isAnyEditing, error, textareaRefs, addTodo, updateText, startEditing, finishEditing, deleteTodo, toggleComplete } = useToDo(Number(widgetId));
     const { ref, width } = useContainerSize();
     const isNarrow = width < 200;
 
@@ -15,6 +15,7 @@ function ToDoWidget({ widgetId = 1 }: { widgetId?: number }) {
                 style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(180,130,50,0.4) rgba(180,130,50,0.1)" }}
             >
             {!isNarrow && <h1 className="text-3xl text-center font-bold text-white mb-2">To-Do Liste</h1>}
+            {error && <p className="text-red-300 text-xs text-center mb-2">{error}</p>}
             <LayoutGroup>
                 <Reorder.Group axis="y" values={todos} onReorder={setTodos} className="p-0 m-0">
                     {todos.map((todo) => (
