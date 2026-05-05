@@ -5,6 +5,7 @@ import GlassButton from "../../ui/GlassButton"
 import useDarkMode from "../../../hooks/useDarkMode"
 import { WeatherPreview, CalendarPreview, TimetablePreview, TodoPreview, MemePreview, PicturePreview } from "./WidgetPreviews"
 import { BREAKPOINT_SM } from "../../../constants/config"
+import type { PendingWidget } from "../../../types/widgetTypes"
 
 const widgetPreviews: Record<string, React.ComponentType<{ onClick: () => void; className?: string; colSpan?: number; rowSpan?: number }>> = {
     weather: WeatherPreview,
@@ -28,9 +29,9 @@ const reducedOpacityWidgets = new Set(["weather", "calendar", "timetable", "todo
 
 interface WidgetDrawerProps {
     onBack: () => void
-    pendingWidget: { type: string, colSpan: number, rowSpan: number } | null
-    setPendingWidget: (widget: { type: string, colSpan: number, rowSpan: number } | null) => void
-    onAddWidget?: (widget: { type: string, colSpan: number, rowSpan: number }) => void
+    pendingWidget: PendingWidget | null
+    setPendingWidget: (widget: PendingWidget | null) => void
+    onAddWidget?: (widget: PendingWidget) => void
 }
 
 function WidgetDrawer({ onBack, pendingWidget, setPendingWidget, onAddWidget }: WidgetDrawerProps) {

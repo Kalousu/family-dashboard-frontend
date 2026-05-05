@@ -2,21 +2,18 @@ import AppHeader from "../components/mainpage/AppHeader"
 import SideBar from "../components/mainpage/sidebar/SideBar"
 import WidgetGrid from "../components/layout/WidgetGrid"
 import { useState, useEffect } from "react"
+import type { PendingWidget } from "../types/widgetTypes"
 import DarkModeBackground from "../components/ui/DarkModeBackground"
 import useAuth from "../hooks/useAuth"
 import GlassButton from "../components/ui/GlassButton"
 import useDarkMode from "../hooks/useDarkMode"
 import { motion, AnimatePresence } from "framer-motion"
 import { useDashboardLayout } from "../hooks/useDashboardLayout"
-
-let tempIdCounter = -1;
-function generateTempId(): string {
-    return String(tempIdCounter--);
-}
+import { generateTempWidgetId } from "../utils/tempId"
 
 function WidgetPage() {
     const [sideBarOpen, setSideBarOpen] = useState(false)
-    const [pendingWidget, setPendingWidget] = useState<{ type: string, colSpan: number, rowSpan: number } | null>(null)
+    const [pendingWidget, setPendingWidget] = useState<PendingWidget | null>(null)
     const { currentUser } = useAuth()
     const { isDarkMode } = useDarkMode()
     const {
@@ -43,7 +40,7 @@ function WidgetPage() {
             <div className="relative flex flex-col w-screen h-screen overflow-hidden">
                 <DarkModeBackground />
                 <div className="relative flex items-center justify-center w-full h-full">
-                    <div className="text-xl">Loading dashboard...</div>
+                    <div className="text-xl">Dashboard wird geladen...</div>
                 </div>
             </div>
         )
@@ -111,7 +108,7 @@ function WidgetPage() {
                     pendingWidget={permissions?.canAddWidgets ? pendingWidget : null}
                     onCellClick={(col, row) => {
                         if (pendingWidget && permissions?.canAddWidgets) {
-                            setPlacedWidgets([...placedWidgets, { id: generateTempId(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
+                            setPlacedWidgets([...placedWidgets, { id: generateTempWidgetId(), type: pendingWidget.type, col, row, colSpan: pendingWidget.colSpan, rowSpan: pendingWidget.rowSpan }])
                             setPendingWidget(null)
                         }
                     }}

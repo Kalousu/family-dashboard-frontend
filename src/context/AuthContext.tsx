@@ -2,6 +2,11 @@ import { createContext, useState } from "react"
 import type { ReactNode } from "react"
 import type { UserProfile, UserRole } from "../types/authTypes"
 import { getCurrentUser } from "../api/userApi"
+import { createStorageManager } from "../utils/storage"
+
+const familyStorage = createStorageManager<number>("familyId")
+const userStorage = createStorageManager<number>("userId")
+const currentUserStorage = createStorageManager<UserProfile>("currentUser")
 
 interface AuthContextType {
     familyId: number | null
@@ -19,70 +24,39 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 function AuthProvider({ children }: { children: ReactNode }) {
-    const [familyId, setFamilyIdState] = useState<number | null>(() => {
-        const stored = localStorage.getItem("familyId")
-        const parsed = stored ? Number(stored) : null
-        return parsed !== null && !Number.isNaN(parsed) ? parsed : null
-    })
-
-    const [userId, setUserIdState] = useState<number | null>(() => {
-        const stored = localStorage.getItem("userId")
-        const parsed = stored ? Number(stored) : null
-        return parsed !== null && !Number.isNaN(parsed) ? parsed : null
-    })
-
-    const [currentUser, setCurrentUserState] = useState<UserProfile | null>(() => {
-        const stored = localStorage.getItem("currentUser")
-        if (!stored) return null
-        try {
-            return JSON.parse(stored)
-        } catch {
-            localStorage.removeItem("currentUser")
-            return null
-        }
-    })
+    const [familyId, setFamilyIdState] = useState<number | null>(familyStorage.get)
+    const [userId, setUserIdState] = useState<number | null>(userStorage.get)
+    const [currentUser, setCurrentUserState] = useState<UserProfile | null>(currentUserStorage.get)
 
     function setFamilyId(id: number | null) {
         setFamilyIdState(id)
-        if (id !== null) {
-            localStorage.setItem("familyId", String(id))
-        } else {
-            localStorage.removeItem("familyId")
-        }
+        familyStorage.set(id)
     }
 
     function setUserId(id: number | null) {
         setUserIdState(id)
-        if (id !== null) {
-            localStorage.setItem("userId", String(id))
-        } else {
-            localStorage.removeItem("userId")
-        }
+        userStorage.set(id)
     }
 
     function setCurrentUser(user: UserProfile | null) {
         setCurrentUserState(user)
-        if (user !== null) {
-            localStorage.setItem("currentUser", JSON.stringify(user))
-        } else {
-            localStorage.removeItem("currentUser")
-        }
+        currentUserStorage.set(user)
     }
 
     function logout() {
         setFamilyIdState(null)
         setUserIdState(null)
         setCurrentUserState(null)
-        localStorage.removeItem("familyId")
-        localStorage.removeItem("userId")
-        localStorage.removeItem("currentUser")
+        familyStorage.clear()
+        userStorage.clear()
+        currentUserStorage.clear()
     }
 
     function logoutUser() {
         setUserIdState(null)
         setCurrentUserState(null)
-        localStorage.removeItem("userId")
-        localStorage.removeItem("currentUser")
+        userStorage.clear()
+        currentUserStorage.clear()
     }
 
     async function refreshCurrentUser() {
@@ -106,10 +80,10 @@ function AuthProvider({ children }: { children: ReactNode }) {
     const isAuthenticated = familyId !== null && userId !== null
 
     return (
-        <AuthContext.Provider value={{ 
-            familyId, 
-            setFamilyId, 
-            userId, 
+        <AuthContext.Provider value={{
+            familyId,
+            setFamilyId,
+            userId,
             setUserId,
             currentUser,
             setCurrentUser,

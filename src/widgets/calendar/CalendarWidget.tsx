@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useContainerSize } from "../../hooks/useContainerSize";
 import { ChevronLeft, ChevronRight, Dot } from "lucide-react";
 import { motion } from "framer-motion";
 import GlassButton from "../../components/ui/GlassButton";
-import { DarkModeContext } from "../../context/DarkModeContext";
+import useDarkMode from "../../hooks/useDarkMode";
 import { WEEKDAYS, MONTH_NAMES, getCalendarDays, isSameDay, getScrollableClass } from "./calendarUtils";
 import type { CalendarDay } from "./calendarUtils";
 import type { CalendarEvent } from "./calendarTypes";
@@ -42,7 +42,6 @@ function CalendarDayCell({ day, today, events, onSelect }: {
         >
             {isToday && (
                 <motion.div
-                    //variants={{ rest: { scale: 0.93 }, hover: { scale: 1.00 } }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     className="absolute inset-0 rounded-lg bg-white/25 pointer-events-none hover:scale-100"
                 />
@@ -64,8 +63,7 @@ function CalendarDayCell({ day, today, events, onSelect }: {
 
 function CalendarWidget({ widgetId }: { widgetId?: string | number }) {
     const numericWidgetId = widgetId !== undefined ? Number(widgetId) : undefined;
-    const darkModeCtx = useContext(DarkModeContext);
-    const isDarkMode = darkModeCtx?.isDarkMode ?? false;
+    const { isDarkMode } = useDarkMode();
 
     const [today, setToday] = useState(() => new Date());
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);

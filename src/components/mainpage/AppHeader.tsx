@@ -1,6 +1,5 @@
-import { User } from "lucide-react"
 import useDarkMode from "../../hooks/useDarkMode"
-import imageIcons from "../../constants/imageIcons"
+import AvatarDisplay from "../ui/AvatarDisplay"
 import type { UserProfile } from "../../types/authTypes"
 
 interface AppHeaderProps {
@@ -19,20 +18,7 @@ function AppHeader({ onUserClick, user }: AppHeaderProps) {
                 onClick={onUserClick}
             >
                 <div className={`absolute rounded-xl inset-x-0 top-0 h-1/2 pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
-                {user && user.avatarType === "URL" ? (
-                    <img src={user.avatar} alt={user.name} className="w-8 h-8 sm:w-8 sm:h-8 rounded-lg border-2 object-cover" style={{ borderColor: user.color || '#ffffff50' }} />
-                ) : user && user.avatarType === "ICON" ? (
-                    (() => {
-                        const Icon = imageIcons[user.avatar as keyof typeof imageIcons]
-                        return Icon ? (
-                            <Icon className="w-8 h-8 rounded-lg border-2" style={{ backgroundColor: user.color, borderColor: user.color || '#ffffff50' }} size={28} />
-                        ) : (
-                            <User className="w-8 h-8 rounded-lg border-2" style={{ backgroundColor: user.color, borderColor: user.color || '#ffffff50' }} size={20} />
-                        )
-                    })()
-                ) : (
-                    <User className="w-8 h-8 rounded-lg border-2" style={{ borderColor: user?.color || '#ffffff50' }} size={20} />
-                )}
+                {user && <AvatarDisplay user={user} size="sm" />}
             </div>
         </div>
     )

@@ -9,6 +9,7 @@ export const NIGHT_START_HOUR = 20;
 export const NIGHT_END_HOUR = 6;
 
 export const BREAKPOINT_SM = 640;
+export const BREAKPOINT_LG = 1024;
 
 export const CALENDAR_DOT_THRESHOLD = 4;
 export const CALENDAR_MAX_DOTS = 3;
