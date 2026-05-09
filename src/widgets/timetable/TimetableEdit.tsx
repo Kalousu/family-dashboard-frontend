@@ -51,9 +51,7 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
     return (
         <div className="bg-white/10 border border-white/15 rounded-xl p-3 flex flex-col gap-2.5 shrink-0">
 
-            {/* User-Verwaltung */}
             {isCompact ? (
-                // Mobile: alle User als Chips, verfügbare direkt antippbar
                 <div className="flex flex-wrap gap-1.5">
                     {watchedProfiles.map((p) => (
                         <div key={p.id} className="flex items-center gap-1 bg-white/15 rounded-lg px-2 py-1.5">
@@ -77,7 +75,6 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
                     ))}
                 </div>
             ) : (
-                // Desktop: bisheriges Layout
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-white/60 text-xs font-semibold shrink-0">User:</span>
                     {watchedProfiles.map((p) => (
@@ -108,10 +105,8 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
                 </div>
             )}
 
-            {/* Event hinzufügen */}
             {showForm ? (
                 isCompact ? (
-                    // Mobile: vertikales Layout, Button-Gruppen statt Selects
                     <div className="flex flex-col gap-2">
                         <input
                             value={newTitle}
@@ -122,7 +117,6 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
                             className="bg-white/10 text-white placeholder:text-white/40 text-xs rounded-lg px-3 py-2.5 border border-white/20 focus:outline-none w-full"
                         />
 
-                        {/* Tag-Buttons */}
                         <div className="flex gap-1">
                             {DAY_LABELS.map((label, i) => (
                                 <button
@@ -139,7 +133,6 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
                             ))}
                         </div>
 
-                        {/* Stunden-Buttons */}
                         <div className="grid grid-cols-9 gap-1">
                             {SLOTS.map((s) => (
                                 <button
@@ -156,7 +149,6 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
                             ))}
                         </div>
 
-                        {/* User-Buttons (nur wenn mehrere) */}
                         {watchedProfiles.length > 1 && (
                             <div className="flex gap-1.5 flex-wrap">
                                 {watchedProfiles.map((p) => (
@@ -192,7 +184,6 @@ function TimetableEdit({ profiles, watchedIds, onAddEvent, onAddUser, onRemoveUs
                         </div>
                     </div>
                 ) : (
-                    // Desktop: bisheriges Layout
                     <div className="flex flex-wrap items-center gap-2">
                         <input
                             value={newTitle}

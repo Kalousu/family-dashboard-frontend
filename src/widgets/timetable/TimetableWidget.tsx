@@ -77,7 +77,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
         roRef.current = ro
     }, [])
 
-    // 0=Mo, 1=Di, ..., 4=Fr; -1 on weekends
     const todayIdx = (() => { const d = (new Date().getDay() + 6) % 7; return d < 5 ? d : -1 })()
 
     const daysToRender: Array<{ dayIndex: number; label: string }> = isCompact
@@ -97,7 +96,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             setAllProfiles(users.map((u) => ({ id: u.id, name: u.name, color: u.color, icon: u.avatar, avatarType: u.avatarType })))
             setEvents(data.events)
             setReminders(data.reminders)
-            
+
             if (data.watchedUserIds.length === 0 && currentUserId && users.some(u => u.id === currentUserId)) {
                 const newWatchedIds = [currentUserId]
                 setWatchedIds(newWatchedIds)
@@ -167,7 +166,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             </div>
         ) : (<>
 
-            {/* Compact: Stift-Button absolut neben dem WidgetGrid-X-Button */}
             {isCompact && (
                 <button
                     onClick={() => setEditMode((v) => !v)}
@@ -181,7 +179,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 </button>
             )}
 
-            {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
                 <div className="flex items-end gap-0.5">
                     <TabButton active={true} onClick={() => setActiveTab("all")}>Alle</TabButton>
@@ -202,7 +199,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 )}
             </div>
 
-            {/* Edit-Panel */}
             {editMode && (
                 <TimetableEdit
                     profiles={allProfiles}
@@ -214,7 +210,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 />
             )}
 
-            {/* Grid */}
             <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{ overflowAnchor: "none" }}>
                 <div
                     className="grid"

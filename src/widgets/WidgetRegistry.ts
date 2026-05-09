@@ -73,3 +73,5 @@ export const getWidget = (name: string) => {
 export const getWidgetSizes = (name: string) => {
     return registry[name]?.sizes || []
 }
+
+export default registry

@@ -10,31 +10,6 @@ import type { Family, FamilyMember, MemberRole } from "./systemAdminTypes"
 import useAdminTheme from "../../hooks/useAdminTheme"
 import { changeUserRole } from "../../api/userApi"
 
-// =============================================================================
-// API-ANBINDUNG — MemberManagement
-//
-// INITIALDATEN (beim Mounten oder wenn sich family.id ändert):
-//   GET /families/:id/members
-//   Response: FamilyMember[]
-//   → aktuell werden die Members direkt aus dem family-Prop gelesen (kein eigener
-//     Fetch nötig, solange GET /families bereits alle Members mitliefert).
-//     Falls das Backend Members separat lädt: useEffect auf family.id.
-//
-// ROLLE ÄNDERN (handleRoleChange — beim Ändern des Dropdowns):
-//   PATCH /members/:id/role
-//   Body: { role: "Mitglied" | "Familienadministrator" }
-//   → nach erfolgreichem Call onFamilyChange mit aktualisiertem Member aufrufen.
-//
-// MITGLIED SPERREN / ENTSPERREN (confirmLockToggle):
-//   PATCH /members/:id/status
-//   Body: { isLocked: true | false }
-//   → nach erfolgreichem Call onFamilyChange mit aktualisiertem Member aufrufen.
-//
-// MITGLIED ENTFERNEN (confirmDelete):
-//   DELETE /members/:id
-//   → nach erfolgreichem Call onFamilyChange ohne das gelöschte Member aufrufen.
-// =============================================================================
-
 interface MemberManagementProps {
     isDarkMode: boolean
     family: Family
@@ -74,7 +49,6 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
     return (
         <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
             {actionError && <p className="text-red-400 text-sm text-center">{actionError}</p>}
-            {/* Header with back navigation */}
             <div className="flex items-center gap-3">
                 <GlassButton isDarkMode={!isDarkMode} onClick={onBack} className="p-2 shrink-0">
                     <ArrowLeft size={16} />
@@ -88,7 +62,6 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                 </span>
             </div>
 
-            {/* Stats */}
             <div className="flex gap-3">
                 {[
                     { label: "Mitglieder", value: family.members.length },
@@ -103,7 +76,6 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                 ))}
             </div>
 
-            {/* Member list */}
             <div className="flex flex-col gap-2">
                 {family.members.length === 0 && (
                     <p className={`text-center py-8 text-sm ${textSecondary}`}>Keine Mitglieder vorhanden.</p>
@@ -114,39 +86,32 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                         <div key={member.id} className={`relative rounded-xl border px-4 py-3 flex items-center gap-3 ${glassCard} ${member.isLocked ? "opacity-60" : ""}`}>
                             <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${shine}`} />
 
-                            {/* Avatar */}
                             <div
                                 className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-white/10 overflow-hidden"
                                 style={{ backgroundColor: member.color + "33" }}
                             >
                                 {member.icon.startsWith('http') ? (
-                                    // URL-based avatar
-                                    <img 
-                                        src={member.icon} 
+                                    <img
+                                        src={member.icon}
                                         alt={member.name}
                                         className="w-full h-full object-cover"
                                         onError={(e) => {
-                                            // Fallback to User icon if image fails to load
                                             const target = e.target as HTMLImageElement
                                             target.style.display = 'none'
                                             target.nextElementSibling?.classList.remove('hidden')
                                         }}
                                     />
                                 ) : (
-                                    // Icon-based avatar
                                     <IconComponent size={20} style={{ color: member.color }} />
                                 )}
-                                {/* Fallback icon (hidden by default, shown if image fails) */}
                                 <User size={20} style={{ color: member.color }} className="hidden" />
                             </div>
 
-                            {/* Name & role */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
                                     <p className={`font-semibold truncate ${textPrimary}`}>{member.name}</p>
                                 </div>
 
-                                {/* Role select */}
                                 <AdminSelect
                                     value={member.role}
                                     onChange={(val) => handleRoleChange(member.id, val as MemberRole)}
@@ -159,12 +124,10 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                                 />
                             </div>
 
-                            {/* Admin badge */}
                             {member.role === "Familienadministrator" && (
                                 <Shield size={14} className="text-blue-400 shrink-0" />
                             )}
 
-                            {/* Action buttons */}
                             <div className="flex gap-2 shrink-0">
                                 <button
                                     onClick={() => setPendingDelete(member)}
@@ -179,7 +142,6 @@ function MemberManagement({ isDarkMode, family, onBack, onFamilyChange }: Member
                 })}
             </div>
 
-            {/* Modals */}
             {pendingDelete && (
                 <ConfirmModal
                     isDarkMode={isDarkMode}

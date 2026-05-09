@@ -23,7 +23,7 @@ function GlassButton({
             onClick={onClick}
             disabled={disabled}
             aria-label={ariaLabel}
-            className={`relative font-semibold rounded-xl border-2 min-h-11 hover:scale-102 hover:brightness-110 transition-all ease-in-out duration-200 touch-manipulation
+            className={`relative font-semibold rounded-xl border-2 min-h-11 hover:scale-101 hover:brightness-110 active:scale-98 transition-all ease-in-out duration-200 touch-manipulation
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
                 ${isDarkMode
                     ? "bg-linear-to-b from-sky-200/30 via-slate-400/15 to-blue-400/20 text-gray-700 border-cyan-950/5"

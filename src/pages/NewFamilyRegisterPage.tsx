@@ -58,8 +58,7 @@ function NewFamilyRegisterPage() {
                 password: formData.passwort,
                 email: formData.email
             })
-            // Nach erfolgreicher Familienregistrierung zur Benutzererstellung navigieren
-            navigate("/register", { 
+            navigate("/register", {
                 state: { 
                     familyId: response.familyId,
                     familyName: response.familyName 
@@ -68,7 +67,6 @@ function NewFamilyRegisterPage() {
         } catch (error: unknown) {
             console.error("Fehler bei der Registrierung:", error)
             
-            // Try to extract specific error message from backend
             let errorMessage = "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut."
             
             if (error && typeof error === 'object' && 'response' in error) {

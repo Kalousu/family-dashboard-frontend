@@ -45,7 +45,6 @@ function WidgetGrid({ placedWidgets, pendingWidget, onCellClick, onRemoveWidget,
     function canPlace(col: number, row: number): boolean {
         if (!pendingWidget) return false
         if (col + pendingWidget.colSpan > COLS || row + pendingWidget.rowSpan > ROWS) return false
-        // Check for overlap with any existing widget using axis-aligned rectangle intersection
         return !placedWidgets.some((w) =>
             col < w.col + w.colSpan &&
             col + pendingWidget.colSpan > w.col &&
