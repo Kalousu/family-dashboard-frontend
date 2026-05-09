@@ -17,3 +17,5 @@ export const CALENDAR_MAX_DOTS_COMPACT = 1;
 
 export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 export const ALLOWED_IMAGE_TYPE = "image/jpeg";
+
+export const MIN_PIN_LENGTH = 3;
