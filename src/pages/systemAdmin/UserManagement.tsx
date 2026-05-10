@@ -9,34 +9,6 @@ import type { Family, MemberRole, SystemUser } from "./systemAdminTypes"
 import useAdminTheme from "../../hooks/useAdminTheme"
 import imageIcons from "../../constants/imageIcons"
 
-// =============================================================================
-// API-ANBINDUNG — UserManagement
-//
-// INITIALDATEN (beim Mounten laden):
-//   GET /users
-//   Response: Array von { id, name, icon, color, role, isLocked, familyId, familyName }
-//   → aktuell werden alle User aus dem families-Prop per flatMap abgeleitet.
-//     Sobald das Backend einen eigenen /users-Endpunkt liefert, kann dieser
-//     State unabhängig vom families-State befüllt werden.
-//
-// BENUTZER SPERREN / ENTSPERREN (confirmLockToggle):
-//   PATCH /users/:id/status
-//   Body: { isLocked: true | false }
-//   → nach erfolgreichem Call den lokalen State aktualisieren.
-//
-// BENUTZER LÖSCHEN (confirmDelete):
-//   DELETE /users/:id
-//   → nach erfolgreichem Call den User aus dem lokalen State entfernen.
-//     Achtung: auch den families-State in SystemAdminPage.tsx aktualisieren,
-//     damit MemberManagement konsistent bleibt (onFamiliesChange aufrufen).
-//
-// PASSWORT-RESET AUSLÖSEN (confirmReset):
-//   POST /users/:id/password-reset
-//   Body: {} (leer — das Backend verschickt die E-Mail selbst)
-//   → aktuell nur alert(). Den alert() durch den API-Call ersetzen.
-//     Erfolgsmeldung danach als Toast/Hinweis im UI anzeigen.
-// =============================================================================
-
 interface UserManagementProps {
     isDarkMode: boolean
     families: Family[]
@@ -119,14 +91,12 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
     }
 
     function confirmReset() {
-        // evtl, hier API call für Passwort-Reset einbauen, momentan nur Alert
         alert(`Passwort-Reset für ${pendingReset?.name} wurde ausgelöst.`)
         setPendingReset(null)
     }
 
     return (
         <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
-            {/* Stats */}
             <div className="flex gap-3">
                 {[
                     { label: "Gesamt", value: allUsers.length },
@@ -141,7 +111,6 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                 ))}
             </div>
 
-            {/* Toolbar */}
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
                     <FormInput
@@ -166,7 +135,6 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                 />
             </div>
 
-            {/* User list — mobile cards */}
             <div className={`sm:hidden relative rounded-xl border overflow-hidden ${glassCard}`}>
                 <div className={`absolute inset-x-0 top-0 h-10 pointer-events-none ${shine}`} />
                 {filteredUsers.length === 0 && (
@@ -207,7 +175,6 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                 ))}
             </div>
 
-            {/* User table — desktop */}
             <div className={`hidden sm:block relative rounded-xl border overflow-hidden ${glassCard}`}>
                 <div className={`absolute inset-x-0 top-0 h-10 pointer-events-none ${shine}`} />
                 <div className={`grid grid-cols-[1fr_1fr_auto_auto] gap-2 px-4 py-2 border-b text-xs font-semibold ${textSecondary} ${border}`}>
@@ -250,7 +217,6 @@ function UserManagement({ isDarkMode, families, onFamiliesChange }: UserManageme
                 ))}
             </div>
 
-            {/* Modals */}
             {pendingDelete && (
                 <ConfirmModal
                     isDarkMode={isDarkMode}

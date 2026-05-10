@@ -31,7 +31,6 @@ function ColorPickerButton({ color, isDarkMode, onChange }: ColorPickerButtonPro
             />
             {showColorPicker && (
                 <>
-                    {/* Backdrop zum Schließen — nur auf Smartphones */}
                     <div
                         className="fixed inset-0 z-40 sm:hidden"
                         onClick={() => setShowColorPicker(false)}

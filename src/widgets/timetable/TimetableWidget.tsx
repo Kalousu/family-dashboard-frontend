@@ -59,6 +59,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
     const [reminders, setReminders]     = useState<Reminder[]>([])
     const [watchedIds, setWatchedIds]   = useState<number[]>([])
     const [loading, setLoading]         = useState(true)
+    const [error, setError]             = useState<string | null>(null)
     const [activeTab, setActiveTab]     = useState<"all" | number>("all")
     const [editMode, setEditMode]       = useState(false)
 
@@ -76,11 +77,8 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
         roRef.current = ro
     }, [])
 
-    // 0=Mo, 1=Di, ..., 4=Fr; -1 on weekends
     const todayIdx = (() => { const d = (new Date().getDay() + 6) % 7; return d < 5 ? d : -1 })()
 
-    // Compact: only today + tomorrow (or Mon+Di on weekends, Fr+Mo on Fridays)
-    // Non-compact: all 5 days
     const daysToRender: Array<{ dayIndex: number; label: string }> = isCompact
         ? todayIdx === -1
             ? [{ dayIndex: 0, label: "Mo" },    { dayIndex: 1, label: "Di" }]
@@ -98,8 +96,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             setAllProfiles(users.map((u) => ({ id: u.id, name: u.name, color: u.color, icon: u.avatar, avatarType: u.avatarType })))
             setEvents(data.events)
             setReminders(data.reminders)
-            
-            // If no users are watched and current user exists, add current user automatically
+
             if (data.watchedUserIds.length === 0 && currentUserId && users.some(u => u.id === currentUserId)) {
                 const newWatchedIds = [currentUserId]
                 setWatchedIds(newWatchedIds)
@@ -107,7 +104,7 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
             } else {
                 setWatchedIds(data.watchedUserIds)
             }
-        }).catch(console.error)
+        }).catch(() => setError("Stundenplan konnte nicht geladen werden."))
           .finally(() => setLoading(false))
     }, [numId, familyId, currentUserId])
 
@@ -115,7 +112,12 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
         if (watchedIds.includes(userId) || numId === undefined) return
         const newIds = [...watchedIds, userId]
         setWatchedIds(newIds)
-        await updateWatchedUsers(numId, newIds).catch(console.error)
+        try {
+            await updateWatchedUsers(numId, newIds)
+        } catch {
+            setWatchedIds(watchedIds)
+            setError("Benutzer konnte nicht hinzugefügt werden.")
+        }
     }
 
     async function removeUser(userId: number) {
@@ -123,7 +125,12 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
         const newIds = watchedIds.filter((id) => id !== userId)
         setWatchedIds(newIds)
         if (activeTab === userId) setActiveTab("all")
-        await updateWatchedUsers(numId, newIds).catch(console.error)
+        try {
+            await updateWatchedUsers(numId, newIds)
+        } catch {
+            setWatchedIds(watchedIds)
+            setError("Benutzer konnte nicht entfernt werden.")
+        }
     }
 
     async function handleAddEvent(body: { title: string; slot: number; day: number; userId: number }) {
@@ -135,26 +142,30 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
         try {
             const created = await createTimetableEvent(numId, body)
             setEvents((prev) => [...prev, created])
-        } catch (err) {
-            console.error("Event save error:", err)
+        } catch {
+            setError("Eintrag konnte nicht gespeichert werden.")
         }
     }
 
     async function handleRemoveReminder(reminderId: number) {
         if (numId === undefined) return
-        await deleteTimetableReminder(numId, reminderId).catch(console.error)
-        setReminders((prev) => prev.filter((r) => r.id !== reminderId))
+        try {
+            await deleteTimetableReminder(numId, reminderId)
+            setReminders((prev) => prev.filter((r) => r.id !== reminderId))
+        } catch {
+            setError("Erinnerung konnte nicht gelöscht werden.")
+        }
     }
 
     return (
         <div ref={containerRef} className="relative w-full h-full bg-linear-to-b from-purple-900/50 to-indigo-400/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-4 flex flex-col gap-3 overflow-hidden">
+        {error && <p className="text-red-300 text-xs text-center">{error}</p>}
         {loading ? (
             <div className="flex-1 flex items-center justify-center">
                 <span className="text-white/50 text-sm">Lädt…</span>
             </div>
         ) : (<>
 
-            {/* Compact: Stift-Button absolut neben dem WidgetGrid-X-Button */}
             {isCompact && (
                 <button
                     onClick={() => setEditMode((v) => !v)}
@@ -168,7 +179,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 </button>
             )}
 
-            {/* Tab-Leiste */}
             <div className="flex items-end shrink-0 border-b border-white/20">
                 <div className="flex items-end gap-0.5">
                     <TabButton active={true} onClick={() => setActiveTab("all")}>Alle</TabButton>
@@ -189,7 +199,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 )}
             </div>
 
-            {/* Edit-Panel */}
             {editMode && (
                 <TimetableEdit
                     profiles={allProfiles}
@@ -201,7 +210,6 @@ function TimetableWidget({ widgetId }: { widgetId?: string | number }) {
                 />
             )}
 
-            {/* Grid */}
             <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{ overflowAnchor: "none" }}>
                 <div
                     className="grid"

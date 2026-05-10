@@ -4,6 +4,7 @@ import { getPicture, uploadPicture } from "../../api/pictureApi"
 import useAuth from "../../hooks/useAuth"
 import useDarkMode from "../../hooks/useDarkMode"
 import type { WidgetConfig } from "../../api/familyApi"
+import { MAX_IMAGE_SIZE_BYTES, ALLOWED_IMAGE_TYPE } from "../../constants/config"
 
 interface PictureWidgetProps {
     widgetId: string
@@ -42,12 +43,12 @@ function PictureWidget({ widgetId }: PictureWidgetProps) {
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file || !familyId) return
-        if (file.type !== "image/jpeg") {
+        if (file.type !== ALLOWED_IMAGE_TYPE) {
             setUploadError("Bitte nur JPG-Dateien hochladen")
             e.target.value = ""
             return
         }
-        if (file.size > 5 * 1024 * 1024) {
+        if (file.size > MAX_IMAGE_SIZE_BYTES) {
             setUploadError("Foto darf maximal 5 MB groß sein")
             e.target.value = ""
             return

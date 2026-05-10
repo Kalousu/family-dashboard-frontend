@@ -9,39 +9,17 @@ import { fadeSlideUp } from "../../constants/animations"
 import FamilyOverview from "./FamilyOverview"
 import MemberManagement from "./MemberManagement"
 import UserManagement from "./UserManagement"
-// import MaintenanceSettings from "./MaintenanceSettings"
-// import { DEFAULT_MAINTENANCE_SETTINGS } from "./systemAdminTypes"
-import type { Family /*, MaintenanceSettings as MaintenanceSettingsType */ } from "./systemAdminTypes"
+import type { Family } from "./systemAdminTypes"
 import { getFamilies, getUsersForFamily } from "../../api/familyApi"
 import { logout } from "../../api/authApi"
 import GlassButton from "../../components/ui/GlassButton"
 
-// =============================================================================
-// API-ANBINDUNG — SystemAdminPage
-//
-// Dieser Bereich ist der Einstiegspunkt der Admin-App.
-// Hier müssen zwei Dinge ergänzt werden:
-//
-// 1. ROUTE-GUARD: Vor dem Rendern der Seite prüfen, ob der eingeloggte User
-//    die Rolle "Systemadministrator" hat. Falls nicht → Redirect zu /login.
-//    Empfohlene Umsetzung: eine ProtectedRoute-Komponente in App.tsx, die
-//    den Token aus localStorage liest und die Rolle prüft.
-//    Beispiel: GET /auth/me  → { id, name, role }
-//
-// 2. INITIALDATEN LADEN: Die Mock-Konstanten MOCK_FAMILIES und
-//    DEFAULT_MAINTENANCE_SETTINGS müssen durch echte API-Calls ersetzt werden.
-//    Beide Calls können parallel beim ersten Laden ausgeführt werden:
-//    GET /families               → ersetzt useState(MOCK_FAMILIES)
-//    GET /settings/maintenance   → ersetzt useState(DEFAULT_MAINTENANCE_SETTINGS)
-// =============================================================================
-
-type Tab = "familien" | "mitglieder" | "benutzer" /* | "wartung" */
+type Tab = "familien" | "mitglieder" | "benutzer"
 
 const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
     { id: "familien", label: "Kunden", icon: Building2 },
     { id: "mitglieder", label: "Mitglieder", icon: Users },
     { id: "benutzer", label: "Benutzer", icon: UserCog },
-    // { id: "wartung", label: "Wartung", icon: Wrench },
 ]
 
 function SystemAdminPage() {
@@ -51,7 +29,6 @@ function SystemAdminPage() {
     const [activeTab, setActiveTab] = useState<Tab>("familien")
     const [families, setFamilies] = useState<Family[]>([])
     const [selectedFamily, setSelectedFamily] = useState<Family | null>(null)
-    // const [maintenanceSettings, setMaintenanceSettings] = useState<MaintenanceSettingsType>(DEFAULT_MAINTENANCE_SETTINGS)
     const [isLoading, setIsLoading] = useState(true)
 
     const handleLogout = async () => {
@@ -60,43 +37,38 @@ function SystemAdminPage() {
             navigate("/login")
         } catch (error) {
             console.error('Logout failed:', error)
-            // Even if logout fails, redirect to login
             navigate("/login")
         }
     }
 
-    // Load families from API
     useEffect(() => {
         const loadFamilies = async () => {
             try {
                 setIsLoading(true)
                 const familyResponses = await getFamilies()
-                
-                // Convert FamilyResponse to Family format with empty members for now
+
                 const familiesWithMembers: Family[] = await Promise.all(
                     familyResponses.map(async (familyResponse) => {
                         try {
-                            // Try to get users for this family
                             const users = await getUsersForFamily(familyResponse.id)
                             const members = users.map(user => ({
                                 id: user.id,
                                 name: user.name,
                                 role: user.role === 'FAMILY_ADMIN' ? 'Familienadministrator' as const : 'Mitglied' as const,
-                                icon: user.avatar || 'user', // Can be URL or icon name
+                                icon: user.avatar || 'user',
                                 color: user.color || '#3b82f6',
                                 isLocked: false
                             }))
-                            
+
                             return {
                                 id: familyResponse.id,
                                 name: familyResponse.familyName,
                                 email: familyResponse.email,
-                                registeredAt: new Date().toISOString().split('T')[0], // Placeholder
+                                registeredAt: new Date().toISOString().split('T')[0],
                                 status: 'aktiv' as const,
                                 members
                             }
                         } catch (error) {
-                            // If getUsersForFamily fails, create family with empty members
                             console.warn(`Failed to load users for family ${familyResponse.id}:`, error)
                             return {
                                 id: familyResponse.id,
@@ -109,7 +81,7 @@ function SystemAdminPage() {
                         }
                     })
                 )
-                
+
                 setFamilies(familiesWithMembers)
             } catch (error) {
                 console.error('Failed to load families:', error)
@@ -141,9 +113,8 @@ function SystemAdminPage() {
             <motion.div
                 key="system-admin"
                 {...fadeSlideUp}
-                className="flex flex-col items-center w-full max-w-2xl px-4 gap-6 will-change-transform"
+                className="flex flex-col items-center w-full max-w-2xl px-4 pb-8 gap-6 will-change-transform"
             >
-                {/* Page title with logout button */}
                 <div className="flex items-start justify-between gap-3 w-full">
                     <div>
                         <h1 className={`text-2xl font-bold ${textPrimary}`}>System Administration</h1>
@@ -159,7 +130,6 @@ function SystemAdminPage() {
                     </GlassButton>
                 </div>
 
-                {/* Tab bar */}
                 <div className={`relative flex gap-1 rounded-xl border p-1 w-full ${glassCard}`}>
                     <div className={`absolute inset-x-0 top-0 h-1/2 rounded-t-xl pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
                     {TABS.map((tab) => {
@@ -187,7 +157,6 @@ function SystemAdminPage() {
                     })}
                 </div>
 
-                {/* Tab content */}
                 <div className="w-full">
                     {isLoading ? (
                         <motion.div key="loading" {...fadeSlideUp} className={`rounded-xl border p-8 text-center ${glassCard}`}>
@@ -226,16 +195,6 @@ function SystemAdminPage() {
                                 onFamiliesChange={setFamilies}
                             />
                         )}
-                        {/* Wartungs-Tab deaktiviert:
-                        {activeTab === "wartung" && (
-                            <MaintenanceSettings
-                                key="wartung"
-                                isDarkMode={isDarkMode}
-                                settings={maintenanceSettings}
-                                onSettingsChange={setMaintenanceSettings}
-                            />
-                        )}
-                        */}
                         </AnimatePresence>
                     )}
                 </div>

@@ -39,7 +39,6 @@ function FloatingIconTile({ iconKey, color, initialX, initialY, duration, delay 
     }
 
     return (
-        // Outer div: handles position — springs to new position on click
         <motion.div
             className="absolute cursor-pointer"
             style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
@@ -48,7 +47,6 @@ function FloatingIconTile({ iconKey, color, initialX, initialY, duration, delay 
             onClick={handleClick}
             whileTap={{ scale: 0.82 }}
         >
-            {/* Inner div: entry fade-in + continuous float */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{
@@ -98,7 +96,6 @@ function LandingPage() {
         <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
         <div className={`min-h-screen ${bg} transition-colors duration-500`}>
 
-            {/* ── NAVBAR ── */}
             <nav className={`flex items-center justify-between px-6 sm:px-10 py-4 border-b ${navBorder}`}>
                 <div className="flex items-center gap-2.5">
                     <img src={logo} alt="FamilyConnect" className="w-10 h-10 object-contain" />
@@ -110,10 +107,8 @@ function LandingPage() {
                 </div>
             </nav>
 
-            {/* ── HERO ── */}
             <main className="max-w-7xl mx-auto px-6 sm:px-10 pt-20 pb-24 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
-                {/* Left — text */}
                 <motion.div
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -146,7 +141,6 @@ function LandingPage() {
                     </div>
                 </motion.div>
 
-                {/* Right — dark card with floating icons + caption */}
                 <div className="flex-1 flex flex-col items-center gap-4 w-full max-w-xl">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.96 }}
@@ -154,14 +148,12 @@ function LandingPage() {
                         transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
                         className={`w-full aspect-[4/3] rounded-3xl ${cardBg} relative overflow-hidden`}
                     >
-                        {/* Beam / glow in center */}
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <div className="w-64 h-64 rounded-full bg-sky-500/10 blur-3xl" />
                             <div className="absolute w-40 h-96 bg-white/4 rotate-30 blur-2xl" />
                             <div className="absolute w-40 h-96 bg-sky-300/5 -rotate-20 blur-2xl" />
                         </div>
 
-                        {/* Floating icon tiles */}
                         {ICON_CONFIGS.map((item) => (
                             <FloatingIconTile
                                 key={item.key}
@@ -180,7 +172,6 @@ function LandingPage() {
                 </div>
             </main>
 
-            {/* ── FEATURES ── */}
             <section id="features" className={`border-t ${navBorder} px-6 sm:px-10 py-24`}>
                 <div className="max-w-7xl mx-auto">
 
@@ -224,7 +215,6 @@ function LandingPage() {
                 </div>
             </section>
 
-            {/* ── BOTTOM CTA ── */}
             <section className={`border-t ${navBorder} px-6 sm:px-10 py-24`}>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -249,7 +239,6 @@ function LandingPage() {
                 </motion.div>
             </section>
 
-            {/* ── FOOTER ── */}
             <footer className={`border-t ${navBorder} px-6 sm:px-10 py-6 flex items-center justify-between text-sm ${muted}`}>
                 <div className="flex items-center gap-2">
                     <img src={logo} alt="" className="w-5 h-5 object-contain opacity-60" />

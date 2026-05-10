@@ -5,10 +5,10 @@ export async function getPicture(widgetId: number): Promise<PictureResponse | nu
     try {
         const response = await axiosInstance.get<PictureResponse>(`/api/widgets/picture/${widgetId}`)
         return response.data
-    } catch (error: any) {
-        const status = error?.response?.status
+    } catch (err) {
+        const status = (err as { response?: { status?: number } })?.response?.status
         if (status === 404 || status === 500) return null
-        throw error
+        throw err
     }
 }
 

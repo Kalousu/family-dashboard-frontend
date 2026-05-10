@@ -83,7 +83,7 @@ function UserProfileEditPage() {
             
             // Update formData to reflect the new avatar URL
             // The refreshCurrentUser will trigger the useEffect that updates formData
-        } catch (error) {
+        } catch {
             setError("Fehler beim Hochladen des Profilbilds");
         } finally {
             setLoading(false);
@@ -106,7 +106,7 @@ function UserProfileEditPage() {
             await refreshCurrentUser();
             setOriginalData(formData);
             setSuccess("Profil erfolgreich aktualisiert!");
-        } catch (error) {
+        } catch {
             setError("Fehler beim Speichern des Profils");
         } finally {
             setLoading(false);
@@ -130,7 +130,7 @@ function UserProfileEditPage() {
             await setUserPin(currentUser.id, pinData.newPin);
             setPinData({ currentPin: "", newPin: "", confirmPin: "" });
             setSuccess("PIN erfolgreich geändert!");
-        } catch (error) {
+        } catch {
             setError("Fehler beim Ändern der PIN");
         } finally {
             setLoading(false);

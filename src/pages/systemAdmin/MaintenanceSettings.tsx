@@ -8,43 +8,6 @@ import { fadeSlideUp } from "../../constants/animations"
 import type { MaintenanceSettings as MaintenanceSettingsType, FeatureFlag } from "./systemAdminTypes"
 import useAdminTheme from "../../hooks/useAdminTheme"
 
-// =============================================================================
-// API-ANBINDUNG — MaintenanceSettings
-//
-// INITIALDATEN (beim Mounten in SystemAdminPage.tsx laden):
-//   GET /settings/maintenance
-//   Response: { maintenanceMode: boolean, maintenanceMessage: string, flags: FeatureFlag[] }
-//   → ersetzt useState(DEFAULT_MAINTENANCE_SETTINGS) in SystemAdminPage.tsx.
-//
-// WARTUNGSMODUS UMSCHALTEN (confirmMaintenanceToggle):
-//   PATCH /settings/maintenance
-//   Body: { maintenanceMode: true | false }
-//   → nach erfolgreichem Call den lokalen State aktualisieren.
-//   Wichtig: Das Backend muss diesen Wert auslesen und bei Login-Anfragen
-//   (POST /auth/login) mit einem 503-Status antworten, wenn maintenanceMode true ist.
-//   Zusätzlich sollte LoginPage.tsx beim Laden GET /settings/maintenance abfragen
-//   und bei maintenanceMode: true eine Wartungsseite anzeigen.
-//
-// WARTUNGSMELDUNG SPEICHERN ("Einstellungen speichern"-Button, handleMessageChange):
-//   PATCH /settings/maintenance
-//   Body: { maintenanceMessage: "..." }
-//   → gleicher Endpunkt wie Wartungsmodus, nur andere Body-Felder.
-//   Den "Einstellungen speichern"-Button mit einem onClick-Handler versehen,
-//   der diesen Call auslöst.
-//
-// EINZELNEN FEATURE-FLAG UMSCHALTEN (toggleFlag):
-//   PATCH /settings/feature-flags/:flagId
-//   Body: { enabled: true | false }
-//   → nach erfolgreichem Call den lokalen flags-State aktualisieren.
-//   Alternativ: alle Flags auf einmal speichern (siehe unten).
-//
-// ALLE FLAGS AUF EINMAL SPEICHERN ("Einstellungen speichern"-Button):
-//   PUT /settings/feature-flags
-//   Body: { flags: FeatureFlag[] }
-//   → sendet den gesamten flags-Array. Einfacher als einzelne PATCH-Calls,
-//   wenn kein Live-Saving gewünscht ist.
-// =============================================================================
-
 interface MaintenanceSettingsProps {
     isDarkMode: boolean
     settings: MaintenanceSettingsType
@@ -112,7 +75,6 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
     return (
         <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full">
 
-            {/* Maintenance mode banner */}
             <AnimatePresence>
                 {settings.maintenanceMode && (
                     <motion.div
@@ -127,7 +89,6 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
                 )}
             </AnimatePresence>
 
-            {/* Maintenance mode card */}
             <div className={`relative rounded-xl border overflow-hidden ${glassCard}`}>
                 <div className={`absolute inset-x-0 top-0 h-8 pointer-events-none ${shine}`} />
 
@@ -145,7 +106,6 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
                     />
                 </div>
 
-                {/* Maintenance message input */}
                 <div className={`px-4 pb-4 border-t ${border}`}>
                     <p className={`text-xs font-semibold mt-3 mb-2 ${textSecondary}`}>Wartungsmeldung</p>
                     <FormInput
@@ -159,7 +119,6 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
                 </div>
             </div>
 
-            {/* Feature flags by category */}
             {CATEGORY_SECTIONS.map(({ id, label, icon: Icon }) => {
                 const flags = flagsForCategory(id)
                 const activeCount = flags.filter((f) => f.enabled).length
@@ -169,7 +128,6 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
                     <div key={id} className={`relative rounded-xl border overflow-hidden ${glassCard}`}>
                         <div className={`absolute inset-x-0 top-0 h-8 pointer-events-none ${shine}`} />
 
-                        {/* Section header */}
                         <button
                             onClick={() => toggleCategory(id)}
                             className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all hover:brightness-110`}
@@ -185,7 +143,6 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
                             }
                         </button>
 
-                        {/* Flag list */}
                         <AnimatePresence>
                             {isExpanded && (
                                 <motion.div
@@ -220,14 +177,12 @@ function MaintenanceSettings({ isDarkMode, settings, onSettingsChange }: Mainten
                 )
             })}
 
-            {/* Save button */}
             <div className="flex justify-end">
                 <GlassButton isDarkMode={!isDarkMode} className="px-6 py-2 text-sm">
                     Einstellungen speichern
                 </GlassButton>
             </div>
 
-            {/* Confirm maintenance toggle modal */}
             {pendingMaintenanceToggle && (
                 <ConfirmModal
                     isDarkMode={isDarkMode}

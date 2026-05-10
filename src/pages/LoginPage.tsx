@@ -29,25 +29,19 @@ function LoginPage() {
 
         try {
             const response = await login({ name: formData.name, password: formData.password });
-            console.log('Login response:', response);
 
-            const responseType = (response as any).type || (response as any).role;
-            switch (responseType) {
-                case "SYSADMIN": 
-                    console.log('SYSADMIN login successful, navigating to /admin');
-                    navigate("/admin"); 
+            switch (response.role) {
+                case "SYSADMIN":
+                    navigate("/admin");
                     break;
                 case "FAMILY":
-                    console.log('FAMILY login successful, navigating to /home');
-                    setFamilyId((response as any).familyId);
-                    navigate("/home", { state: { profiles: (response as any).profiles } }); 
+                    setFamilyId(response.familyId);
+                    navigate("/home", { state: { profiles: response.profiles } });
                     break;
                 default:
-                    console.log('Unknown type/role:', responseType);
-                    setError("Unbekannte Rolle: " + responseType);
+                    setError("Unbekannte Rolle: " + (response as { role: string }).role);
             }
         } catch (err) {
-            console.error('Login error:', err);
             setError("Name oder Passwort falsch. " + err)
         }
     }, [formData, navigate, setFamilyId])

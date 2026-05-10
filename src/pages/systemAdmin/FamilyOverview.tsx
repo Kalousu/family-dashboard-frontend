@@ -8,26 +8,6 @@ import type { Family } from "./systemAdminTypes"
 import useAdminTheme from "../../hooks/useAdminTheme"
 import { deleteFamily } from "../../api/familyApi"
 
-// =============================================================================
-// API-ANBINDUNG — FamilyOverview
-//
-// INITIALDATEN (beim Mounten der Komponente laden):
-//   GET /families
-//   Response: Family[]
-//   → ersetzt den families-State, der aktuell als Prop mit MOCK_FAMILIES befüllt wird.
-//   In SystemAdminPage.tsx: useEffect(() => { api.get('/families').then(...) }, [])
-//
-// FAMILIE SPERREN / ENTSPERREN (confirmToggleStatus):
-//   PATCH /families/:id/status
-//   Body: { status: "aktiv" | "gesperrt" }
-//   → nach erfolgreichem Call den lokalen State aktualisieren (oder neu laden).
-//
-// FAMILIE LÖSCHEN (confirmDelete):
-//   DELETE /families/:id
-//   → nach erfolgreichem Call die Familie aus dem lokalen State entfernen.
-//
-// =============================================================================
-
 interface FamilyOverviewProps {
     isDarkMode: boolean
     families: Family[]
@@ -39,6 +19,7 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
     const [searchTerm, setSearchTerm] = useState("")
     const [expandedFamilyId, setExpandedFamilyId] = useState<number | null>(null)
     const [pendingDelete, setPendingDelete] = useState<Family | null>(null)
+    const [deleteError, setDeleteError] = useState<string | null>(null)
 
     const { glassCard, textPrimary, textSecondary, border } = useAdminTheme(isDarkMode)
 
@@ -55,22 +36,20 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
 
     async function confirmDelete() {
         if (!pendingDelete) return
-        
+        setDeleteError(null)
         try {
             await deleteFamily(pendingDelete.id)
-            // Only update UI if API call was successful
             onFamiliesChange(families.filter((f) => f.id !== pendingDelete.id))
             setPendingDelete(null)
-        } catch (error) {
-            console.error('Failed to delete family:', error)
-            // TODO: Show error message to user
+        } catch {
+            setDeleteError("Familie konnte nicht gelöscht werden.")
             setPendingDelete(null)
         }
     }
 
     return (
         <motion.div {...fadeSlideUp} className="flex flex-col gap-4 w-full will-change-transform">
-            {/* Toolbar */}
+            {deleteError && <p className="text-red-400 text-sm text-center">{deleteError}</p>}
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
                     <FormInput
@@ -84,7 +63,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                 </div>
             </div>
 
-            {/* Family list */}
             <div className="flex flex-col gap-2">
                 {filteredFamilies.length === 0 && (
                     <p className={`text-center py-8 text-sm ${textSecondary}`}>Keine Familien gefunden.</p>
@@ -93,7 +71,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                     <div key={family.id} className={`relative rounded-xl border overflow-hidden ${glassCard}`}>
                         <div className={`absolute inset-x-0 top-0 h-6 pointer-events-none ${isDarkMode ? "bg-white/5" : "bg-white/30"}`} />
 
-                        {/* Header row */}
                         <div className="flex items-center gap-2 px-4 py-2">
                             <button
                                 onClick={() => toggleExpand(family.id)}
@@ -112,7 +89,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                                 </div>
                             </button>
 
-                            {/* Actions */}
                             <div className="flex gap-1.5 shrink-0">
                                 <button
                                     onClick={() => onSelectFamily(family)}
@@ -131,7 +107,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                             </div>
                         </div>
 
-                        {/* Expanded detail */}
                         <AnimatePresence>
                             {expandedFamilyId === family.id && (
                                 <motion.div
@@ -157,7 +132,6 @@ function FamilyOverview({ isDarkMode, families, onFamiliesChange, onSelectFamily
                 ))}
             </div>
 
-            {/* Modals */}
             {pendingDelete && (
                 <ConfirmModal
                     isDarkMode={isDarkMode}

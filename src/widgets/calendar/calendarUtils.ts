@@ -36,7 +36,6 @@ export function getCalendarDays(year: number, month: number): CalendarDay[] {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
 
-    // Convert Sunday-based (0=So) to Monday-based (0=Mo)
     const startOffset = (firstDay.getDay() + 6) % 7;
 
     const days: CalendarDay[] = [];
@@ -49,7 +48,6 @@ export function getCalendarDays(year: number, month: number): CalendarDay[] {
         days.push({ date: new Date(year, month, d), isCurrentMonth: true });
     }
 
-    // Fill only to the next full week
     const remaining = (7 - (days.length % 7)) % 7;
     for (let d = 1; d <= remaining; d++) {
         days.push({ date: new Date(year, month + 1, d), isCurrentMonth: false });

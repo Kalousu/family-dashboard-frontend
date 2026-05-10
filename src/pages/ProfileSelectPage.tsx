@@ -106,11 +106,9 @@ function ProfileSelectPage() {
                     </GlassButton>
                 </motion.div>
             ) : (
-                <motion.div key="profiles" {...fadeSlideUp} className="relative w-full h-full flex flex-col items-center justify-center">
-                    <div className="p-2 flex flex-col items-center gap-4">
-                        <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Wer bist du?</p>
-                    </div>
-                    <div className="p-4 flex flex-row items-center justify-center gap-4 flex-wrap">
+                <motion.div key="profiles" {...fadeSlideUp} className="w-full flex flex-col items-center gap-4 px-4">
+                    <p className={`text-center text-3xl font-bold ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>Wer bist du?</p>
+                    <div className="flex flex-row items-center justify-center gap-4 flex-wrap">
                         {profiles && profiles.length > 0 ? (
                             profiles.map(profile => (
                                 <ProfileCard
@@ -129,11 +127,9 @@ function ProfileSelectPage() {
                             </p>
                         )}
                     </div>
-                    <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-                        <GlassButton isDarkMode={!isDarkMode} onClick={handleFamilyLogout} className="px-4 py-2 backdrop-blur-sm">
-                            Familie abmelden
-                        </GlassButton>
-                    </div>
+                    <GlassButton isDarkMode={!isDarkMode} onClick={handleFamilyLogout} className="px-4 py-2 backdrop-blur-sm mt-2">
+                        Familie abmelden
+                    </GlassButton>
                 </motion.div>
             )}
         </AuthPageLayout>

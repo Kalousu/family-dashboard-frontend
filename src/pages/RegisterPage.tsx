@@ -10,6 +10,7 @@ import IconSelect from "../components/IconSelect"
 import ColorPickerButton from "../components/ui/ColorPickerButton"
 import ProfileCard from "../components/ProfileCard"
 import { fadeSlideUp } from "../constants/animations"
+import { MAX_IMAGE_SIZE_BYTES, ALLOWED_IMAGE_TYPE, MIN_PIN_LENGTH } from "../constants/config"
 import { register } from "../api/authApi"
 import useAuth from "../hooks/useAuth"
 
@@ -53,7 +54,7 @@ function RegisterPage() {
         if (!formData.name) return "Bitte einen Namen eingeben."
         if (!isAddingMember) {
             if (!formData.pin) return "PIN ist erforderlich für Familienadministratoren."
-            if (formData.pin.length < 3) return "PIN muss mindestens 3 Zeichen lang sein."
+            if (formData.pin.length < MIN_PIN_LENGTH) return `PIN muss mindestens ${MIN_PIN_LENGTH} Zeichen lang sein.`
             if (formData.pin !== formData.pinWiederholen) return "PINs stimmen nicht überein."
         }
         return null
@@ -103,12 +104,12 @@ function RegisterPage() {
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
         if (!file) return
-        if (file.type !== "image/jpeg") {
+        if (file.type !== ALLOWED_IMAGE_TYPE) {
             setError("Bitte nur JPG-Dateien hochladen")
             e.target.value = ""
             return
         }
-        if (file.size > 5 * 1024 * 1024) {
+        if (file.size > MAX_IMAGE_SIZE_BYTES) {
             setError("Foto darf maximal 5 MB groß sein")
             e.target.value = ""
             return
@@ -185,6 +186,9 @@ function RegisterPage() {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
+                                    role="tab"
+                                    aria-selected={activeTab === tab}
+                                    aria-controls={`${tab}-panel`}
                                     className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all touch-manipulation min-h-11 capitalize ${
                                         activeTab === tab
                                             ? isDarkMode ? "bg-indigo-500/30 text-white border border-white/20" : "bg-sky-300/50 text-gray-800 border border-sky-400/20"
@@ -220,6 +224,7 @@ function RegisterPage() {
                                         onChange={handleFileChange}
                                         className="hidden"
                                         id="avatar-upload"
+                                        aria-label="Profilbild hochladen"
                                     />
                                     <label htmlFor="avatar-upload">
                                         <GlassButton
@@ -278,8 +283,10 @@ function RegisterPage() {
 
                                 <GlassButton
                                     isDarkMode={!isDarkMode}
-                                    onClick={loading ? undefined : handleCreateUser}
-                                    className={`px-4 py-2 backdrop-blur-sm ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    onClick={handleCreateUser}
+                                    disabled={loading}
+                                    aria-label={loading ? "Benutzer wird erstellt" : isAddingMember ? "Familienmitglied hinzufügen" : "Administrator erstellen"}
+                                    className="px-4 py-2 backdrop-blur-sm"
                                 >
                                     {loading
                                         ? "Wird erstellt..."
